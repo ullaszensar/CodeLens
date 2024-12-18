@@ -57,7 +57,7 @@ def main():
         uploaded_files = st.sidebar.file_uploader(
             "Upload Code Files",
             accept_multiple_files=True,
-            type=['py', 'java', 'js', 'ts', 'cs', 'php', 'rb']
+            type=['py', 'java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
         )
         
         if uploaded_files:

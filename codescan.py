@@ -73,7 +73,8 @@ class CodeAnalyzer:
             '.ts': 'TypeScript',  
             '.cs': 'C#',  
             '.php': 'PHP',  
-            '.rb': 'Ruby'  
+            '.rb': 'Ruby',
+            '.xsd': 'XSD'  
         }  
 
     def setup_logging(self):  

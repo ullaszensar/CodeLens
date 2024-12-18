@@ -143,7 +143,7 @@ ZensarCA/
   - Run with appropriate permissions for file operations
 
 ## Notes
-- Supported file extensions: .py, .java, .js, .ts, .cs, .php, .rb
+- Supported file extensions: .py, .java, .js, .ts, .cs, .php, .rb, .xsd
 - Reports are generated in both JSON and HTML formats
 - The tool requires read access to the source code files/directory
 - Large repositories may take longer to analyze
