@@ -1,0 +1,137 @@
+  
+        <!DOCTYPE html>  
+        <html>  
+        <head>  
+            <title>MyApp - Code Analysis Report</title>  
+            <style>  
+                body { font-family: Arial, sans-serif; margin: 20px; }  
+                .section { margin-bottom: 30px; }  
+                .pattern { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }  
+                .code { background-color: #f5f5f5; padding: 10px; }  
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }  
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }  
+                th { background-color: #f2f2f2; }
+                .metadata { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }  
+            </style>  
+        </head>  
+        <body>  
+            <div class="header">
+                <h1>MyApp - Code Analysis Report</h1>
+                <div class="metadata">
+                    <p><strong>Application Name:</strong> MyApp</p>
+                    <p><strong>Generated:</strong> 2024-12-18 13:55:29</p>
+                    <p><strong>Repository Path:</strong> /tmp/tmpi9o5nnlq</p>
+                </div>
+            </div>
+            <div class="section">  
+                <h2>Summary</h2>  
+                <p>Files Analyzed: 1</p>  
+                <p>Unique Demographic Fields: 3 [Email, email, name]</p>  
+                <p>Demographic Fields Occurrences Found: 14</p>  
+                <p>Integration Patterns Found: 1</p>  
+                <h3>File-wise Summary</h3>  
+                <table>  
+                    <tr>  
+                        <th>#</th>  
+                        <th>File Analyzed</th>  
+                        <th>Demographic Fields Occurrences Found</th>  
+                        <th>Integration Patterns Found</th>  
+                    </tr>  
+                      
+            <tr>  
+                <td>1</td>  
+                <td>/tmp/tmpi9o5nnlq/Member.java</td>  
+                <td>14</td>  
+                <td>1</td>  
+            </tr>  
+              
+                </table>  
+            </div>  
+
+            <div class="section">  
+                <h2>Demographic Data Fields by File</h2>  
+                <h3>File: /tmp/tmpi9o5nnlq/Member.java</h3>  
+                <div class="pattern">  
+                    <h4>Field: Email (Type: contact)</h4>  
+                      
+                    <div class="code">  
+                        <p>Line 17: import org.hibernate.validator.constraints.Email;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 38: @Email</p>  
+                    </div>  
+                    </div>  
+                <div class="pattern">  
+                    <h4>Field: email (Type: contact)</h4>  
+                      
+                    <div class="code">  
+                        <p>Line 22: @Table(uniqueConstraints = @UniqueConstraint(columnNames = "email"))</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 39: private String email;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 64: return email;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 67: public void setEmail(String email) {</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 68: this.email = email;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 68: this.email = email;</p>  
+                    </div>  
+                    </div>  
+                <div class="pattern">  
+                    <h4>Field: name (Type: name)</h4>  
+                      
+                    <div class="code">  
+                        <p>Line 34: private String name;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 44: @Column(name = "phone_number")</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 56: return name;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 59: public void setName(String name) {</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 60: this.name = name;</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 60: this.name = name;</p>  
+                    </div>  
+                    </div>  
+            </div>  
+
+            <div class="section">  
+                <h2>Integration Patterns</h2>  
+                  
+            <div class="pattern">
+                <h3>Pattern Type: soap_services</h3>
+                <p>Sub Type: soap_components</p>
+                <p>File: /tmp/tmpi9o5nnlq/Member.java</p>
+                <p>Line: 15</p>
+                <div class="code">
+                    <p>import javax.xml.bind.annotation.XmlRootElement;</p>
+                </div>
+            </div>
+              
+            </div>  
+        </body>  
+        </html>  
+        
