@@ -22,9 +22,8 @@ apply_custom_styles()
 # Creator information
 st.sidebar.markdown("""
 ### Created by:
-**Ullas Krishnan**  
-Sr Solution Architect  
-AES Team
+**AES Team**  
+Zensar
 """)
 
 def get_file_download_link(file_path, link_text):

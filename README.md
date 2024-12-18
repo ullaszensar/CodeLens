@@ -3,9 +3,8 @@
 A comprehensive web-based source code analysis tool designed to extract demographic data and integration patterns across multiple programming languages.
 
 ## Created by
-- **Ullas Krishnan**
-- Sr Solution Architect
-- AES Team
+- **AES Team**
+- Zensar
 
 ## Setup Instructions
 
