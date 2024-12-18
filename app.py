@@ -131,6 +131,26 @@ def main():
                     )
                     if heatmap:
                         st.plotly_chart(heatmap, use_container_width=True)
+                        
+                        st.markdown("""
+                        ### Understanding the Heat Map
+                        - **Green**: Low complexity (Good)
+                        - **Yellow**: Medium complexity (Moderate)
+                        - **Orange**: High complexity (Warning)
+                        - **Red**: Very high complexity (Critical)
+                        
+                        Hover over the cells to see detailed metrics for each file.
+                        """)
+                        
+                        # Add expandable section for complexity metrics explanation
+                        with st.expander("What do these metrics mean?"):
+                            st.markdown("""
+                            - **Cyclomatic Complexity**: Measures the number of linearly independent paths through code
+                            - **Complexity Rank**: Grade from A (best) to F (worst) based on complexity
+                            - **Lines of Code**: Total number of code lines
+                            - **Logical Lines**: Number of executable statements
+                            - **Functions**: Number of functions/methods in the file
+                            """)
                     
                     st.header("File Structure")
                     create_file_tree(repo_path)

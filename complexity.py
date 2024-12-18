@@ -43,7 +43,7 @@ def get_complexity_rank(complexity: int) -> str:
         return 'F'
 
 def generate_complexity_heatmap(repo_path: str, file_extensions: List[str]) -> go.Figure:
-    """Generate a heat map visualization of code complexity"""
+    """Generate an interactive heat map visualization of code complexity"""
     complexity_data = []
     
     for root, _, files in os.walk(repo_path):
@@ -66,26 +66,60 @@ def generate_complexity_heatmap(repo_path: str, file_extensions: List[str]) -> g
     files = [item['file'] for item in complexity_data]
     complexities = [item['metrics']['cyclomatic_complexity'] for item in complexity_data]
     
-    # Create heat map
+    # Create detailed hover text
+    hover_text = []
+    for item in complexity_data:
+        metrics = item['metrics']
+        hover_text.append(
+            f"File: {item['file']}<br>" +
+            f"Cyclomatic Complexity: {metrics['cyclomatic_complexity']}<br>" +
+            f"Complexity Rank: {metrics['complexity_rank']}<br>" +
+            f"Lines of Code: {metrics['loc']}<br>" +
+            f"Logical Lines: {metrics['lloc']}<br>" +
+            f"Functions: {metrics['functions']}"
+        )
+    
+    # Create heat map with enhanced interactivity
     fig = go.Figure(data=go.Heatmap(
         z=[complexities],
         y=['Complexity'],
         x=files,
-        colorscale='RdYlGn_r',  # Red for high complexity, green for low
+        colorscale=[
+            [0, 'rgb(0, 255, 0)'],      # Green for low complexity
+            [0.4, 'rgb(255, 255, 0)'],   # Yellow for medium complexity
+            [0.7, 'rgb(255, 165, 0)'],   # Orange for high complexity
+            [1, 'rgb(255, 0, 0)']        # Red for very high complexity
+        ],
         showscale=True,
-        text=[[f"CC: {cc}<br>Rank: {item['metrics']['complexity_rank']}" 
-               for cc, item in zip(complexities, complexity_data)]],
+        text=[[hover_text[i] for i in range(len(complexities))]],
         hoverongaps=False,
         hoverinfo='text'
     ))
     
+    # Enhanced layout with better interactivity
     fig.update_layout(
-        title='Code Complexity Heat Map',
-        xaxis_title='Files',
-        yaxis_title='Metric',
-        height=400,
-        margin=dict(t=50, l=50, r=50, b=100),
-        xaxis={'tickangle': 45}
+        title={
+            'text': 'Interactive Code Complexity Heat Map',
+            'y': 0.95,
+            'x': 0.5,
+            'xanchor': 'center',
+            'yanchor': 'top',
+            'font': {'size': 24}
+        },
+        xaxis_title='Source Files',
+        yaxis_title='Complexity Level',
+        height=500,
+        margin=dict(t=100, l=50, r=50, b=120),
+        xaxis={
+            'tickangle': 45,
+            'tickfont': {'size': 10},
+            'showgrid': False
+        },
+        yaxis={
+            'showgrid': False
+        },
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
     )
     
     return fig
