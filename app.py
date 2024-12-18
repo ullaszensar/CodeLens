@@ -6,6 +6,7 @@ import time
 from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
+from complexity import generate_complexity_heatmap, calculate_file_complexity, display_complexity_metrics
 import base64
 
 # Page config
@@ -121,6 +122,16 @@ def main():
                             display_code_with_highlights(pattern['code_snippet'], pattern['line_number'])
                 
                 with col2:
+                    st.header("Code Complexity Analysis")
+                    
+                    # Generate and display complexity heat map
+                    heatmap = generate_complexity_heatmap(
+                        repo_path,
+                        ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb', '.xsd']
+                    )
+                    if heatmap:
+                        st.plotly_chart(heatmap, use_container_width=True)
+                    
                     st.header("File Structure")
                     create_file_tree(repo_path)
                     
