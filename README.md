@@ -1,1 +1,2 @@
-code ZensarCA
+mkdir ZensarCA
+cd ZensarCA
