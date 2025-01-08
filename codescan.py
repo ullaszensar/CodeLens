@@ -135,6 +135,19 @@ class CodeAnalyzer:
                     code_files.append(file_path)  
         return code_files  
 
+    def is_comment_line(line: str, file_extension: str) -> bool:
+        """
+        Check if a line is a comment based on file extension
+        """
+        line = line.strip()
+        if file_extension in ['.py', '.rb']:
+            return line.startswith('#')
+        elif file_extension in ['.java', '.js', '.ts', '.cs']:
+            return line.strip().startswith('//') or line.strip().startswith('/*')
+        elif file_extension == '.php':
+            return line.startswith('//') or line.startswith('#') or line.startswith('/*')
+        return False
+
     def analyze_file(self, file_path: Path) -> Dict:  
         """  
         Analyze a single file for demographic data and integration patterns  
@@ -149,6 +162,10 @@ class CodeAnalyzer:
                 content = f.readlines()  
 
             for line_num, line in enumerate(content, 1):  
+                # Skip comment lines
+                if self.is_comment_line(line, file_path.suffix):
+                    continue
+
                 # Check for demographic data  
                 for data_type, pattern in self.demographic_patterns.items():  
                     matches = re.finditer(pattern, line, re.IGNORECASE)  
@@ -373,4 +390,4 @@ if __name__ == "__main__":
 # Created/Modified files during execution:  
 # - code_analysis.log  
 # - code_analysis_report_[timestamp].json  
-# - code_analysis_report_[timestamp].html  
+# - code_analysis_report_[timestamp].html

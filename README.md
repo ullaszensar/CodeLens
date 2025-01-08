@@ -63,69 +63,40 @@ font = "sans serif"
 - Select "Run 'app'"
 - Access the application at http://localhost:5000
 
-## Windows Setup Instructions with VSCode
+## Quick Start Guide for VSCode (Windows)
 
-1. Install Python 3.11:
-   - Download Python 3.11 from [python.org](https://www.python.org/downloads/)
-   - During installation, check "Add Python to PATH"
-   - Verify installation: `python --version` in Command Prompt
+1. Prerequisites:
+   - Install [Python 3.11](https://www.python.org/downloads/)
+   - Install [VSCode](https://code.visualstudio.com)
+   - Install VSCode Python extension
 
-2. Install VSCode:
-   - Download from [code.visualstudio.com](https://code.visualstudio.com)
-   - Install Python extension in VSCode
-
-3. Create project directory:
+2. Quick Setup:
 ```cmd
 md ZensarCA
 cd ZensarCA
-```
-
-4. Set up Python environment:
-```cmd
 python -m venv venv
 venv\Scripts\activate
 pip install streamlit plotly pygments radon
 ```
 
-5. Set up project structure:
-```cmd
-md .streamlit
-type nul > .streamlit\config.toml
-type nul > app.py
-type nul > codescan.py
-type nul > complexity.py
-type nul > styles.py
-type nul > utils.py
-```
+3. Download and Copy Files:
+   - Create a new folder named `ZensarCA`
+   - Copy all provided Python files into it:
+     - app.py
+     - codescan.py
+     - complexity.py
+     - styles.py
+     - utils.py
+   - Create `.streamlit/config.toml` with the provided configuration
 
-6. Copy the following content into `.streamlit/config.toml`:
-```toml
-[server]
-headless = true
-address = "0.0.0.0"
-port = 5000
+4. Run Application:
+   - Open VSCode: `code .`
+   - Open Terminal in VSCode: View → Terminal
+   - Activate virtual environment: `venv\Scripts\activate`
+   - Run: `streamlit run app.py`
+   - Access at http://localhost:5000
 
-[theme]
-primaryColor = "#FF4B4B"
-backgroundColor = "#0E1117"
-secondaryBackgroundColor = "#262730"
-textColor = "#FAFAFA"
-font = "sans serif"
-```
-
-7. Copy the provided Python files:
-- app.py: Main Streamlit application file
-- codescan.py: Code analysis implementation
-- complexity.py: Code complexity metrics
-- styles.py: Custom styling for the application
-- utils.py: Utility functions
-
-8. Run the application:
-- Open VSCode in project directory: `code .`
-- Open Terminal in VSCode (View → Terminal)
-- Ensure venv is activated: `venv\Scripts\activate`
-- Run: `streamlit run app.py`
-- Access at http://localhost:5000
+Note: The application now excludes matches found in comments from the analysis results, reducing the HTML report size.
 
 ## Project Files Description
 
