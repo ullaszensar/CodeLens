@@ -4,3 +4,5 @@
 2024-12-18 14:06:10,220 - INFO - Analysis reports generated: MyApp_code_analysis_20241218_140610.json and MyApp_code_analysis_20241218_140610.html
 2024-12-18 17:36:01,267 - INFO - Analyzing file: /tmp/tmpd6566hpo/Member.java
 2024-12-18 17:36:01,274 - INFO - Analysis reports generated: MyApp_code_analysis_20241218_173601.json and MyApp_code_analysis_20241218_173601.html
+2025-01-08 13:40:52,313 - INFO - Analyzing file: /tmp/tmpgw_4yhqh/EmployeeEndpoint.java
+2025-01-08 13:40:52,332 - INFO - Analysis reports generated: MyApp_code_analysis_20250108_134052.json and MyApp_code_analysis_20250108_134052.html
