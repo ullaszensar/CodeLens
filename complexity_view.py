@@ -9,6 +9,13 @@ def show_complexity_analysis(repo_path: str):
     """Display the code complexity analysis tab content"""
     st.header("Code Complexity Analysis")
 
+    # Initialize files list at the start
+    files = []
+    for root, _, filenames in os.walk(repo_path):
+        for filename in filenames:
+            if any(filename.endswith(ext) for ext in ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb']):
+                files.append(os.path.join(root, filename))
+
     # Create sub-tabs for different analysis views
     complexity_tab, suggestions_tab = st.tabs(["Complexity Metrics", "AI Suggestions"])
 
@@ -74,13 +81,6 @@ def show_complexity_analysis(repo_path: str):
 
             # Add interactive file analysis
             st.subheader("File-specific Analysis")
-
-            # Get all analyzable files
-            files = []
-            for root, _, filenames in os.walk(repo_path):
-                for filename in filenames:
-                    if any(filename.endswith(ext) for ext in ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb']):
-                        files.append(os.path.join(root, filename))
 
             if files:
                 selected_file = st.selectbox(
