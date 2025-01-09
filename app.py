@@ -190,7 +190,7 @@ def display_analysis_results(results: Dict):
             if table_data:
                 st.table(table_data)
 
-                # Export options
+                # Export options for filtered results
                 st.subheader("Export Filtered Results")
                 export_format = st.selectbox(
                     "Select Export Format",
@@ -210,6 +210,42 @@ def display_analysis_results(results: Dict):
                         get_download_link(content, filename),
                         unsafe_allow_html=True
                     )
+
+                # Add complete report export section
+                st.subheader("Export Complete Analysis Report")
+                report_col1, report_col2 = st.columns(2)
+
+                # Generate HTML report
+                with report_col1:
+                    if st.button("Generate HTML Report"):
+                        timestamp = time.strftime("%Y%m%d_%H%M%S")
+                        html_report = f'{results["metadata"]["application_name"]}_code_analysis_{timestamp}.html'
+                        analyzer = CodeAnalyzer(results['metadata']['repository_path'], results['metadata']['application_name'])
+                        analyzer.generate_html_report(results, html_report)
+
+                        with open(html_report, 'r', encoding='utf-8') as f:
+                            html_content = f.read()
+                            st.markdown(
+                                get_download_link(html_content, html_report),
+                                unsafe_allow_html=True
+                            )
+                        st.success(f"HTML report generated: {html_report}")
+
+                # Generate JSON report
+                with report_col2:
+                    if st.button("Generate JSON Report"):
+                        timestamp = time.strftime("%Y%m%d_%H%M%S")
+                        json_report = f'{results["metadata"]["application_name"]}_code_analysis_{timestamp}.json'
+                        with open(json_report, 'w') as f:
+                            json.dump(results, f, indent=2)
+
+                        with open(json_report, 'r') as f:
+                            json_content = f.read()
+                            st.markdown(
+                                get_download_link(json_content, json_report),
+                                unsafe_allow_html=True
+                            )
+                        st.success(f"JSON report generated: {json_report}")
             else:
                 st.info("No matching records found with current filters.")
 
