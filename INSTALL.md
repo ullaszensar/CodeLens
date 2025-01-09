@@ -3,6 +3,7 @@
 ## Prerequisites
 1. Python 3.11 or higher
 2. pip (Python package manager)
+3. OpenAI API key (for AI-powered code suggestions)
 
 ## Step-by-Step Installation
 
