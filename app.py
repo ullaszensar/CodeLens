@@ -8,6 +8,7 @@ from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
 from complexity import generate_complexity_heatmap, calculate_file_complexity, display_complexity_metrics
+from complexity_view import show_complexity_analysis
 import base64
 from typing import List, Dict
 import json
@@ -106,142 +107,116 @@ def filter_results(results: Dict, file_extensions: List[str] = None, pattern_typ
 
 def display_analysis_results(results: Dict):
     """Display analysis results in the Streamlit UI"""
-    col1, col2 = st.columns([2, 1])
+    # Create tabs for different views
+    tab1, tab2 = st.tabs(["Pattern Analysis", "Code Complexity"])
 
-    with col1:
-        st.header("Analysis Results")
+    with tab1:
+        col1, _ = st.columns([2, 1])
+        with col1:
+            st.header("Analysis Results")
 
-        # Summary Statistics in expander
-        with st.expander("Summary Statistics", expanded=False):
-            stats_cols = st.columns(4)
-            stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
-            stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
-            stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
-            stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+            # Summary Statistics in expander
+            with st.expander("Summary Statistics", expanded=False):
+                stats_cols = st.columns(4)
+                stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+                stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+                stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+                stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
 
-        # Share button
-        if st.button("Generate Share Link"):
-            share_link = generate_share_link(results)
-            st.code(share_link)
-            st.info("Share this link to allow others to view these analysis results.")
+            # Share button
+            if st.button("Generate Share Link"):
+                share_link = generate_share_link(results)
+                st.code(share_link)
+                st.info("Share this link to allow others to view these analysis results.")
 
-        # Add filtering options
-        st.subheader("Filter Results")
+            # Add filtering options
+            st.subheader("Filter Results")
 
-        # File extension filter
-        available_extensions = ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb', '.xsd']
-        selected_extensions = st.multiselect(
-            "Filter by File Type",
-            available_extensions,
-            default=available_extensions
-        )
-
-        # Pattern type filter
-        pattern_types = ['name', 'address', 'contact', 'identity', 'demographics']
-        selected_patterns = st.multiselect(
-            "Filter by Pattern Type",
-            pattern_types,
-            default=pattern_types
-        )
-
-        # Search box
-        search_term = st.text_input("Search in Results", "")
-
-        # Sort options
-        sort_by = st.selectbox(
-            "Sort Results By",
-            ["File Name", "Number of Matches"]
-        )
-
-        # Apply filters
-        filtered_results = filter_results(
-            results,
-            file_extensions=selected_extensions,
-            pattern_types=selected_patterns,
-            search_term=search_term
-        )
-
-        # Create and sort table data
-        table_data = []
-        for file_path, fields in filtered_results.items():
-            matches = format_matching_records(fields)
-            table_data.append({
-                "Class/File Name": os.path.basename(file_path),
-                "Matching Records": matches,
-                "_match_count": matches.count('\n') + 1  # For sorting
-            })
-
-        # Sort table data
-        if sort_by == "File Name":
-            table_data.sort(key=lambda x: x["Class/File Name"])
-        else:  # Number of Matches
-            table_data.sort(key=lambda x: x["_match_count"], reverse=True)
-
-        # Remove sorting helper field
-        for row in table_data:
-            del row["_match_count"]
-
-        # Display table
-        st.subheader("Matching Records")
-        if table_data:
-            st.table(table_data)
-
-            # Export options
-            st.subheader("Export Filtered Results")
-            export_format = st.selectbox(
-                "Select Export Format",
-                ["CSV", "JSON"]
+            # File extension filter
+            available_extensions = ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb', '.xsd']
+            selected_extensions = st.multiselect(
+                "Filter by File Type",
+                available_extensions,
+                default=available_extensions
             )
 
-            if st.button("Export Filtered Results"):
-                timestamp = time.strftime("%Y%m%d_%H%M%S")
-                if export_format == "CSV":
-                    content = export_to_csv(table_data)
-                    filename = f"filtered_results_{timestamp}.csv"
-                else:  # JSON
-                    content = export_to_json(table_data)
-                    filename = f"filtered_results_{timestamp}.json"
+            # Pattern type filter
+            pattern_types = ['name', 'address', 'contact', 'identity', 'demographics']
+            selected_patterns = st.multiselect(
+                "Filter by Pattern Type",
+                pattern_types,
+                default=pattern_types
+            )
 
-                st.markdown(
-                    get_download_link(content, filename),
-                    unsafe_allow_html=True
+            # Search box
+            search_term = st.text_input("Search in Results", "")
+
+            # Sort options
+            sort_by = st.selectbox(
+                "Sort Results By",
+                ["File Name", "Number of Matches"]
+            )
+
+            # Apply filters
+            filtered_results = filter_results(
+                results,
+                file_extensions=selected_extensions,
+                pattern_types=selected_patterns,
+                search_term=search_term
+            )
+
+            # Create and sort table data
+            table_data = []
+            for file_path, fields in filtered_results.items():
+                matches = format_matching_records(fields)
+                table_data.append({
+                    "Class/File Name": os.path.basename(file_path),
+                    "Matching Records": matches,
+                    "_match_count": matches.count('\n') + 1  # For sorting
+                })
+
+            # Sort table data
+            if sort_by == "File Name":
+                table_data.sort(key=lambda x: x["Class/File Name"])
+            else:  # Number of Matches
+                table_data.sort(key=lambda x: x["_match_count"], reverse=True)
+
+            # Remove sorting helper field
+            for row in table_data:
+                del row["_match_count"]
+
+            # Display table
+            st.subheader("Matching Records")
+            if table_data:
+                st.table(table_data)
+
+                # Export options
+                st.subheader("Export Filtered Results")
+                export_format = st.selectbox(
+                    "Select Export Format",
+                    ["CSV", "JSON"]
                 )
-        else:
-            st.info("No matching records found with current filters.")
 
-    with col2:
-        st.header("Code Complexity Analysis")
+                if st.button("Export Filtered Results"):
+                    timestamp = time.strftime("%Y%m%d_%H%M%S")
+                    if export_format == "CSV":
+                        content = export_to_csv(table_data)
+                        filename = f"filtered_results_{timestamp}.csv"
+                    else:  # JSON
+                        content = export_to_json(table_data)
+                        filename = f"filtered_results_{timestamp}.json"
 
-        # Generate and display complexity heat map
-        heatmap = generate_complexity_heatmap(
-            results['metadata']['repository_path'],
-            ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb', '.xsd']
-        )
-        if heatmap:
-            st.plotly_chart(heatmap, use_container_width=True)
+                    st.markdown(
+                        get_download_link(content, filename),
+                        unsafe_allow_html=True
+                    )
+            else:
+                st.info("No matching records found with current filters.")
 
-            st.markdown("""
-            ### Understanding the Heat Map
-            - **Green**: Low complexity (Good)
-            - **Yellow**: Medium complexity (Moderate)
-            - **Orange**: High complexity (Warning)
-            - **Red**: Very high complexity (Critical)
+    with tab2:
+        # Show the complexity analysis in a separate tab
+        show_complexity_analysis(results['metadata']['repository_path'])
 
-            Hover over the cells to see detailed metrics for each file.
-            """)
-
-            # Add expandable section for complexity metrics explanation
-            with st.expander("What do these metrics mean?"):
-                st.markdown("""
-                - **Cyclomatic Complexity**: Measures the number of linearly independent paths through code
-                - **Complexity Rank**: Grade from A (best) to F (worst) based on complexity
-                - **Lines of Code**: Total number of code lines
-                - **Logical Lines**: Number of executable statements
-                - **Functions**: Number of functions/methods in the file
-                """)
-
-        st.header("File Structure")
-        create_file_tree(results['metadata']['repository_path'])
 
 def main():
     st.title("🔍 ZensarCA")
