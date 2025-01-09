@@ -9,6 +9,9 @@ from styles import apply_custom_styles
 from complexity import generate_complexity_heatmap, calculate_file_complexity, display_complexity_metrics
 import base64
 from typing import List, Dict
+import json
+import csv
+from io import StringIO
 
 # Page config
 st.set_page_config(
@@ -20,13 +23,6 @@ st.set_page_config(
 
 # Apply custom styles
 apply_custom_styles()
-
-# Creator information
-st.sidebar.markdown("""
-### Created by:
-**AES Team**  
-Zensar
-""")
 
 def get_file_download_link(file_path, link_text):
     """Generate a download link for a file"""
@@ -42,6 +38,24 @@ def format_matching_records(file_data):
         for occurrence in data['occurrences']:
             records.append(f"Line {occurrence['line_number']} - {field_name}")
     return "\n".join(records)
+
+def export_to_json(table_data: List[Dict]) -> str:
+    """Export table data to JSON format"""
+    return json.dumps(table_data, indent=2)
+
+def export_to_csv(table_data: List[Dict]) -> str:
+    """Export table data to CSV format"""
+    output = StringIO()
+    writer = csv.DictWriter(output, fieldnames=["Class/File Name", "Matching Records"])
+    writer.writeheader()
+    writer.writerows(table_data)
+    return output.getvalue()
+
+def get_download_link(content: str, filename: str) -> str:
+    """Create a download link for the content"""
+    b64 = base64.b64encode(content.encode()).decode()
+    file_type = "text/csv" if filename.endswith(".csv") else "application/json"
+    return f'<a href="data:text/{file_type};base64,{b64}" download="{filename}">{filename}</a>'
 
 def filter_results(results: Dict, file_extensions: List[str] = None, pattern_types: List[str] = None, search_term: str = None):
     """Filter analysis results based on criteria"""
@@ -203,6 +217,27 @@ def main():
                     st.subheader("Matching Records")
                     if table_data:
                         st.table(table_data)
+
+                        # Export options
+                        st.subheader("Export Filtered Results")
+                        export_format = st.selectbox(
+                            "Select Export Format",
+                            ["CSV", "JSON"]
+                        )
+
+                        if st.button("Export Filtered Results"):
+                            timestamp = time.strftime("%Y%m%d_%H%M%S")
+                            if export_format == "CSV":
+                                content = export_to_csv(table_data)
+                                filename = f"filtered_results_{timestamp}.csv"
+                            else:  # JSON
+                                content = export_to_json(table_data)
+                                filename = f"filtered_results_{timestamp}.json"
+
+                            st.markdown(
+                                get_download_link(content, filename),
+                                unsafe_allow_html=True
+                            )
                     else:
                         st.info("No matching records found with current filters.")
 
