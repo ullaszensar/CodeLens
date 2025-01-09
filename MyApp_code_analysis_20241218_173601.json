@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "application_name": "MyApp",
+    "scan_timestamp": "2024-12-18 17:36:01",
+    "repository_path": "/tmp/tmpd6566hpo"
+  },
+  "demographic_data": {
+    "/tmp/tmpd6566hpo/Member.java": {
+      "Email": {
+        "data_type": "contact",
+        "occurrences": [
+          {
+            "line_number": 17,
+            "code_snippet": "import org.hibernate.validator.constraints.Email;"
+          },
+          {
+            "line_number": 38,
+            "code_snippet": "@Email"
+          }
+        ]
+      },
+      "email": {
+        "data_type": "contact",
+        "occurrences": [
+          {
+            "line_number": 22,
+            "code_snippet": "@Table(uniqueConstraints = @UniqueConstraint(columnNames = \"email\"))"
+          },
+          {
+            "line_number": 39,
+            "code_snippet": "private String email;"
+          },
+          {
+            "line_number": 64,
+            "code_snippet": "return email;"
+          },
+          {
+            "line_number": 67,
+            "code_snippet": "public void setEmail(String email) {"
+          },
+          {
+            "line_number": 68,
+            "code_snippet": "this.email = email;"
+          },
+          {
+            "line_number": 68,
+            "code_snippet": "this.email = email;"
+          }
+        ]
+      },
+      "name": {
+        "data_type": "name",
+        "occurrences": [
+          {
+            "line_number": 34,
+            "code_snippet": "private String name;"
+          },
+          {
+            "line_number": 44,
+            "code_snippet": "@Column(name = \"phone_number\")"
+          },
+          {
+            "line_number": 56,
+            "code_snippet": "return name;"
+          },
+          {
+            "line_number": 59,
+            "code_snippet": "public void setName(String name) {"
+          },
+          {
+            "line_number": 60,
+            "code_snippet": "this.name = name;"
+          },
+          {
+            "line_number": 60,
+            "code_snippet": "this.name = name;"
+          }
+        ]
+      }
+    }
+  },
+  "integration_patterns": [
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "soap_components",
+      "file_path": "/tmp/tmpd6566hpo/Member.java",
+      "line_number": 15,
+      "code_snippet": "import javax.xml.bind.annotation.XmlRootElement;"
+    }
+  ],
+  "summary": {
+    "files_analyzed": 1,
+    "unique_demographic_fields": [
+      "email",
+      "Email",
+      "name"
+    ],
+    "demographic_fields_found": 14,
+    "integration_patterns_found": 1,
+    "file_details": [
+      {
+        "file_path": "/tmp/tmpd6566hpo/Member.java",
+        "demographic_fields_found": 14,
+        "integration_patterns_found": 1
+      }
+    ]
+  }
+}

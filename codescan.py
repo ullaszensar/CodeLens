@@ -162,8 +162,8 @@ class CodeAnalyzer:
                 content = f.readlines()  
 
             for line_num, line in enumerate(content, 1):  
-                # Skip empty lines and comment lines
-                if not line.strip() or self.is_comment_line(line, file_path.suffix):
+                # Skip comment lines
+                if self.is_comment_line(line, file_path.suffix):
                     continue
 
                 # Check for demographic data  
@@ -171,34 +171,29 @@ class CodeAnalyzer:
                     matches = re.finditer(pattern, line, re.IGNORECASE)  
                     for match in matches:  
                         field_name = match.group(0)  
-                        # Ensure we have valid content before adding
-                        code_snippet = line.strip()
-                        if code_snippet:  # Only add if we have actual content
-                            if str(file_path) not in results['demographic_data']:  
-                                results['demographic_data'][str(file_path)] = {}  
-                            if field_name not in results['demographic_data'][str(file_path)]:  
-                                results['demographic_data'][str(file_path)][field_name] = {  
-                                    'data_type': data_type,  
-                                    'occurrences': []  
-                                }  
-                            results['demographic_data'][str(file_path)][field_name]['occurrences'].append({  
-                                'line_number': line_num,  
-                                'code_snippet': code_snippet
-                            })  
+                        if str(file_path) not in results['demographic_data']:  
+                            results['demographic_data'][str(file_path)] = {}  
+                        if field_name not in results['demographic_data'][str(file_path)]:  
+                            results['demographic_data'][str(file_path)][field_name] = {  
+                                'data_type': data_type,  
+                                'occurrences': []  
+                            }  
+                        results['demographic_data'][str(file_path)][field_name]['occurrences'].append({  
+                            'line_number': line_num,  
+                            'code_snippet': line.strip()  
+                        })  
 
                 # Check for integration patterns  
                 for pattern_category, sub_patterns in self.integration_patterns.items():
                     for sub_type, pattern in sub_patterns.items():
                         if re.search(pattern, line, re.IGNORECASE):
-                            code_snippet = line.strip()
-                            if code_snippet:  # Only add if we have actual content
-                                results['integration_patterns'].append({
-                                    'pattern_type': pattern_category,
-                                    'sub_type': sub_type,
-                                    'file_path': str(file_path),
-                                    'line_number': line_num,
-                                    'code_snippet': code_snippet
-                                })
+                            results['integration_patterns'].append({
+                                'pattern_type': pattern_category,
+                                'sub_type': sub_type,
+                                'file_path': str(file_path),
+                                'line_number': line_num,
+                                'code_snippet': line.strip()
+                            })
 
         except Exception as e:  
             self.logger.error(f"Error analyzing file {file_path}: {str(e)}")  
