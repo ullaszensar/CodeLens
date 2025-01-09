@@ -223,8 +223,7 @@ def main():
     st.markdown("### Code Analysis Utility")
 
     # Check for shared report ID in URL parameters
-    query_params = st.experimental_get_query_params()
-    report_id = query_params.get("report_id", [None])[0]
+    report_id = st.query_params.get("report_id", None)
 
     if report_id and report_id in st.session_state.reports:
         # Display shared report
