@@ -8,6 +8,7 @@ from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
 from complexity import generate_complexity_heatmap, calculate_file_complexity, display_complexity_metrics
 import base64
+from typing import List, Dict
 
 # Page config
 st.set_page_config(
@@ -41,6 +42,41 @@ def format_matching_records(file_data):
         for occurrence in data['occurrences']:
             records.append(f"Line {occurrence['line_number']} - {field_name}")
     return "\n".join(records)
+
+def filter_results(results: Dict, file_extensions: List[str] = None, pattern_types: List[str] = None, search_term: str = None):
+    """Filter analysis results based on criteria"""
+    filtered_data = {}
+
+    for file_path, fields in results['demographic_data'].items():
+        # Filter by file extension
+        if file_extensions and not any(file_path.endswith(ext) for ext in file_extensions):
+            continue
+
+        # Filter by search term
+        if search_term:
+            matches_search = False
+            for field_name, data in fields.items():
+                if (search_term.lower() in field_name.lower() or 
+                    any(search_term.lower() in occ['code_snippet'].lower() 
+                        for occ in data['occurrences'])):
+                    matches_search = True
+                    break
+            if not matches_search:
+                continue
+
+        # Filter by pattern type
+        if pattern_types:
+            matches_pattern = False
+            for field_name, data in fields.items():
+                if data['data_type'] in pattern_types:
+                    matches_pattern = True
+                    break
+            if not matches_pattern:
+                continue
+
+        filtered_data[file_path] = fields
+
+    return filtered_data
 
 def main():
     st.title("🔍 ZensarCA")
@@ -90,8 +126,6 @@ def main():
             with st.spinner("Analyzing code..."):
                 analyzer = CodeAnalyzer(repo_path, app_name)
                 progress_bar = st.progress(0)
-
-                # Run analysis
                 results = analyzer.scan_repository()
                 progress_bar.progress(100)
 
@@ -101,7 +135,7 @@ def main():
                 with col1:
                     st.header("Analysis Results")
 
-                    # Summary Stats in a smaller section
+                    # Summary Statistics in expander
                     with st.expander("Summary Statistics", expanded=False):
                         stats_cols = st.columns(4)
                         stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
@@ -109,20 +143,68 @@ def main():
                         stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
                         stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
 
-                    # Create table for matches
-                    st.subheader("Matching Records")
+                    # Add filtering options
+                    st.subheader("Filter Results")
+
+                    # File extension filter
+                    available_extensions = ['.py', '.java', '.js', '.ts', '.cs', '.php', '.rb', '.xsd']
+                    selected_extensions = st.multiselect(
+                        "Filter by File Type",
+                        available_extensions,
+                        default=available_extensions
+                    )
+
+                    # Pattern type filter
+                    pattern_types = ['name', 'address', 'contact', 'identity', 'demographics']
+                    selected_patterns = st.multiselect(
+                        "Filter by Pattern Type",
+                        pattern_types,
+                        default=pattern_types
+                    )
+
+                    # Search box
+                    search_term = st.text_input("Search in Results", "")
+
+                    # Sort options
+                    sort_by = st.selectbox(
+                        "Sort Results By",
+                        ["File Name", "Number of Matches"]
+                    )
+
+                    # Apply filters
+                    filtered_results = filter_results(
+                        results,
+                        file_extensions=selected_extensions,
+                        pattern_types=selected_patterns,
+                        search_term=search_term
+                    )
+
+                    # Create and sort table data
                     table_data = []
-                    for file_path, fields in results['demographic_data'].items():
+                    for file_path, fields in filtered_results.items():
+                        matches = format_matching_records(fields)
                         table_data.append({
                             "Class/File Name": os.path.basename(file_path),
-                            "Matching Records": format_matching_records(fields)
+                            "Matching Records": matches,
+                            "_match_count": matches.count('\n') + 1  # For sorting
                         })
 
+                    # Sort table data
+                    if sort_by == "File Name":
+                        table_data.sort(key=lambda x: x["Class/File Name"])
+                    else:  # Number of Matches
+                        table_data.sort(key=lambda x: x["_match_count"], reverse=True)
+
+                    # Remove sorting helper field
+                    for row in table_data:
+                        del row["_match_count"]
+
                     # Display table
+                    st.subheader("Matching Records")
                     if table_data:
                         st.table(table_data)
                     else:
-                        st.info("No matching records found in the analyzed files.")
+                        st.info("No matching records found with current filters.")
 
                 with col2:
                     st.header("Code Complexity Analysis")
