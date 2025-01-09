@@ -45,3 +45,13 @@
 2025-01-09 00:55:09,043 - INFO - Analyzing file: /tmp/tmpjk1vaxw6/ApplicationConfiguration.java
 2025-01-09 00:55:09,044 - ERROR - Error analyzing file /tmp/tmpjk1vaxw6/ApplicationConfiguration.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
 2025-01-09 00:55:09,049 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_005509.json and MyApp_code_analysis_20250109_005509.html
+2025-01-09 01:23:32,287 - INFO - Analyzing file: /tmp/tmpe1kyagvw/EmployeeEndpoint.java
+2025-01-09 01:23:32,289 - ERROR - Error analyzing file /tmp/tmpe1kyagvw/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 01:23:32,289 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_012332.json and MyApp_code_analysis_20250109_012332.html
+2025-01-09 01:23:33,113 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-01-09 01:23:47,659 - INFO - Analyzing file: /tmp/tmphlicqx6v/EmployeeEndpoint.java
+2025-01-09 01:23:47,660 - ERROR - Error analyzing file /tmp/tmphlicqx6v/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 01:23:47,661 - INFO - Analyzing file: /tmp/tmphlicqx6v/BackendService.java
+2025-01-09 01:23:47,661 - ERROR - Error analyzing file /tmp/tmphlicqx6v/BackendService.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 01:23:47,663 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_012347.json and MyApp_code_analysis_20250109_012347.html
+2025-01-09 01:23:47,969 - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 404 Not Found"
