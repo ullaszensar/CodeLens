@@ -15,3 +15,16 @@
 2025-01-09 00:25:54,178 - INFO - Analyzing file: /tmp/tmp5nqduedo/EmployeeEndpoint.java
 2025-01-09 00:25:54,179 - ERROR - Error analyzing file /tmp/tmp5nqduedo/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
 2025-01-09 00:25:54,180 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_002554.json and MyApp_code_analysis_20250109_002554.html
+2025-01-09 00:29:09,170 - INFO - Analyzing file: /tmp/tmpuf3_umy1/BackendService.java
+2025-01-09 00:29:09,173 - ERROR - Error analyzing file /tmp/tmpuf3_umy1/BackendService.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 00:29:09,178 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_002909.json and MyApp_code_analysis_20250109_002909.html
+2025-01-09 00:29:20,909 - INFO - Analyzing file: /tmp/tmp5iwwroti/BackendService.java
+2025-01-09 00:29:20,909 - ERROR - Error analyzing file /tmp/tmp5iwwroti/BackendService.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 00:29:20,909 - INFO - Analyzing file: /tmp/tmp5iwwroti/EmployeeEndpoint.java
+2025-01-09 00:29:20,910 - ERROR - Error analyzing file /tmp/tmp5iwwroti/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 00:29:20,911 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_002920.json and MyApp_code_analysis_20250109_002920.html
+2025-01-09 00:29:34,490 - INFO - Analyzing file: /tmp/tmpqxyj2t22/BackendService.java
+2025-01-09 00:29:34,491 - ERROR - Error analyzing file /tmp/tmpqxyj2t22/BackendService.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 00:29:34,491 - INFO - Analyzing file: /tmp/tmpqxyj2t22/EmployeeEndpoint.java
+2025-01-09 00:29:34,491 - ERROR - Error analyzing file /tmp/tmpqxyj2t22/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 00:29:34,492 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_002934.json and MyApp_code_analysis_20250109_002934.html
