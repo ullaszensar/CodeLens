@@ -47,7 +47,15 @@ def parse_timestamp_from_filename(filename):
 
 def create_dashboard_charts(results):
     """Create visualization charts for the dashboard"""
-    # Prepare data for visualizations
+    # Summary Stats at the top
+    st.subheader("Summary")
+    stats_cols = st.columns(4)
+    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+
+    st.markdown("---")  # Add a separator line
 
     # 1. Demographic Fields Distribution - Side by side charts
     field_frequencies = {}
