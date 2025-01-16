@@ -182,10 +182,18 @@ def main():
                 results = analyzer.scan_repository()
                 progress_bar.progress(100)
 
-                # Create tabs for Analysis Results, Dashboard, and Export Reports
-                tab1, tab2, tab3 = st.tabs(["Analysis Results", "Dashboard", "Export Reports"])
+                # Create tabs for Dashboard, Analysis Results, and Export Reports
+                tab1, tab2, tab3 = st.tabs(["Dashboard", "Analysis Results", "Export Reports"])
 
                 with tab1:
+                    st.header("Analysis Dashboard")
+                    st.markdown("""
+                    This dashboard provides visual insights into the code analysis results,
+                    showing distributions of files, demographic fields, and integration patterns.
+                    """)
+                    create_dashboard_charts(results)
+
+                with tab2:
                     # Summary Stats
                     st.subheader("Summary")
                     stats_cols = st.columns(4)
@@ -218,14 +226,6 @@ def main():
                                 pattern['line_number'],
                                 pattern['file_path']
                             )
-
-                with tab2:
-                    st.header("Analysis Dashboard")
-                    st.markdown("""
-                    This dashboard provides visual insights into the code analysis results,
-                    showing distributions of files, demographic fields, and integration patterns.
-                    """)
-                    create_dashboard_charts(results)
 
                 with tab3:
                     st.header("Available Reports")
