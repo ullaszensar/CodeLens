@@ -48,6 +48,31 @@ def apply_custom_styles():
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .stButton > button:hover {
+            background-color: #90EE90 !important;
+            color: #262730 !important;
+        }
+
+        /* Tabs styling */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 2px;
+            background-color: #0066cc;
+            padding: 10px 10px 0 10px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            color: white !important;
+            background-color: #0066cc;
+            padding: 10px 20px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {
+            background-color: #004c99;
         }
 
         /* Sidebar */
@@ -80,7 +105,8 @@ def apply_custom_styles():
         }
 
         .download-button:hover {
-            background-color: #0052a3;
+            background-color: #90EE90;
+            color: #262730 !important;
             text-decoration: none;
         }
 
