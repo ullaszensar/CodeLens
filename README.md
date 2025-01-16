@@ -3,8 +3,7 @@
 A comprehensive web-based source code analysis tool designed to extract demographic data and integration patterns across multiple programming languages.
 
 ## Created by
-- **AES Team**
-- Zensar
+- **Zensar Project Diamond Team**
 
 ## Setup Instructions
 
