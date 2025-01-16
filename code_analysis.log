@@ -4,3 +4,9 @@
 2024-12-18 14:06:10,220 - INFO - Analysis reports generated: MyApp_code_analysis_20241218_140610.json and MyApp_code_analysis_20241218_140610.html
 2025-01-16 17:10:41,042 - INFO - Analyzing file: /tmp/tmpuxkvu1oi/EmployeeEndpoint.java
 2025-01-16 17:10:41,051 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_171041.json and MyApp_code_analysis_20250116_171041.html
+2025-01-16 17:13:55,866 - INFO - Analyzing file: /tmp/tmp72bu2uek/EmployeeEndpoint.java
+2025-01-16 17:13:55,872 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_171355.json and MyApp_code_analysis_20250116_171355.html
+2025-01-16 17:14:10,142 - INFO - Analyzing file: /tmp/tmps27ihzk0/EmployeeEndpoint.java
+2025-01-16 17:14:10,147 - INFO - Analysis reports generated: test_code_analysis_20250116_171410.json and test_code_analysis_20250116_171410.html
+2025-01-16 17:14:38,466 - INFO - Analyzing file: /tmp/tmp8kwmpjlk/EmployeeEndpoint.java
+2025-01-16 17:14:38,473 - INFO - Analysis reports generated: test_code_analysis_20250116_171438.json and test_code_analysis_20250116_171438.html
