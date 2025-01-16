@@ -8,6 +8,9 @@ from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
 import base64
+import plotly.express as px
+import plotly.graph_objects as go
+from collections import Counter
 
 # Page config
 st.set_page_config(
@@ -41,6 +44,91 @@ def parse_timestamp_from_filename(filename):
         return datetime.strptime(date_time_str, '%Y%m%d_%H%M%S')
     except:
         return datetime.min
+
+def create_dashboard_charts(results):
+    """Create visualization charts for the dashboard"""
+    # Prepare data for visualizations
+
+    # 1. Files by Language Bar Chart
+    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
+    file_counts = Counter(file_extensions)
+
+    fig_files = px.bar(
+        x=list(file_counts.keys()),
+        y=list(file_counts.values()),
+        title="Files by Language",
+        labels={'x': 'File Extension', 'y': 'Count'},
+        color=list(file_counts.keys()),
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    fig_files.update_layout(showlegend=False)
+    st.plotly_chart(fig_files)
+
+    # 2. Demographic Fields Distribution Pie Chart
+    field_frequencies = {}
+    for file_data in results['demographic_data'].values():
+        for field_name, data in file_data.items():
+            if field_name not in field_frequencies:
+                field_frequencies[field_name] = len(data['occurrences'])
+            else:
+                field_frequencies[field_name] += len(data['occurrences'])
+
+    fig_demo = px.pie(
+        values=list(field_frequencies.values()),
+        names=list(field_frequencies.keys()),
+        title="Distribution of Demographic Fields",
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    st.plotly_chart(fig_demo)
+
+    # 3. Integration Patterns Line Graph
+    pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+
+    fig_patterns = go.Figure()
+    fig_patterns.add_trace(go.Scatter(
+        x=list(pattern_types.keys()),
+        y=list(pattern_types.values()),
+        mode='lines+markers',
+        name='Pattern Count',
+        line=dict(color='#0066cc', width=2),
+        marker=dict(size=10)
+    ))
+    fig_patterns.update_layout(
+        title="Integration Patterns Distribution",
+        xaxis_title="Pattern Type",
+        yaxis_title="Count",
+        showlegend=False
+    )
+    st.plotly_chart(fig_patterns)
+
+    # 4. Files and Fields Correlation
+    fig_correlation = go.Figure()
+
+    # Extract data for each file
+    file_names = [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']]
+    demographic_counts = [detail['demographic_fields_found'] for detail in results['summary']['file_details']]
+    integration_counts = [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
+
+    fig_correlation.add_trace(go.Bar(
+        name='Demographic Fields',
+        x=file_names,
+        y=demographic_counts,
+        marker_color='#0066cc'
+    ))
+    fig_correlation.add_trace(go.Bar(
+        name='Integration Patterns',
+        x=file_names,
+        y=integration_counts,
+        marker_color='#90EE90'
+    ))
+
+    fig_correlation.update_layout(
+        title="Fields and Patterns by File",
+        xaxis_title="File Name",
+        yaxis_title="Count",
+        barmode='group'
+    )
+    st.plotly_chart(fig_correlation)
 
 def main():
     st.title("🔍 CodeLens")
@@ -94,8 +182,8 @@ def main():
                 results = analyzer.scan_repository()
                 progress_bar.progress(100)
 
-                # Create tabs for Analysis Results and Export Reports
-                tab1, tab2 = st.tabs(["Analysis Results", "Export Reports"])
+                # Create tabs for Analysis Results, Dashboard, and Export Reports
+                tab1, tab2, tab3 = st.tabs(["Analysis Results", "Dashboard", "Export Reports"])
 
                 with tab1:
                     # Summary Stats
@@ -132,6 +220,14 @@ def main():
                             )
 
                 with tab2:
+                    st.header("Analysis Dashboard")
+                    st.markdown("""
+                    This dashboard provides visual insights into the code analysis results,
+                    showing distributions of files, demographic fields, and integration patterns.
+                    """)
+                    create_dashboard_charts(results)
+
+                with tab3:
                     st.header("Available Reports")
 
                     # Get all report files and filter by app_name
