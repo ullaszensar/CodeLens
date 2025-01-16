@@ -7,75 +7,65 @@ def apply_custom_styles():
         /* Main container */
         .main {
             padding: 2rem;
-            background-color: white;
         }
-
+        
         /* Metrics styling */
         .css-1ht1j8u {
-            background-color: #f8f9fa;
+            background-color: #2d3035;
             padding: 1rem;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
         }
-
+        
         /* Expander styling */
         .streamlit-expanderHeader {
-            background-color: #f8f9fa;
+            background-color: #2d3035;
             border-radius: 5px;
-            border: 1px solid #e9ecef;
         }
-
+        
         /* Code blocks */
         .stCode {
-            background-color: #f8f9fa !important;
+            background-color: #272822 !important;
             border-radius: 5px;
-            border: 1px solid #e9ecef;
         }
-
+        
         /* Progress bar */
         .stProgress > div > div {
-            background-color: #4B9CD3;
+            background-color: #FF4B4B;
         }
-
+        
         /* File uploader */
         .uploadedFile {
-            background-color: #f8f9fa;
+            background-color: #2d3035;
             border-radius: 5px;
             padding: 0.5rem;
-            border: 1px solid #e9ecef;
         }
-
+        
         /* Buttons */
         .stButton > button {
-            background-color: #4B9CD3;
+            background-color: #FF4B4B;
             color: white;
             border: none;
             padding: 0.5rem 1rem;
             border-radius: 5px;
         }
-
-        .stButton > button:hover {
-            background-color: #357ABD;
-        }
-
+        
         /* Sidebar */
         .css-1d391kg {
-            background-color: white;
+            background-color: #1E1E1E;
         }
-
+        
         /* Headers */
         h1, h2, h3 {
-            color: #4B9CD3;
+            color: #FF4B4B;
         }
-
+        
         /* File tree */
         pre {
-            background-color: #f8f9fa;
+            background-color: #2d3035;
             padding: 1rem;
             border-radius: 5px;
             margin: 0.5rem 0;
-            border: 1px solid #e9ecef;
         }
         </style>
     """, unsafe_allow_html=True)
