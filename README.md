@@ -44,8 +44,12 @@ A comprehensive web-based source code analysis tool designed to extract demograp
 
 5. Install required packages:
    ```bash
-   pip install streamlit==1.41.1 pygments==2.18.0
+   pip install streamlit==1.41.1 pygments==2.18.0 plotly==5.18.0
    ```
+   This will install:
+   - Streamlit: For the web interface
+   - Pygments: For code syntax highlighting
+   - Plotly: For interactive data visualizations and dashboards
 
 ### Running the Application
 
@@ -115,6 +119,11 @@ ZensarCA/
   - File operations
 - HTML report generation with detailed findings
 - Interactive web interface with syntax highlighting
+- Interactive dashboards with:
+  - File distribution charts
+  - Demographic field analysis
+  - Integration pattern visualization
+  - Correlation graphs
 
 ## Usage
 1. Launch the application using the steps above
@@ -124,6 +133,7 @@ ZensarCA/
 3. Enter the application/repository name
 4. Click "Run Analysis"
 5. View the analysis results:
+   - Interactive dashboards
    - Summary statistics
    - Demographic data findings
    - Integration patterns detected
