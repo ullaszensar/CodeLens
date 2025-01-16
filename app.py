@@ -64,7 +64,7 @@ def create_dashboard_charts(results):
     fig_files.update_layout(showlegend=False)
     st.plotly_chart(fig_files)
 
-    # 2. Demographic Fields Distribution Pie Chart
+    # 2. Demographic Fields Distribution - Side by side charts
     field_frequencies = {}
     for file_data in results['demographic_data'].values():
         for field_name, data in file_data.items():
@@ -73,13 +73,31 @@ def create_dashboard_charts(results):
             else:
                 field_frequencies[field_name] += len(data['occurrences'])
 
-    fig_demo = px.pie(
-        values=list(field_frequencies.values()),
-        names=list(field_frequencies.keys()),
-        title="Distribution of Demographic Fields",
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
-    st.plotly_chart(fig_demo)
+    # Create two columns for side-by-side charts
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Pie Chart
+        fig_demo_pie = px.pie(
+            values=list(field_frequencies.values()),
+            names=list(field_frequencies.keys()),
+            title="Distribution of Demographic Fields (Pie Chart)",
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        st.plotly_chart(fig_demo_pie, use_container_width=True)
+
+    with col2:
+        # Bar Chart
+        fig_demo_bar = px.bar(
+            x=list(field_frequencies.keys()),
+            y=list(field_frequencies.values()),
+            title="Distribution of Demographic Fields (Bar Chart)",
+            labels={'x': 'Field Name', 'y': 'Occurrences'},
+            color=list(field_frequencies.keys()),
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        fig_demo_bar.update_layout(showlegend=False)
+        st.plotly_chart(fig_demo_bar, use_container_width=True)
 
     # 3. Integration Patterns Line Graph
     pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
