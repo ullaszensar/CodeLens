@@ -10,7 +10,7 @@ import base64
 
 # Page config
 st.set_page_config(
-    page_title="ZensarCA - Code Utility",
+    page_title="CodeLens - Code Utility",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -33,7 +33,7 @@ def get_file_download_link(file_path, link_text):
     return f'<a href="data:text/html;base64,{b64}" download="{os.path.basename(file_path)}">{link_text}</a>'
 
 def main():
-    st.title("🔍 ZensarCA")
+    st.title("🔍 CodeLens")
     st.markdown("### Source Code Analysis Tool")
     
     # Sidebar
@@ -120,22 +120,18 @@ def main():
                             display_code_with_highlights(pattern['code_snippet'], pattern['line_number'])
                 
                 with col2:
-                    st.header("File Structure")
-                    create_file_tree(repo_path)
-                    
                     # Download Reports
                     st.header("Export Reports")
                     report_files = [f for f in os.listdir() if f.endswith(('.html', '.json')) and 'code_analysis' in f]
-                    
+
                     for report_file in report_files:
                         st.markdown(
                             get_file_download_link(report_file, f"Download {report_file}"),
                             unsafe_allow_html=True
                         )
-                
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")
-        
+
         finally:
             if temp_dir:
                 import shutil
