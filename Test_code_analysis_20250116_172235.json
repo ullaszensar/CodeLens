@@ -1,0 +1,77 @@
+{
+  "metadata": {
+    "application_name": "Test",
+    "scan_timestamp": "2025-01-16 17:22:35",
+    "repository_path": "/tmp/tmp1770jvs6"
+  },
+  "demographic_data": {},
+  "integration_patterns": [
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 18,
+      "code_snippet": "//private static final String NAMESPACE_URI = \"http://www.jpworks.com/employee\";"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 18,
+      "code_snippet": "//private static final String NAMESPACE_URI = \"http://www.jpworks.com/employee\";"
+    },
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 20,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByNameRequest\")"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 20,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByNameRequest\")"
+    },
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 33,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByIdRequest\")"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+      "line_number": 33,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByIdRequest\")"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "soap_components",
+      "file_path": "/tmp/tmp1770jvs6/BackendService.java",
+      "line_number": 6,
+      "code_snippet": "import javax.xml.datatype.DatatypeFactory;"
+    }
+  ],
+  "summary": {
+    "files_analyzed": 2,
+    "unique_demographic_fields": [],
+    "demographic_fields_found": 0,
+    "integration_patterns_found": 7,
+    "file_details": [
+      {
+        "file_path": "/tmp/tmp1770jvs6/EmployeeEndpoint.java",
+        "demographic_fields_found": 0,
+        "integration_patterns_found": 6
+      },
+      {
+        "file_path": "/tmp/tmp1770jvs6/BackendService.java",
+        "demographic_fields_found": 0,
+        "integration_patterns_found": 1
+      }
+    ]
+  }
+}

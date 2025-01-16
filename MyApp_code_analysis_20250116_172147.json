@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "application_name": "MyApp",
+    "scan_timestamp": "2025-01-16 17:21:47",
+    "repository_path": "/tmp/tmp3hwb8bct"
+  },
+  "demographic_data": {},
+  "integration_patterns": [
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 18,
+      "code_snippet": "//private static final String NAMESPACE_URI = \"http://www.jpworks.com/employee\";"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 18,
+      "code_snippet": "//private static final String NAMESPACE_URI = \"http://www.jpworks.com/employee\";"
+    },
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 20,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByNameRequest\")"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 20,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByNameRequest\")"
+    },
+    {
+      "pattern_type": "rest_api",
+      "sub_type": "url_patterns",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 33,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByIdRequest\")"
+    },
+    {
+      "pattern_type": "soap_services",
+      "sub_type": "xml_namespaces",
+      "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+      "line_number": 33,
+      "code_snippet": "@PayloadRoot(namespace = \"http://www.jpworks.com/employee\", localPart = \"EmployeeByIdRequest\")"
+    }
+  ],
+  "summary": {
+    "files_analyzed": 1,
+    "unique_demographic_fields": [],
+    "demographic_fields_found": 0,
+    "integration_patterns_found": 6,
+    "file_details": [
+      {
+        "file_path": "/tmp/tmp3hwb8bct/EmployeeEndpoint.java",
+        "demographic_fields_found": 0,
+        "integration_patterns_found": 6
+      }
+    ]
+  }
+}

@@ -142,28 +142,36 @@ def main():
                     report_files.sort(key=parse_timestamp_from_filename, reverse=True)
 
                     if report_files:
-                        # Create a table with three columns
-                        cols = st.columns([1, 2, 2])
-                        cols[0].markdown("**Download**")
+                        # Create a table with five columns
+                        cols = st.columns([1, 3, 2, 2, 1])
+                        cols[0].markdown("**S.No**")
                         cols[1].markdown("**File Name**")
-                        cols[2].markdown("**Timestamp**")
+                        cols[2].markdown("**Date**")
+                        cols[3].markdown("**Time**")
+                        cols[4].markdown("**Download**")
 
                         # List all reports
-                        for report_file in report_files:
-                            cols = st.columns([1, 2, 2])
+                        for idx, report_file in enumerate(report_files, 1):
+                            cols = st.columns([1, 3, 2, 2, 1])
 
-                            # Download button column
-                            cols[0].markdown(
-                                get_file_download_link(report_file),
-                                unsafe_allow_html=True
-                            )
+                            # Serial number column
+                            cols[0].text(f"{idx}")
 
                             # File name column
                             cols[1].text(report_file)
 
-                            # Timestamp column
+                            # Extract timestamp and format date and time separately
                             timestamp = parse_timestamp_from_filename(report_file)
-                            cols[2].text(timestamp.strftime('%Y-%m-%d %H:%M:%S'))
+                            # Date in DD-MM-YY format
+                            cols[2].text(timestamp.strftime('%d-%m-%y'))
+                            # Time in HH:MM:SS format
+                            cols[3].text(timestamp.strftime('%H:%M:%S'))
+
+                            # Download button column (last)
+                            cols[4].markdown(
+                                get_file_download_link(report_file),
+                                unsafe_allow_html=True
+                            )
                     else:
                         st.info("No reports available for this application.")
 
