@@ -271,6 +271,9 @@ class CodeAnalyzer:
                 <p>Unique Demographic Fields: {len(unique_fields)} [{', '.join(unique_fields)}]</p>  
                 <p>Demographic Fields Occurrences Found: {results['summary']['demographic_fields_found']}</p>  
                 <p>Integration Patterns Found: {results['summary']['integration_patterns_found']}</p>  
+
+                {self._generate_field_frequency_html(results)}
+
                 <h3>File-wise Summary</h3>  
                 <table>  
                     <tr>  
@@ -345,6 +348,51 @@ class CodeAnalyzer:
             </div>
             """  
         return html  
+
+    def _generate_field_frequency_html(self, results: Dict) -> str:
+        """Generate HTML table for field frequency"""
+        # Calculate field frequencies
+        field_frequencies = {}
+        for file_data in results['demographic_data'].values():
+            for field_name, data in file_data.items():
+                if field_name not in field_frequencies:
+                    field_frequencies[field_name] = {
+                        'count': len(data['occurrences']),
+                        'type': data['data_type']
+                    }
+                else:
+                    field_frequencies[field_name]['count'] += len(data['occurrences'])
+
+        # Generate HTML table with consistent styling
+        html = """
+        <div class="section">
+            <h3>Field Frequency Analysis</h3>
+            <p>Below table shows how many times each demographic field appears across all analyzed files:</p>
+            <table>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 35%;">Field Name</th>
+                    <th style="width: 30%;">Field Type</th>
+                    <th style="width: 30%;">Total Occurrences</th>
+                </tr>
+        """
+
+        for idx, (field_name, data) in enumerate(sorted(field_frequencies.items(), key=lambda x: x[1]['count'], reverse=True), 1):
+            html += f"""
+                <tr>
+                    <td>{idx}</td>
+                    <td>{field_name}</td>
+                    <td>{data['type']}</td>
+                    <td>{data['count']}</td>
+                </tr>
+            """
+
+        html += """
+            </table>
+        </div>
+        <br>
+        """
+        return html
 
 def main():  
     """
