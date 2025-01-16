@@ -33,3 +33,5 @@
 2025-01-16 17:38:01,627 - INFO - Analysis report generated: Hari_code_analysis_20250116_173801.html
 2025-01-16 17:41:19,122 - INFO - Analyzing file: /tmp/tmpyetkt8jb/EmployeeEndpoint.java
 2025-01-16 17:41:19,133 - INFO - Analysis report generated: MyApp_code_analysis_20250116_174119.html
+2025-01-16 17:47:56,077 - INFO - Analyzing file: /tmp/tmpsz16jisl/EmployeeEndpoint.java
+2025-01-16 17:47:56,089 - INFO - Analysis report generated: MyApp_CodeLens_20250116_174756.html
