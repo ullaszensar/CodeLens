@@ -6,3 +6,6 @@
 2024-12-18 17:36:01,274 - INFO - Analysis reports generated: MyApp_code_analysis_20241218_173601.json and MyApp_code_analysis_20241218_173601.html
 2025-01-08 13:40:52,313 - INFO - Analyzing file: /tmp/tmpgw_4yhqh/EmployeeEndpoint.java
 2025-01-08 13:40:52,332 - INFO - Analysis reports generated: MyApp_code_analysis_20250108_134052.json and MyApp_code_analysis_20250108_134052.html
+2025-01-09 01:33:07,726 - INFO - Analyzing file: /tmp/tmpaiftotqr/EmployeeEndpoint.java
+2025-01-09 01:33:07,730 - ERROR - Error analyzing file /tmp/tmpaiftotqr/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-09 01:33:07,733 - INFO - Analysis reports generated: MyApp_code_analysis_20250109_013307.json and MyApp_code_analysis_20250109_013307.html
