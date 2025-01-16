@@ -12,3 +12,6 @@
 2025-01-16 16:56:53,262 - INFO - Analyzing file: /tmp/tmpsooyui86/EmployeeEndpoint.java
 2025-01-16 16:56:53,264 - ERROR - Error analyzing file /tmp/tmpsooyui86/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
 2025-01-16 16:56:53,266 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_165653.json and MyApp_code_analysis_20250116_165653.html
+2025-01-16 16:59:31,991 - INFO - Analyzing file: /tmp/tmp8381w_7p/EmployeeEndpoint.java
+2025-01-16 16:59:31,992 - ERROR - Error analyzing file /tmp/tmp8381w_7p/EmployeeEndpoint.java: CodeAnalyzer.is_comment_line() takes 2 positional arguments but 3 were given
+2025-01-16 16:59:31,993 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_165931.json and MyApp_code_analysis_20250116_165931.html
