@@ -24,3 +24,5 @@
 2025-01-16 17:30:38,787 - INFO - Analyzing file: /tmp/tmpnqp7f0c6/EmployeeEndpoint.java
 2025-01-16 17:30:38,792 - INFO - Analyzing file: /tmp/tmpnqp7f0c6/BackendService.java
 2025-01-16 17:30:38,800 - INFO - Analysis report generated: NewApp_code_analysis_20250116_173038.html
+2025-01-16 17:31:20,653 - INFO - Analyzing file: /tmp/tmpvjg6dt61/EmployeeEndpoint.java
+2025-01-16 17:31:20,660 - INFO - Analysis report generated: MyApp_code_analysis_20250116_173120.html

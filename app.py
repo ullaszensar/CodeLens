@@ -44,11 +44,10 @@ def parse_timestamp_from_filename(filename):
 
 def main():
     st.title("🔍 CodeLens")
-    st.markdown("### Source Code Analysis Tool")
+    st.markdown("### Code Analysis Tool Utility")
 
     # Sidebar
     st.sidebar.header("Analysis Settings")
-    st.sidebar.markdown("*Source Code Analysis Utility*")
 
     # Input method selection
     input_method = st.sidebar.radio(
