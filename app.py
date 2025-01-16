@@ -44,7 +44,7 @@ def parse_timestamp_from_filename(filename):
 
 def main():
     st.title("🔍 CodeLens")
-    st.markdown("### Code Analysis Tool Utility")
+    st.markdown("### Code Analysis Utility")
 
     # Sidebar
     st.sidebar.header("Analysis Settings")
@@ -115,7 +115,8 @@ def main():
                                 for occurrence in data['occurrences']:
                                     display_code_with_highlights(
                                         occurrence['code_snippet'],
-                                        occurrence['line_number']
+                                        occurrence['line_number'],
+                                        file_path
                                     )
 
                     # Integration Patterns
@@ -124,7 +125,11 @@ def main():
                         with st.expander(f"🔌 {pattern['pattern_type']} - {pattern['sub_type']}"):
                             st.write(f"**File:** {os.path.basename(pattern['file_path'])}")
                             st.write(f"**Line:** {pattern['line_number']}")
-                            display_code_with_highlights(pattern['code_snippet'], pattern['line_number'])
+                            display_code_with_highlights(
+                                pattern['code_snippet'],
+                                pattern['line_number'],
+                                pattern['file_path']
+                            )
 
                 with tab2:
                     st.header("Available Reports")
