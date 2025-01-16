@@ -161,8 +161,9 @@ def main():
                             # Serial number column
                             cols[0].text(f"{idx}")
 
-                            # File name column
-                            cols[1].text(report_file)
+                            # File name column without .html extension
+                            display_name = report_file.replace('.html', '')
+                            cols[1].text(display_name)
 
                             # Extract timestamp and format date and time separately
                             timestamp = parse_timestamp_from_filename(report_file)
