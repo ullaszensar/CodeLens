@@ -162,10 +162,10 @@ def main():
 
                             # Extract timestamp and format date and time separately
                             timestamp = parse_timestamp_from_filename(report_file)
-                            # Date in DD-MM-YY format
-                            cols[2].text(timestamp.strftime('%d-%m-%y'))
-                            # Time in HH:MM:SS format
-                            cols[3].text(timestamp.strftime('%H:%M:%S'))
+                            # Date in DD-MMM-YYYY format
+                            cols[2].text(timestamp.strftime('%d-%b-%Y'))
+                            # Time in 12-hour format with AM/PM
+                            cols[3].text(timestamp.strftime('%I:%M:%S %p'))
 
                             # Download button column (last)
                             cols[4].markdown(

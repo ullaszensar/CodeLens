@@ -19,3 +19,8 @@
 2025-01-16 17:22:35,897 - INFO - Analysis reports generated: Test_code_analysis_20250116_172235.json and Test_code_analysis_20250116_172235.html
 2025-01-16 17:25:39,059 - INFO - Analyzing file: /tmp/tmpcp3df0ax/EmployeeEndpoint.java
 2025-01-16 17:25:39,068 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_172539.json and MyApp_code_analysis_20250116_172539.html
+2025-01-16 17:28:19,969 - INFO - Analyzing file: /tmp/tmp6640kfzi/EmployeeEndpoint.java
+2025-01-16 17:28:19,975 - INFO - Analysis report generated: NewApp_code_analysis_20250116_172819.html
+2025-01-16 17:30:38,787 - INFO - Analyzing file: /tmp/tmpnqp7f0c6/EmployeeEndpoint.java
+2025-01-16 17:30:38,792 - INFO - Analyzing file: /tmp/tmpnqp7f0c6/BackendService.java
+2025-01-16 17:30:38,800 - INFO - Analysis report generated: NewApp_code_analysis_20250116_173038.html
