@@ -227,11 +227,10 @@ class CodeAnalyzer:
         """  
         Generate a detailed HTML report of the analysis  
         """  
-        # Convert the set of unique demographic fields to a list for JSON serialization  
         results['summary']['unique_demographic_fields'] = list(results['summary']['unique_demographic_fields'])  
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')  
-        html_report = f'{self.app_name}_code_analysis_{timestamp}.html'  
+        html_report = f'{self.app_name}_CodeLens_{timestamp}.html'  
         self.generate_html_report(results, html_report)  
 
         self.logger.info(f"Analysis report generated: {html_report}")  

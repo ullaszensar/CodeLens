@@ -138,7 +138,7 @@ def main():
                     report_files = [
                         f for f in os.listdir()
                         if f.endswith('.html')
-                        and 'code_analysis' in f
+                        and 'CodeLens' in f
                         and f.startswith(app_name)
                     ]
 
