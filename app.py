@@ -57,7 +57,7 @@ def main():
     )
 
     # Application name input
-    app_name = st.sidebar.text_input("Application/Repository Name", "MyApp")
+    app_name = st.sidebar.text_input("Application Name", "MyApp")
 
     analysis_triggered = False
     temp_dir = None
@@ -133,7 +133,7 @@ def main():
                     # Get all report files and filter by app_name
                     report_files = [
                         f for f in os.listdir()
-                        if f.endswith(('.html', '.json'))
+                        if f.endswith('.html')
                         and 'code_analysis' in f
                         and f.startswith(app_name)
                     ]

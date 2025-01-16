@@ -225,22 +225,16 @@ class CodeAnalyzer:
 
     def generate_report(self, results: Dict):  
         """  
-        Generate a detailed report of the analysis  
+        Generate a detailed HTML report of the analysis  
         """  
         # Convert the set of unique demographic fields to a list for JSON serialization  
         results['summary']['unique_demographic_fields'] = list(results['summary']['unique_demographic_fields'])  
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')  
-        report_file = f'{self.app_name}_code_analysis_{timestamp}.json'  
-
-        with open(report_file, 'w') as f:  
-            json.dump(results, f, indent=2)  
-
-        # Generate HTML report for better visualization  
         html_report = f'{self.app_name}_code_analysis_{timestamp}.html'  
         self.generate_html_report(results, html_report)  
 
-        self.logger.info(f"Analysis reports generated: {report_file} and {html_report}")  
+        self.logger.info(f"Analysis report generated: {html_report}")  
 
     def generate_html_report(self, results: Dict, filename: str):  
         """  
@@ -372,5 +366,4 @@ if __name__ == "__main__":
 
 # Created/Modified files during execution:  
 # - code_analysis.log  
-# - code_analysis_report_[timestamp].json  
-# - code_analysis_report_[timestamp].html  
+# - code_analysis_report_[timestamp].html

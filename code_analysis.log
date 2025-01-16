@@ -17,3 +17,5 @@
 2025-01-16 17:22:35,890 - INFO - Analyzing file: /tmp/tmp1770jvs6/EmployeeEndpoint.java
 2025-01-16 17:22:35,893 - INFO - Analyzing file: /tmp/tmp1770jvs6/BackendService.java
 2025-01-16 17:22:35,897 - INFO - Analysis reports generated: Test_code_analysis_20250116_172235.json and Test_code_analysis_20250116_172235.html
+2025-01-16 17:25:39,059 - INFO - Analyzing file: /tmp/tmpcp3df0ax/EmployeeEndpoint.java
+2025-01-16 17:25:39,068 - INFO - Analysis reports generated: MyApp_code_analysis_20250116_172539.json and MyApp_code_analysis_20250116_172539.html
