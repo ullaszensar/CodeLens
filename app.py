@@ -49,22 +49,7 @@ def create_dashboard_charts(results):
     """Create visualization charts for the dashboard"""
     # Prepare data for visualizations
 
-    # 1. Files by Language Bar Chart
-    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
-    file_counts = Counter(file_extensions)
-
-    fig_files = px.bar(
-        x=list(file_counts.keys()),
-        y=list(file_counts.values()),
-        title="Files by Language",
-        labels={'x': 'File Extension', 'y': 'Count'},
-        color=list(file_counts.keys()),
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
-    fig_files.update_layout(showlegend=False)
-    st.plotly_chart(fig_files)
-
-    # 2. Demographic Fields Distribution - Side by side charts
+    # 1. Demographic Fields Distribution - Side by side charts
     field_frequencies = {}
     for file_data in results['demographic_data'].values():
         for field_name, data in file_data.items():
@@ -98,6 +83,21 @@ def create_dashboard_charts(results):
         )
         fig_demo_bar.update_layout(showlegend=False)
         st.plotly_chart(fig_demo_bar, use_container_width=True)
+
+    # 2. Files by Language Bar Chart
+    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
+    file_counts = Counter(file_extensions)
+
+    fig_files = px.bar(
+        x=list(file_counts.keys()),
+        y=list(file_counts.values()),
+        title="Files by Language",
+        labels={'x': 'File Extension', 'y': 'Count'},
+        color=list(file_counts.keys()),
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    fig_files.update_layout(showlegend=False)
+    st.plotly_chart(fig_files)
 
     # 3. Integration Patterns Line Graph
     pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
