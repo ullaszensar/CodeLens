@@ -67,5 +67,32 @@ def apply_custom_styles():
             border-radius: 5px;
             margin: 0.5rem 0;
         }
+
+        /* Download button styling */
+        .download-button {
+            background-color: #0066cc;
+            color: white !important;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .download-button:hover {
+            background-color: #0052a3;
+            text-decoration: none;
+        }
+
+        /* Table styling */
+        .stMarkdown table {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .stMarkdown td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
         </style>
     """, unsafe_allow_html=True)
