@@ -10,7 +10,7 @@ import base64
 
 # Page config
 st.set_page_config(
-    page_title="ZensarCA - Java Code Utility",
+    page_title="ZensarCA - Code Utility",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -34,11 +34,11 @@ def get_file_download_link(file_path, link_text):
 
 def main():
     st.title("🔍 ZensarCA")
-    st.markdown("### Java Code Utility")
+    st.markdown("### Source Code Analysis Tool")
     
     # Sidebar
     st.sidebar.header("Analysis Settings")
-    st.sidebar.markdown("*Java Source Code Analysis Utility*")
+    st.sidebar.markdown("*Source Code Analysis Utility*")
     
     # Input method selection
     input_method = st.sidebar.radio(
