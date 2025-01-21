@@ -228,6 +228,45 @@ def main():
                     stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
                     stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
 
+                    # Demographic Fields Summary Table
+                    st.subheader("Demographic Fields Summary")
+                    demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
+                    if demographic_files:
+                        cols = st.columns([1, 3, 2, 2])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Analyzed**")
+                        cols[2].markdown("**Fields Found**")
+                        cols[3].markdown("**Unique Fields**")
+
+                        for idx, file_detail in enumerate(demographic_files, 1):
+                            file_path = file_detail['file_path']
+                            unique_fields = []
+                            if file_path in results['demographic_data']:
+                                unique_fields = list(results['demographic_data'][file_path].keys())
+
+                            cols = st.columns([1, 3, 2, 2])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_path))
+                            cols[2].text(str(file_detail['demographic_fields_found']))
+                            cols[3].text(', '.join(unique_fields))
+
+                    # Integration Patterns Summary Table
+                    st.subheader("Integration Patterns Summary")
+                    integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
+                    if integration_files:
+                        cols = st.columns([1, 3, 2])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Name**")
+                        cols[2].markdown("**Patterns Found**")
+
+                        for idx, file_detail in enumerate(integration_files, 1):
+                            cols = st.columns([1, 3, 2])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_detail['file_path']))
+                            cols[2].text(str(file_detail['integration_patterns_found']))
+
+                    # Comment out detailed findings sections
+                    """
                     # Demographic Data
                     st.subheader("Demographic Data Findings")
                     for file_path, fields in results['demographic_data'].items():
@@ -252,6 +291,7 @@ def main():
                                 pattern['line_number'],
                                 pattern['file_path']
                             )
+                    """
 
                 with tab3:
                     st.header("Available Reports")
