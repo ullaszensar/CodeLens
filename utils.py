@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from pygments import highlight, lexers, util
 from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
+from pygments.formatters import TerminalFormatter
 
 def detect_language(file_path: str, content: str = None) -> tuple:
     """Detect programming language from file extension and content"""
@@ -44,7 +44,7 @@ def display_code_with_highlights(code_snippet: str, line_number: int, file_path:
         # Detect language
         language_name, lexer = detect_language(file_path if file_path else '', code_snippet)
 
-        # Add language badge
+        # Add language badge using markdown
         st.markdown(f"""
             <div style="margin-bottom: 5px;">
                 <span style="background-color: #0066cc; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em;">
@@ -53,23 +53,15 @@ def display_code_with_highlights(code_snippet: str, line_number: int, file_path:
             </div>
         """, unsafe_allow_html=True)
 
-        # Format and display code
-        formatted_code = highlight(
-            code_snippet,
-            lexer,
-            HtmlFormatter(style='monokai', linenos=True, linenostart=line_number)
-        )
+        # Format the code using Pygments with Terminal formatter
+        formatted_code = highlight(code_snippet, lexer, TerminalFormatter())
 
-        st.markdown(
-            f"""
-            <style>
-                .highlight pre {{ background-color: #272822; padding: 10px; border-radius: 5px; }}
-                .highlight .linenos {{ color: #8f908a; }}
-            </style>
-            {formatted_code}
-            """,
-            unsafe_allow_html=True
-        )
+        # Add line number prefix
+        code_with_line = f"Line {line_number}:\n{code_snippet}"
+
+        # Display code using Streamlit's native code block
+        st.code(code_with_line, language=language_name.lower())
+
     except Exception:
         st.code(code_snippet)
 
