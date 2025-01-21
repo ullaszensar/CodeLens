@@ -235,28 +235,27 @@ class CodeAnalyzer:
 
         self.logger.info(f"Analysis report generated: {html_report}")  
 
-    def generate_html_report(self, results: Dict, filename: str):  
-        """  
-        Generate an HTML report for better visualization  
-        """  
-        unique_fields = list(results['summary']['unique_demographic_fields'])  
-        html_content = f"""  
-        <!DOCTYPE html>  
-        <html>  
-        <head>  
-            <title>{self.app_name} - Code Analysis Report</title>  
-            <style>  
-                body {{ font-family: Arial, sans-serif; margin: 20px; }}  
-                .section {{ margin-bottom: 30px; }}  
-                .pattern {{ margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }}  
-                .code {{ background-color: #f5f5f5; padding: 10px; }}  
-                table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; }}  
-                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}  
+    def generate_html_report(self, results: Dict, filename: str):
+        """Generate an HTML report for better visualization"""
+        self.results = results  # Store results for use in other methods
+        unique_fields = list(results['summary']['unique_demographic_fields'])
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>{self.app_name} - Code Analysis Report</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .section {{ margin-bottom: 30px; }}
+                .pattern {{ margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }}
+                .code {{ background-color: #f5f5f5; padding: 10px; }}
+                table {{ width: 100%; border-collapse: collapse; margin-bottom: 20px; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
                 th {{ background-color: #f2f2f2; }}
-                .metadata {{ background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}  
-            </style>  
-        </head>  
-        <body>  
+                .metadata {{ background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+            </style>
+        </head>
+        <body>
             <div class="header">
                 <h1>{self.app_name} - Code Analysis Report</h1>
                 <div class="metadata">
@@ -265,55 +264,98 @@ class CodeAnalyzer:
                     <p><strong>Repository Path:</strong> {results['metadata']['repository_path']}</p>
                 </div>
             </div>
-            <div class="section">  
-                <h2>Summary</h2>  
-                <p>Files Analyzed: {results['summary']['files_analyzed']}</p>  
-                <p>Unique Demographic Fields: {len(unique_fields)} [{', '.join(unique_fields)}]</p>  
-                <p>Demographic Fields Occurrences Found: {results['summary']['demographic_fields_found']}</p>  
-                <p>Integration Patterns Found: {results['summary']['integration_patterns_found']}</p>  
+            <div class="section">
+                <h2>Summary</h2>
+                <p>Files Analyzed: {results['summary']['files_analyzed']}</p>
+                <p>Unique Demographic Fields: {len(unique_fields)} [{', '.join(unique_fields)}]</p>
+                <p>Demographic Fields Occurrences Found: {results['summary']['demographic_fields_found']}</p>
+                <p>Integration Patterns Found: {results['summary']['integration_patterns_found']}</p>
 
                 {self._generate_field_frequency_html(results)}
 
-                <h3>File-wise Summary</h3>  
-                <table>  
-                    <tr>  
-                        <th>#</th>  
-                        <th>File Analyzed</th>  
-                        <th>Demographic Fields Occurrences Found</th>  
-                        <th>Integration Patterns Found</th>  
-                    </tr>  
-                    {self._generate_file_summary_html(results['summary']['file_details'])}  
-                </table>  
-            </div>  
+                {self._generate_demographic_summary_html(results['summary']['file_details'])}
+                {self._generate_integration_summary_html(results['summary']['file_details'])}
+            </div>
 
-            <div class="section">  
-                <h2>Demographic Data Fields by File</h2>  
-                {self._generate_demographic_html(results['demographic_data'])}  
-            </div>  
+            <div class="section">
+                <h2>Demographic Data Fields by File</h2>
+                {self._generate_demographic_html(results['demographic_data'])}
+            </div>
 
-            <div class="section">  
-                <h2>Integration Patterns</h2>  
-                {self._generate_integration_html(results['integration_patterns'])}  
-            </div>  
-        </body>  
-        </html>  
-        """  
+            <div class="section">
+                <h2>Integration Patterns</h2>
+                {self._generate_integration_html(results['integration_patterns'])}
+            </div>
+        </body>
+        </html>
+        """
 
-        with open(filename, 'w') as f:  
-            f.write(html_content)  
+        with open(filename, 'w') as f:
+            f.write(html_content)
 
-    def _generate_file_summary_html(self, file_details: List[Dict]) -> str:  
-        html = ""  
-        for index, file_detail in enumerate(file_details, 1):  
-            html += f"""  
-            <tr>  
-                <td>{index}</td>  
-                <td>{file_detail['file_path']}</td>  
-                <td>{file_detail['demographic_fields_found']}</td>  
-                <td>{file_detail['integration_patterns_found']}</td>  
-            </tr>  
-            """  
-        return html  
+    def _generate_demographic_summary_html(self, file_details: List[Dict]) -> str:
+        """Generate HTML table for demographic field summary"""
+        # Filter out entries with zero demographic fields
+        demographic_files = [f for f in file_details if f['demographic_fields_found'] > 0]
+
+        if not demographic_files:
+            return ""
+
+        html = """
+        <h3>Demographic Fields Summary</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>File Analyzed</th>
+                <th>Demographic Fields Occurrences</th>
+                <th>Unique Fields</th>
+            </tr>
+        """
+
+        for index, file_detail in enumerate(demographic_files, 1):
+            # Get unique fields for this file from demographic_data
+            file_path = file_detail['file_path']
+            unique_fields = []
+            if file_path in self.results['demographic_data']:
+                unique_fields = list(self.results['demographic_data'][file_path].keys())
+
+            html += f"""
+            <tr>
+                <td>{index}</td>
+                <td>{file_path}</td>
+                <td>{file_detail['demographic_fields_found']}</td>
+                <td>{', '.join(unique_fields)}</td>
+            </tr>
+            """
+        return html + "</table>"
+
+    def _generate_integration_summary_html(self, file_details: List[Dict]) -> str:
+        """Generate HTML table for integration patterns summary"""
+        # Filter out entries with zero integration patterns
+        integration_files = [f for f in file_details if f['integration_patterns_found'] > 0]
+
+        if not integration_files:
+            return ""
+
+        html = """
+        <h3>Integration Patterns Summary</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Integration Patterns Found</th>
+            </tr>
+        """
+
+        for index, file_detail in enumerate(integration_files, 1):
+            html += f"""
+            <tr>
+                <td>{index}</td>
+                <td>{file_detail['file_path']}</td>
+                <td>{file_detail['integration_patterns_found']}</td>
+            </tr>
+            """
+        return html + "</table>"
 
     def _generate_demographic_html(self, demographic_data: Dict) -> str:  
         html = ""  
