@@ -102,6 +102,11 @@ def apply_custom_styles():
             text-decoration: none;
             font-size: 0.9rem;
             transition: background-color 0.3s;
+            display: inline-block;
+            white-space: nowrap;
+            text-align: center;
+            min-width: 80px;
+            margin: 0 auto;
         }
 
         .download-button:hover {
@@ -150,6 +155,19 @@ def apply_custom_styles():
         /* Table headers in Analysis tab */
         div[data-testid="stMarkdownContainer"] strong {
             color: #0066cc;
+        }
+
+        /* Export Reports table column styling */
+        div[data-testid="stHorizontalBlock"]:has(> div > a.download-button) {
+            display: flex;
+            align-items: center;
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(> div > a.download-button) > div:last-child {
+            display: flex;
+            justify-content: center;
+            padding: 0 5px;
+            min-width: 100px;
         }
         </style>
     """, unsafe_allow_html=True)

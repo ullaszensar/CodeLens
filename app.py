@@ -289,7 +289,7 @@ def main():
 
                     if report_files:
                         # Create a table with five columns
-                        cols = st.columns([1, 3, 2, 2, 1])
+                        cols = st.columns([1, 3, 2, 2, 2])
                         cols[0].markdown("**S.No**")
                         cols[1].markdown("**File Name**")
                         cols[2].markdown("**Date**")
@@ -298,7 +298,7 @@ def main():
 
                         # List all reports
                         for idx, report_file in enumerate(report_files, 1):
-                            cols = st.columns([1, 3, 2, 2, 1])
+                            cols = st.columns([1, 3, 2, 2, 2])
 
                             # Serial number column
                             cols[0].text(f"{idx}")
