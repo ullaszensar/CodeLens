@@ -308,7 +308,7 @@ class CodeAnalyzer:
                 <th>#</th>
                 <th>File Analyzed</th>
                 <th>Demographic Fields Occurrences</th>
-                <th>Unique Fields</th>
+                <th>Fields</th>
             </tr>
         """
 
@@ -344,15 +344,24 @@ class CodeAnalyzer:
                 <th>#</th>
                 <th>File Name</th>
                 <th>Integration Patterns Found</th>
+                <th>Patterns Found Details</th>
             </tr>
         """
 
         for index, file_detail in enumerate(integration_files, 1):
+            # Get pattern details for this file
+            file_path = file_detail['file_path']
+            pattern_details = set()
+            for pattern in self.results['integration_patterns']:
+                if pattern['file_path'] == file_path:
+                    pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
+
             html += f"""
             <tr>
                 <td>{index}</td>
                 <td>{file_detail['file_path']}</td>
                 <td>{file_detail['integration_patterns_found']}</td>
+                <td>{', '.join(pattern_details)}</td>
             </tr>
             """
         return html + "</table>"

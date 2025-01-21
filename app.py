@@ -236,7 +236,7 @@ def main():
                         cols[0].markdown("**#**")
                         cols[1].markdown("**File Analyzed**")
                         cols[2].markdown("**Fields Found**")
-                        cols[3].markdown("**Unique Fields**")
+                        cols[3].markdown("**Fields**")
 
                         for idx, file_detail in enumerate(demographic_files, 1):
                             file_path = file_detail['file_path']
@@ -254,16 +254,24 @@ def main():
                     st.subheader("Integration Patterns Summary")
                     integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
                     if integration_files:
-                        cols = st.columns([1, 3, 2])
+                        cols = st.columns([1, 3, 2, 3])
                         cols[0].markdown("**#**")
                         cols[1].markdown("**File Name**")
                         cols[2].markdown("**Patterns Found**")
+                        cols[3].markdown("**Patterns Found Details**")
 
                         for idx, file_detail in enumerate(integration_files, 1):
-                            cols = st.columns([1, 3, 2])
+                            file_path = file_detail['file_path']
+                            pattern_details = set()
+                            for pattern in results['integration_patterns']:
+                                if pattern['file_path'] == file_path:
+                                    pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
+
+                            cols = st.columns([1, 3, 2, 3])
                             cols[0].text(str(idx))
-                            cols[1].text(os.path.basename(file_detail['file_path']))
+                            cols[1].text(os.path.basename(file_path))
                             cols[2].text(str(file_detail['integration_patterns_found']))
+                            cols[3].text(', '.join(pattern_details))
 
                 with tab3:
                     st.header("Available Reports")
