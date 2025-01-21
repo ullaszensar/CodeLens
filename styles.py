@@ -114,11 +114,42 @@ def apply_custom_styles():
         .stMarkdown table {
             width: 100%;
             margin-bottom: 1rem;
+            border-collapse: collapse;
         }
 
-        .stMarkdown td {
-            padding: 0.5rem;
-            border-bottom: 1px solid #e9ecef;
+        .stMarkdown td, .stMarkdown th {
+            padding: 0.75rem;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .stMarkdown th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        /* Analysis tab tables */
+        div[data-testid="stHorizontalBlock"] {
+            background: white;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+
+        div[data-testid="stHorizontalBlock"] > div {
+            border-right: 1px solid #dee2e6;
+            padding: 0 10px;
+        }
+
+        div[data-testid="stHorizontalBlock"] > div:last-child {
+            border-right: none;
+        }
+
+        /* Table headers in Analysis tab */
+        div[data-testid="stMarkdownContainer"] strong {
+            color: #0066cc;
         }
         </style>
     """, unsafe_allow_html=True)
