@@ -44,22 +44,14 @@ def display_code_with_highlights(code_snippet: str, line_number: int, file_path:
         # Detect language
         language_name, lexer = detect_language(file_path if file_path else '', code_snippet)
 
-        # Add language badge using markdown
-        st.markdown(f"""
-            <div style="margin-bottom: 5px;">
-                <span style="background-color: #0066cc; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8em;">
-                    {language_name}
-                </span>
-            </div>
-        """, unsafe_allow_html=True)
+        # Add language badge using native Streamlit components
+        st.caption(f"Language: {language_name}")
 
         # Format the code using Pygments with Terminal formatter
         formatted_code = highlight(code_snippet, lexer, TerminalFormatter())
 
-        # Add line number prefix
-        code_with_line = f"Line {line_number}:\n{code_snippet}"
-
-        # Display code using Streamlit's native code block
+        # Add line number prefix and display using Streamlit's native code block
+        code_with_line = f"Line {line_number}:\n{formatted_code}"
         st.code(code_with_line, language=language_name.lower())
 
     except Exception:

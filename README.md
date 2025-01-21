@@ -2,6 +2,38 @@
 
 A comprehensive web-based source code analysis tool designed to extract demographic data and integration patterns across multiple programming languages.
 
+## Key Benefits
+- **Time-Saving Code Analysis**
+  - Automatically scans and analyzes code across 8 programming languages
+  - Eliminates manual code review effort for finding data patterns
+  - Rapid identification of integration points saves weeks of documentation work
+
+- **Enhanced Security & Compliance**
+  - Identifies sensitive demographic data patterns across codebases
+  - Helps ensure GDPR and data privacy compliance
+  - Tracks where customer data is being handled in the code
+
+- **Better Architecture Understanding**
+  - Visual representation of code patterns and relationships
+  - Clear mapping of all integration points (APIs, databases, messaging)
+  - Helps new team members understand system architecture quickly
+
+- **Data-Driven Decision Making**
+  - Interactive dashboards show code metrics and patterns
+  - Helps identify areas needing refactoring or standardization
+  - Provides concrete metrics for technical debt discussions
+
+- **Improved Documentation**
+  - Auto-generates comprehensive HTML reports
+  - Creates living documentation that stays current with the code
+  - Exports findings in multiple formats for different stakeholders
+
+- **Developer Productivity**
+  - Instant insight into unfamiliar codebases
+  - Reduces time spent searching for integration points
+  - Helps prevent duplicate implementations
+
+
 ## Created by
 - **Zensar Project Diamond Team**
 
