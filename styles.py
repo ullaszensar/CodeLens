@@ -137,15 +137,19 @@ def apply_custom_styles():
         /* Analysis tab tables */
         div[data-testid="stHorizontalBlock"] {
             background: white;
-            padding: 10px;
+            padding: 0;
             border: 1px solid #dee2e6;
-            border-radius: 5px;
-            margin: 5px 0;
+            border-radius: 0;
+            margin: 0;
+            min-height: 0;
+            line-height: normal;
         }
 
         div[data-testid="stHorizontalBlock"] > div {
             border-right: 1px solid #dee2e6;
-            padding: 0 10px;
+            padding: 5px 10px;
+            margin: 0;
+            min-height: 0;
         }
 
         div[data-testid="stHorizontalBlock"] > div:last-child {
@@ -167,7 +171,22 @@ def apply_custom_styles():
             display: flex;
             justify-content: center;
             padding: 0 5px;
-            min-width: 100px;
+            min-width: 120px;
+        }
+
+        /* Additional styles for table rows */
+        div[data-testid="column"] {
+            padding: 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        div[data-testid="stVerticalBlock"] > div {
+            margin-bottom: 0 !important;
+        }
+
+        .element-container {
+            margin: 0 !important;
+            border-bottom: 1px solid #dee2e6;
         }
         </style>
     """, unsafe_allow_html=True)

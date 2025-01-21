@@ -232,7 +232,7 @@ def main():
                     st.subheader("Demographic Fields Summary")
                     demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
                     if demographic_files:
-                        cols = st.columns([1, 3, 2, 2])
+                        cols = st.columns([0.5, 2, 1, 2])
                         cols[0].markdown("**#**")
                         cols[1].markdown("**File Analyzed**")
                         cols[2].markdown("**Fields Found**")
@@ -244,7 +244,7 @@ def main():
                             if file_path in results['demographic_data']:
                                 unique_fields = list(results['demographic_data'][file_path].keys())
 
-                            cols = st.columns([1, 3, 2, 2])
+                            cols = st.columns([0.5, 2, 1, 2])
                             cols[0].text(str(idx))
                             cols[1].text(os.path.basename(file_path))
                             cols[2].text(str(file_detail['demographic_fields_found']))
@@ -254,11 +254,11 @@ def main():
                     st.subheader("Integration Patterns Summary")
                     integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
                     if integration_files:
-                        cols = st.columns([1, 3, 2, 3])
+                        cols = st.columns([0.5, 2, 1, 2])
                         cols[0].markdown("**#**")
                         cols[1].markdown("**File Name**")
                         cols[2].markdown("**Patterns Found**")
-                        cols[3].markdown("**Patterns Found Details**")
+                        cols[3].markdown("**Pattern Details**")
 
                         for idx, file_detail in enumerate(integration_files, 1):
                             file_path = file_detail['file_path']
@@ -267,7 +267,7 @@ def main():
                                 if pattern['file_path'] == file_path:
                                     pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
 
-                            cols = st.columns([1, 3, 2, 3])
+                            cols = st.columns([0.5, 2, 1, 2])
                             cols[0].text(str(idx))
                             cols[1].text(os.path.basename(file_path))
                             cols[2].text(str(file_detail['integration_patterns_found']))
