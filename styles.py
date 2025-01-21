@@ -105,7 +105,7 @@ def apply_custom_styles():
             display: inline-block;
             white-space: nowrap;
             text-align: center;
-            min-width: 80px;
+            min-width: 120px;
             margin: 0 auto;
         }
 
@@ -115,30 +115,11 @@ def apply_custom_styles():
             text-decoration: none;
         }
 
-        /* Table styling */
-        .stMarkdown table {
-            width: 100%;
-            margin-bottom: 1rem;
-            border-collapse: collapse;
-        }
-
-        .stMarkdown td, .stMarkdown th {
-            padding: 0.75rem;
-            border: 1px solid #dee2e6;
-            text-align: left;
-        }
-
-        .stMarkdown th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            border-bottom: 2px solid #dee2e6;
-        }
-
         /* Analysis tab tables */
         div[data-testid="stHorizontalBlock"] {
             background: white;
             padding: 0;
-            border: 1px solid #dee2e6;
+            border: none;
             border-radius: 0;
             margin: 0;
             min-height: 0;
@@ -146,7 +127,7 @@ def apply_custom_styles():
         }
 
         div[data-testid="stHorizontalBlock"] > div {
-            border-right: 1px solid #dee2e6;
+            border-right: none;
             padding: 5px 10px;
             margin: 0;
             min-height: 0;
@@ -177,7 +158,7 @@ def apply_custom_styles():
         /* Additional styles for table rows */
         div[data-testid="column"] {
             padding: 0;
-            border-bottom: 1px solid #dee2e6;
+            border: none;
         }
 
         div[data-testid="stVerticalBlock"] > div {
@@ -186,7 +167,7 @@ def apply_custom_styles():
 
         .element-container {
             margin: 0 !important;
-            border-bottom: 1px solid #dee2e6;
+            border: none;
         }
         </style>
     """, unsafe_allow_html=True)
