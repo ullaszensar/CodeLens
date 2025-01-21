@@ -1,5 +1,4 @@
 import streamlit as st
-from st_aggrid import AgGrid, GridOptionsBuilder
 import tempfile
 import os
 from pathlib import Path
@@ -12,83 +11,23 @@ import base64
 import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
-import pandas as pd
 
-def create_styled_table(data):
-    """Create a styled table using AgGrid with advanced formatting"""
-    df = pd.DataFrame(data)
+# Page config
+st.set_page_config(
+    page_title="CodeLens - Code Utility",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-    gb = GridOptionsBuilder.from_dataframe(df)
-    gb.configure_default_column(
-        resizable=True,
-        filterable=True,
-        sorteable=True,
-        editable=False
-    )
+# Apply custom styles
+apply_custom_styles()
 
-    # Configure specific columns
-    gb.configure_column(
-        "S.No",
-        width=70,
-        header_name="#",
-        type=["numericColumn"]
-    )
-    gb.configure_column(
-        "File Name",
-        width=200
-    )
-    gb.configure_column(
-        "Fields Found",
-        width=120,
-        type=["numericColumn"]
-    )
-    gb.configure_column(
-        "Fields",
-        width=300,
-        wrapText=True,
-        autoHeight=True
-    )
-    gb.configure_column(
-        "Patterns Found",
-        width=120,
-        type=["numericColumn"]
-    )
-    gb.configure_column(
-        "Patterns Details",
-        width=300,
-        wrapText=True,
-        autoHeight=True
-    )
-
-    # Configure grid options
-    gb.configure_grid_options(
-        domLayout='normal',
-        rowHeight=50,
-        headerHeight=45,
-        enableRangeSelection=True,
-        suppressRowHoverHighlight=False,
-        rowStyle={'border': '1px solid #ddd'},
-        headerStyle={
-            'background-color': '#0066cc',
-            'color': 'white',
-            'font-weight': 'bold',
-            'border': '1px solid #004c99'
-        }
-    )
-
-    gridOptions = gb.build()
-
-    # Render the grid
-    return AgGrid(
-        df,
-        gridOptions=gridOptions,
-        allow_unsafe_jscode=True,
-        theme="streamlit",
-        update_mode="no_update",
-        fit_columns_on_grid_load=False,
-        height=400
-    )
-
+# Creator information
+st.sidebar.markdown("""
+### Created by:
+**Zensar Project Diamond Team**
+""")
 
 def get_file_download_link(file_path):
     """Generate a download link for a file"""
@@ -293,27 +232,34 @@ def main():
                     st.subheader("Demographic Fields Summary")
                     demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
                     if demographic_files:
-                        table_data = []
+                        cols = st.columns([1, 3, 2, 2])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Analyzed**")
+                        cols[2].markdown("**Fields Found**")
+                        cols[3].markdown("**Fields**")
+
                         for idx, file_detail in enumerate(demographic_files, 1):
                             file_path = file_detail['file_path']
                             unique_fields = []
                             if file_path in results['demographic_data']:
                                 unique_fields = list(results['demographic_data'][file_path].keys())
 
-                            table_data.append({
-                                "S.No": idx,
-                                "File Name": os.path.basename(file_path),
-                                "Fields Found": file_detail['demographic_fields_found'],
-                                "Fields": ', '.join(unique_fields)
-                            })
-
-                        create_styled_table(table_data)
+                            cols = st.columns([1, 3, 2, 2])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_path))
+                            cols[2].text(str(file_detail['demographic_fields_found']))
+                            cols[3].text(', '.join(unique_fields))
 
                     # Integration Patterns Summary Table
                     st.subheader("Integration Patterns Summary")
                     integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
                     if integration_files:
-                        table_data = []
+                        cols = st.columns([1, 3, 2, 3])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Name**")
+                        cols[2].markdown("**Patterns Found**")
+                        cols[3].markdown("**Patterns Found Details**")
+
                         for idx, file_detail in enumerate(integration_files, 1):
                             file_path = file_detail['file_path']
                             pattern_details = set()
@@ -321,14 +267,11 @@ def main():
                                 if pattern['file_path'] == file_path:
                                     pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
 
-                            table_data.append({
-                                "S.No": idx,
-                                "File Name": os.path.basename(file_path),
-                                "Patterns Found": file_detail['integration_patterns_found'],
-                                "Patterns Details": ', '.join(pattern_details)
-                            })
-
-                        create_styled_table(table_data)
+                            cols = st.columns([1, 3, 2, 3])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_path))
+                            cols[2].text(str(file_detail['integration_patterns_found']))
+                            cols[3].text(', '.join(pattern_details))
 
                 with tab3:
                     st.header("Available Reports")
