@@ -222,6 +222,33 @@ def main():
                 with tab2:
                     # Summary Stats
                     st.subheader("Summary")
+                    st.markdown("""
+                        <style>
+                        .custom-table {
+                            border-collapse: collapse;
+                            margin: 10px 0;
+                            width: 100%;
+                        }
+                        .custom-table th {
+                            background-color: #0066cc;
+                            color: white;
+                            padding: 12px 8px;
+                            text-align: left;
+                            border: 1px solid #ddd;
+                        }
+                        .custom-table td {
+                            padding: 8px;
+                            border: 1px solid #ddd;
+                        }
+                        .custom-table tr:nth-child(even) {
+                            background-color: #f8f9fa;
+                        }
+                        .custom-table tr:hover {
+                            background-color: #e6f3ff;
+                        }
+                        </style>
+                    """, unsafe_allow_html=True)
+
                     stats_cols = st.columns(4)
                     stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
                     stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
@@ -232,11 +259,16 @@ def main():
                     st.subheader("Demographic Fields Summary")
                     demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
                     if demographic_files:
-                        cols = st.columns([1, 3, 2, 2])
-                        cols[0].markdown("**#**")
-                        cols[1].markdown("**File Analyzed**")
-                        cols[2].markdown("**Fields Found**")
-                        cols[3].markdown("**Fields**")
+                        # Create table using HTML
+                        table_html = """
+                        <table class="custom-table">
+                            <tr>
+                                <th>#</th>
+                                <th>File Analyzed</th>
+                                <th>Fields Found</th>
+                                <th>Fields</th>
+                            </tr>
+                        """
 
                         for idx, file_detail in enumerate(demographic_files, 1):
                             file_path = file_detail['file_path']
@@ -244,21 +276,32 @@ def main():
                             if file_path in results['demographic_data']:
                                 unique_fields = list(results['demographic_data'][file_path].keys())
 
-                            cols = st.columns([1, 3, 2, 2])
-                            cols[0].text(str(idx))
-                            cols[1].text(os.path.basename(file_path))
-                            cols[2].text(str(file_detail['demographic_fields_found']))
-                            cols[3].text(', '.join(unique_fields))
+                            table_html += f"""
+                            <tr>
+                                <td>{idx}</td>
+                                <td>{os.path.basename(file_path)}</td>
+                                <td>{file_detail['demographic_fields_found']}</td>
+                                <td>{', '.join(unique_fields)}</td>
+                            </tr>
+                            """
+
+                        table_html += "</table>"
+                        st.markdown(table_html, unsafe_allow_html=True)
 
                     # Integration Patterns Summary Table
                     st.subheader("Integration Patterns Summary")
                     integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
                     if integration_files:
-                        cols = st.columns([1, 3, 2, 3])
-                        cols[0].markdown("**#**")
-                        cols[1].markdown("**File Name**")
-                        cols[2].markdown("**Patterns Found**")
-                        cols[3].markdown("**Patterns Found Details**")
+                        # Create table using HTML
+                        table_html = """
+                        <table class="custom-table">
+                            <tr>
+                                <th>#</th>
+                                <th>File Name</th>
+                                <th>Patterns Found</th>
+                                <th>Patterns Found Details</th>
+                            </tr>
+                        """
 
                         for idx, file_detail in enumerate(integration_files, 1):
                             file_path = file_detail['file_path']
@@ -267,11 +310,17 @@ def main():
                                 if pattern['file_path'] == file_path:
                                     pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
 
-                            cols = st.columns([1, 3, 2, 3])
-                            cols[0].text(str(idx))
-                            cols[1].text(os.path.basename(file_path))
-                            cols[2].text(str(file_detail['integration_patterns_found']))
-                            cols[3].text(', '.join(pattern_details))
+                            table_html += f"""
+                            <tr>
+                                <td>{idx}</td>
+                                <td>{os.path.basename(file_path)}</td>
+                                <td>{file_detail['integration_patterns_found']}</td>
+                                <td>{', '.join(pattern_details)}</td>
+                            </tr>
+                            """
+
+                        table_html += "</table>"
+                        st.markdown(table_html, unsafe_allow_html=True)
 
                 with tab3:
                     st.header("Available Reports")
