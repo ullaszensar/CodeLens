@@ -265,34 +265,6 @@ def main():
                             cols[1].text(os.path.basename(file_detail['file_path']))
                             cols[2].text(str(file_detail['integration_patterns_found']))
 
-                    # Comment out detailed findings sections
-                    """
-                    # Demographic Data
-                    st.subheader("Demographic Data Findings")
-                    for file_path, fields in results['demographic_data'].items():
-                        with st.expander(f"📄 {os.path.basename(file_path)}"):
-                            for field_name, data in fields.items():
-                                st.write(f"**Field:** {field_name} ({data['data_type']})")
-                                for occurrence in data['occurrences']:
-                                    display_code_with_highlights(
-                                        occurrence['code_snippet'],
-                                        occurrence['line_number'],
-                                        file_path
-                                    )
-
-                    # Integration Patterns
-                    st.subheader("Integration Patterns")
-                    for pattern in results['integration_patterns']:
-                        with st.expander(f"🔌 {pattern['pattern_type']} - {pattern['sub_type']}"):
-                            st.write(f"**File:** {os.path.basename(pattern['file_path'])}")
-                            st.write(f"**Line:** {pattern['line_number']}")
-                            display_code_with_highlights(
-                                pattern['code_snippet'],
-                                pattern['line_number'],
-                                pattern['file_path']
-                            )
-                    """
-
                 with tab3:
                     st.header("Available Reports")
 
