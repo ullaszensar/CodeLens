@@ -14,6 +14,7 @@ from collections import Counter
 import pandas as pd
 from rapidfuzz import fuzz, process
 from io import BytesIO
+from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Page config
 st.set_page_config(
@@ -57,13 +58,6 @@ def parse_timestamp_from_filename(filename):
         return datetime.min
 
 # Demographic Analysis Functions (Previously Excel Analysis)
-def load_excel_file(uploaded_file):
-    """Load Excel file and return DataFrame"""
-    try:
-        return pd.read_excel(uploaded_file)
-    except Exception as e:
-        st.error(f"Error loading Excel file: {str(e)}")
-        return None
 
 def fuzzy_match_columns(df1, df2, threshold=80):
     """Match columns between two DataFrames using fuzzy matching"""
@@ -100,72 +94,63 @@ def compare_dataframes(df1, df2, matched_columns):
 def display_demographic_analysis():
     st.title("📊 Demographic Data Analysis")
 
-    # Sidebar settings
-    st.sidebar.header("Demographic Analysis Settings")
-    match_threshold = st.sidebar.slider(
-        "Column Matching Threshold",
-        min_value=50,
-        max_value=100,
-        value=80,
-        help="Minimum similarity score (%) for matching columns"
-    )
-
     # File upload section
-    st.subheader("Upload Excel Files")
-    col1, col2 = st.columns(2)
+    uploaded_file = st.file_uploader("Upload Excel File", type=['xlsx', 'xls'])
 
-    with col1:
-        file1 = st.file_uploader("Upload First Excel File", type=['xlsx', 'xls'])
-        if file1:
-            df1 = load_excel_file(file1)
-            if df1 is not None:
-                st.success(f"File 1 loaded: {df1.shape[0]} rows, {df1.shape[1]} columns")
-                st.dataframe(df1.head(), use_container_width=True)
+    if uploaded_file:
+        try:
+            # Load the Excel file
+            df = pd.read_excel(uploaded_file)
 
-    with col2:
-        file2 = st.file_uploader("Upload Second Excel File", type=['xlsx', 'xls'])
-        if file2:
-            df2 = load_excel_file(file2)
-            if df2 is not None:
-                st.success(f"File 2 loaded: {df2.shape[0]} rows, {df2.shape[1]} columns")
-                st.dataframe(df2.head(), use_container_width=True)
+            # Display original data in a compact grid
+            st.subheader("Original Data Preview")
+            from st_aggrid import AgGrid, GridOptionsBuilder
+            gb = GridOptionsBuilder.from_dataframe(df)
+            gb.configure_pagination(paginationAutoPageSize=True)
+            gb.configure_side_bar()
+            grid_response = AgGrid(
+                df,
+                gridOptions=gb.build(),
+                height=300,
+                data_return_mode='AS_INPUT'
+            )
 
-    # Analysis section
-    if file1 and file2 and df1 is not None and df2 is not None:
-        st.subheader("Column Analysis")
+            # Search interface
+            st.subheader("Search Data")
+            col1, col2 = st.columns([2, 1])
 
-        # Find matching columns
-        matches = fuzzy_match_columns(df1, df2, match_threshold)
+            with col1:
+                search_term = st.text_input("Enter search term")
 
-        # Display matched columns
-        st.write("#### Matched Columns")
-        if matches:
-            match_df = pd.DataFrame(matches, columns=['File 1 Column', 'File 2 Column', 'Match Score'])
-            st.dataframe(match_df, use_container_width=True)
+            with col2:
+                # Get column names from the DataFrame
+                columns = list(df.columns)
+                selected_column = st.selectbox("Select column to search", columns)
 
-            # Compare matched columns
-            comparison_results = compare_dataframes(df1, df2, matches)
+            # Filter data based on search criteria
+            if search_term and selected_column:
+                # Case-insensitive search
+                filtered_df = df[df[selected_column].astype(str).str.contains(search_term, case=False, na=False)]
 
-            st.write("#### Detailed Comparison")
-            st.dataframe(comparison_results, use_container_width=True)
+                st.subheader("Search Results")
+                if not filtered_df.empty:
+                    # Display filtered results in a grid
+                    gb_filtered = GridOptionsBuilder.from_dataframe(filtered_df)
+                    gb_filtered.configure_pagination(paginationAutoPageSize=True)
+                    AgGrid(
+                        filtered_df,
+                        gridOptions=gb_filtered.build(),
+                        height=300,
+                        data_return_mode='AS_INPUT'
+                    )
 
-            # Export results
-            if st.button("Export Analysis Results"):
-                # Create Excel file with multiple sheets
-                output = BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    comparison_results.to_excel(writer, sheet_name='Comparison Results', index=False)
-                    match_df.to_excel(writer, sheet_name='Matched Columns', index=False)
+                    st.info(f"Found {len(filtered_df)} matches")
+                else:
+                    st.warning("No matches found")
 
-                # Offer download
-                st.download_button(
-                    label="Download Demographic Analysis",
-                    data=output.getvalue(),
-                    file_name="demographic_analysis_results.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        else:
-            st.warning("No matching columns found with the current threshold")
+        except Exception as e:
+            st.error(f"Error processing file: {str(e)}")
+
 
 def create_dashboard_charts(results):
     """Create visualization charts for the dashboard"""
@@ -462,7 +447,7 @@ def display_code_analysis():
 
 def main():
     # Navigation menu in sidebar
-    
+
     if page == "Code Analysis":
         display_code_analysis()
     else:
