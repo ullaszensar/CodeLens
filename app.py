@@ -382,82 +382,126 @@ def display_export_reports(app_name):
         st.info("No reports available for this application.")
 
 
+def display_logs():
+    """Display and provide download link for log files"""
+    st.subheader("📋 Analysis Logs")
+
+    # Check if log file exists
+    log_file = "code_analysis.log"
+    if os.path.exists(log_file):
+        # Read log contents
+        with open(log_file, 'r') as f:
+            log_contents = f.read()
+
+        # Create columns for the log section
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            st.text_area("Log Contents", value=log_contents, height=300, key="log_viewer")
+
+        with col2:
+            # Download button for logs
+            st.download_button(
+                label="📥 Download Logs",
+                data=log_contents,
+                file_name="code_analysis.log",
+                mime="text/plain"
+            )
+
+            # Clear logs button
+            if st.button("🗑️ Clear Logs"):
+                with open(log_file, 'w') as f:
+                    f.write("")
+                st.experimental_rerun()
+    else:
+        st.info("No log file found. Run a code analysis to generate logs.")
+
 def display_code_analysis():
     st.title("🔍 Code Analysis")
     st.markdown("### Source Code Analysis Utility")
 
-    # Analysis Settings in sidebar
-    st.sidebar.header("Analysis Settings")
+    # Create tabs for main sections
+    tab1, tab2, tab3, tab4 = st.tabs(["Analysis", "Dashboard", "Reports", "Logs"])
 
-    # Input method selection
-    input_method = st.sidebar.radio(
-        "Choose Input Method",
-        ["Upload Files", "Repository Path"]
-    )
+    with tab1:
+        # Analysis Settings in sidebar
+        st.sidebar.header("Analysis Settings")
 
-    # Application name input
-    app_name = st.sidebar.text_input("Application Name", "MyApp")
-
-    analysis_triggered = False
-    temp_dir = None
-
-    if input_method == "Upload Files":
-        uploaded_files = st.sidebar.file_uploader(
-            "Upload Code Files",
-            accept_multiple_files=True,
-            type=['py', 'java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
+        # Input method selection
+        input_method = st.sidebar.radio(
+            "Choose Input Method",
+            ["Upload Files", "Repository Path"]
         )
 
-        if uploaded_files:
-            temp_dir = tempfile.mkdtemp()
-            for uploaded_file in uploaded_files:
-                file_path = os.path.join(temp_dir, uploaded_file.name)
-                with open(file_path, 'wb') as f:
-                    f.write(uploaded_file.getbuffer())
+        # Application name input
+        app_name = st.sidebar.text_input("Application Name", "MyApp")
 
-            if st.sidebar.button("Run Analysis"):
+        analysis_triggered = False
+        temp_dir = None
+
+        if input_method == "Upload Files":
+            uploaded_files = st.sidebar.file_uploader(
+                "Upload Code Files",
+                accept_multiple_files=True,
+                type=['py', 'java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
+            )
+
+            if uploaded_files:
+                temp_dir = tempfile.mkdtemp()
+                for uploaded_file in uploaded_files:
+                    file_path = os.path.join(temp_dir, uploaded_file.name)
+                    with open(file_path, 'wb') as f:
+                        f.write(uploaded_file.getbuffer())
+
+                if st.sidebar.button("Run Analysis"):
+                    analysis_triggered = True
+                    repo_path = temp_dir
+
+        else:
+            repo_path = st.sidebar.text_input("Enter Repository Path")
+            if repo_path and st.sidebar.button("Run Analysis"):
                 analysis_triggered = True
-                repo_path = temp_dir
 
-    else:
-        repo_path = st.sidebar.text_input("Enter Repository Path")
-        if repo_path and st.sidebar.button("Run Analysis"):
-            analysis_triggered = True
+        if analysis_triggered:
+            try:
+                with st.spinner("Analyzing code..."):
+                    analyzer = CodeAnalyzer(repo_path, app_name)
+                    progress_bar = st.progress(0)
 
-    if analysis_triggered:
-        try:
-            with st.spinner("Analyzing code..."):
-                analyzer = CodeAnalyzer(repo_path, app_name)
-                progress_bar = st.progress(0)
+                    # Run analysis
+                    results = analyzer.scan_repository()
+                    progress_bar.progress(100)
 
-                # Run analysis
-                results = analyzer.scan_repository()
-                progress_bar.progress(100)
-
-                # Create tabs for Dashboard, Analysis Results, and Export Reports
-                tab1, tab2, tab3 = st.tabs(["Dashboard", "Analysis Results", "Export Reports"])
-
-                with tab1:
-                    st.header("Analysis Dashboard")
-                    st.markdown("""
-                    This dashboard provides visual insights into the code analysis results,
-                    showing distributions of files, demographic fields, and integration patterns.
-                    """)
-                    create_dashboard_charts(results)
-
-                with tab2:
+                    # Display analysis results
                     display_analysis_results(results)
 
-                with tab3:
-                    display_export_reports(app_name)
+            except Exception as e:
+                st.error(f"Error during analysis: {str(e)}")
 
-        except Exception as e:
-            st.error(f"Error during analysis: {str(e)}")
+            finally:
+                if temp_dir:
+                    import shutil
+                    shutil.rmtree(temp_dir)
 
-        finally:
-            if temp_dir:
-                import shutil
-                shutil.rmtree(temp_dir)
+    with tab2:
+        st.header("Analysis Dashboard")
+        st.markdown("""
+        This dashboard provides visual insights into the code analysis results,
+        showing distributions of files, demographic fields, and integration patterns.
+        """)
+        if 'results' in locals():
+            create_dashboard_charts(results)
+        else:
+            st.info("Run an analysis to view the dashboard.")
+
+    with tab3:
+        if app_name:
+            display_export_reports(app_name)
+        else:
+            st.info("Enter an application name to view available reports.")
+
+    with tab4:
+        display_logs()
 
 def display_about_page():
     st.title("ℹ️ About CodeLens")
