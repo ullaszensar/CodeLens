@@ -17,7 +17,7 @@ from io import BytesIO
 
 # Page config
 st.set_page_config(
-    page_title="CodeLens - Code Analysis Platform",
+    page_title="CodeLens - Advanced Code Analysis Platform",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -25,6 +25,14 @@ st.set_page_config(
 
 # Apply custom styles
 apply_custom_styles()
+
+# Main title in sidebar
+st.sidebar.title("CodeLens")
+st.sidebar.markdown("*Advanced Code Analysis Platform*")
+
+# Navigation
+st.sidebar.markdown("### Navigation")
+page = st.sidebar.radio("", ["Code Analysis", "Demographic Analysis"])
 
 # Creator information in sidebar footer
 st.sidebar.markdown("""
@@ -454,9 +462,7 @@ def display_code_analysis():
 
 def main():
     # Navigation menu in sidebar
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Select Page", ["Code Analysis", "Demographic Analysis"])
-
+    
     if page == "Code Analysis":
         display_code_analysis()
     else:
