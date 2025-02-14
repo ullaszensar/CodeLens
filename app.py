@@ -10,9 +10,7 @@ from styles import apply_custom_styles
 import base64
 import plotly.express as px
 import plotly.graph_objects as go
-from collections import Counter
 import pandas as pd
-from rapidfuzz import fuzz, process
 from io import BytesIO
 
 # Page config
@@ -56,40 +54,6 @@ def parse_timestamp_from_filename(filename):
     except:
         return datetime.min
 
-# Demographic Analysis Functions (Previously Excel Analysis)
-
-def fuzzy_match_columns(df1, df2, threshold=80):
-    """Match columns between two DataFrames using fuzzy matching"""
-    matches = []
-    for col1 in df1.columns:
-        match = process.extractOne(col1, df2.columns, scorer=fuzz.ratio)
-        if match and match[1] >= threshold:
-            matches.append((col1, match[0], match[1]))
-    return matches
-
-def compare_dataframes(df1, df2, matched_columns):
-    """Compare two DataFrames based on matched columns"""
-    comparison_results = []
-
-    for col1, col2, score in matched_columns:
-        # Get basic statistics
-        stats1 = df1[col1].describe()
-        stats2 = df2[col2].describe()
-
-        # Calculate differences
-        differences = {
-            'column_1': col1,
-            'column_2': col2,
-            'match_score': score,
-            'unique_values_1': df1[col1].nunique(),
-            'unique_values_2': df2[col2].nunique(),
-            'null_count_1': df1[col1].isnull().sum(),
-            'null_count_2': df2[col2].isnull().sum(),
-        }
-        comparison_results.append(differences)
-
-    return pd.DataFrame(comparison_results)
-
 def display_demographic_analysis():
     st.title("📊 Demographic Data Analysis")
 
@@ -121,28 +85,10 @@ def display_demographic_analysis():
                 columns = list(df.columns)
                 selected_column = st.selectbox("Select column to search", columns)
 
-            # Add fuzzy search threshold slider
-            fuzzy_threshold = st.slider(
-                "Fuzzy Search Similarity Threshold (%)",
-                min_value=50,
-                max_value=100,
-                value=80,
-                help="Lower values will return more approximate matches"
-            )
-
             # Filter data based on search criteria
             if search_term and selected_column:
-                # Initialize empty mask for fuzzy matching
-                mask = pd.Series(False, index=df.index)
-
-                # Perform fuzzy matching on the selected column
-                for idx, value in df[selected_column].astype(str).items():
-                    # Calculate similarity ratio between search term and value
-                    similarity = fuzz.ratio(search_term.lower(), str(value).lower())
-                    if similarity >= fuzzy_threshold:
-                        mask.at[idx] = True
-
-                filtered_df = df[mask]
+                # Simple case-insensitive string matching
+                filtered_df = df[df[selected_column].astype(str).str.contains(search_term, case=False, na=False)]
 
                 st.subheader("Search Results")
                 if not filtered_df.empty:
