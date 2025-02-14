@@ -59,11 +59,11 @@ def display_demographic_analysis():
     st.title("📊 Demographic Data Analysis")
 
     # File upload section for main data
-    st.subheader("Upload Primary Excel File")
+    st.subheader("Upload Project File")
     uploaded_file = st.file_uploader("Upload Main Excel File", type=['xlsx', 'xls'], key="primary_file")
 
     # Second file upload for matching
-    st.subheader("Upload Secondary Excel File (for matching)")
+    st.subheader("Upload Customer C360 File")
     secondary_file = st.file_uploader("Upload Secondary Excel File", type=['xlsx', 'xls'], key="secondary_file")
 
     if uploaded_file:
@@ -470,21 +470,21 @@ def display_about_page():
             "Streamlit",
             "Pandas",
             "Plotly",
-            "RapidFuzz",
+            "Openpyxl",
             "Pygments"
         ],
         "Purpose": [
             "Web application framework for data apps",
             "Data manipulation and analysis",
             "Interactive data visualization",
-            "Fuzzy string matching and search",
+            "Excel file processing and handling",
             "Code syntax highlighting"
         ],
         "Key Benefits": [
             "Rapid development, interactive UI components",
             "Efficient handling of large datasets",
             "Rich, interactive charts and dashboards",
-            "Intelligent search capabilities",
+            "Seamless Excel file operations",
             "Beautiful code presentation"
         ]
     }
@@ -499,7 +499,7 @@ def display_about_page():
         "Feature": [
             "Code Analysis",
             "Demographic Data Analysis",
-            "Fuzzy Search",
+            "Excel Data Matching",
             "Interactive Visualizations",
             "Export Capabilities",
             "Pattern Recognition"
@@ -507,7 +507,7 @@ def display_about_page():
         "Description": [
             "Deep analysis of source code for patterns and integrations",
             "Analysis of demographic data with advanced filtering",
-            "Intelligent search using fuzzy matching algorithms",
+            "Match and compare data between Excel files",
             "Interactive charts and dashboards for data insights",
             "Export results to Excel for further analysis",
             "AI-powered pattern detection and code structure analysis"
@@ -515,7 +515,7 @@ def display_about_page():
         "Details": [
             "Supports multiple programming languages, identifies integration patterns",
             "Excel file analysis with column-based searching",
-            "Uses RapidFuzz with adjustable similarity threshold (50-100%)",
+            "Match records using 'sub Group' identifiers across files",
             "Powered by Plotly for dynamic, interactive charts",
             "Generate detailed reports in Excel format",
             "AI-powered pattern detection and code structure analysis"
@@ -525,27 +525,34 @@ def display_about_page():
     features_df = pd.DataFrame(features)
     st.table(features_df)
 
-    # Fuzzy Logic Section
-    st.subheader("🔍 Fuzzy Search Technology")
+    # Data Processing Section
+    st.subheader("📊 Data Processing Capabilities")
     st.markdown("""
-    CodeLens implements advanced fuzzy search capabilities using the RapidFuzz library, which provides:
+    CodeLens provides advanced data processing capabilities:
 
-    - **Similarity Matching**: Uses Levenshtein distance algorithm to find approximate matches
-    - **Adjustable Threshold**: Customizable similarity threshold (50-100%)
-    - **Case-Insensitive**: Matches regardless of letter case
-    - **Performance**: Optimized for large datasets
+    - **Excel File Handling**
+        - Support for XLSX and XLS formats
+        - Multiple file upload capabilities
+        - Column-based searching and filtering
+        - Data matching between files
 
-    #### How it Works
-    1. User enters a search term
-    2. System calculates similarity ratio between search term and each value
-    3. Returns matches above the specified threshold
-    4. Results are ranked by similarity score
+    - **Search and Match Features**
+        - Simple text-based search across columns
+        - Cross-file data matching using key columns
+        - Results preview with pagination
+        - Export functionality for matched records
+
+    - **Data Analysis Tools**
+        - Column-based data filtering
+        - Record matching across files
+        - Export capabilities for further analysis
+        - Interactive data previews
 
     #### Use Cases
-    - Finding similar names or terms
-    - Matching patterns in code
-    - Identifying related demographic data
-    - Handling typos and variations in search
+    - Cross-referencing data between Excel files
+    - Finding matching records across datasets
+    - Analyzing demographic data patterns
+    - Generating filtered data exports
     """)
 
 def main():
