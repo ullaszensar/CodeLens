@@ -12,6 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from io import BytesIO
+from collections import Counter
 
 # Page config
 st.set_page_config(
@@ -57,16 +58,21 @@ def parse_timestamp_from_filename(filename):
 def display_demographic_analysis():
     st.title("📊 Demographic Data Analysis")
 
-    # File upload section
-    uploaded_file = st.file_uploader("Upload Excel File", type=['xlsx', 'xls'])
+    # File upload section for main data
+    st.subheader("Upload Primary Excel File")
+    uploaded_file = st.file_uploader("Upload Main Excel File", type=['xlsx', 'xls'], key="primary_file")
+
+    # Second file upload for matching
+    st.subheader("Upload Secondary Excel File (for matching)")
+    secondary_file = st.file_uploader("Upload Secondary Excel File", type=['xlsx', 'xls'], key="secondary_file")
 
     if uploaded_file:
         try:
-            # Load the Excel file
+            # Load the primary Excel file
             df = pd.read_excel(uploaded_file)
 
             # Display original data in a standard table
-            st.subheader("Original Data Preview")
+            st.subheader("Primary Data Preview")
             st.dataframe(
                 df,
                 height=300,
@@ -92,7 +98,6 @@ def display_demographic_analysis():
 
                 st.subheader("Search Results")
                 if not filtered_df.empty:
-                    # Display filtered results in a standard table
                     st.dataframe(
                         filtered_df,
                         height=300,
@@ -101,7 +106,49 @@ def display_demographic_analysis():
 
                     st.info(f"Found {len(filtered_df)} matches")
 
-                    # Export results button
+                    # If secondary file is uploaded, show matching interface
+                    if secondary_file is not None:
+                        try:
+                            # Load secondary file
+                            df2 = pd.read_excel(secondary_file)
+
+                            # Check if 'sub Group' exists in both dataframes
+                            if 'sub Group' in filtered_df.columns and 'sub Group' in df2.columns:
+                                st.subheader("Matching Results with Secondary File")
+
+                                # Get unique sub Group values from filtered results
+                                sub_groups = filtered_df['sub Group'].unique()
+
+                                # Find matches in secondary file
+                                matches = df2[df2['sub Group'].isin(sub_groups)]
+
+                                if not matches.empty:
+                                    st.dataframe(
+                                        matches,
+                                        height=300,
+                                        use_container_width=True
+                                    )
+                                    st.success(f"Found {len(matches)} matching records in secondary file")
+
+                                    # Export matched results button
+                                    output = BytesIO()
+                                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                                        matches.to_excel(writer, index=False, sheet_name='Matching Results')
+
+                                    st.download_button(
+                                        label="📥 Export Matching Results to Excel",
+                                        data=output.getvalue(),
+                                        file_name="matching_results.xlsx",
+                                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    )
+                                else:
+                                    st.warning("No matching records found in secondary file")
+                            else:
+                                st.error("'sub Group' column not found in one or both files")
+                        except Exception as e:
+                            st.error(f"Error processing secondary file: {str(e)}")
+
+                    # Export search results button
                     output = BytesIO()
                     with pd.ExcelWriter(output, engine='openpyxl') as writer:
                         filtered_df.to_excel(writer, index=False, sheet_name='Search Results')
