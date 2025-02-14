@@ -1,6 +1,7 @@
 import streamlit as st
 import tempfile
 import os
+import logging
 from pathlib import Path
 import time
 from datetime import datetime
@@ -445,24 +446,43 @@ def display_code_analysis():
             )
 
             if uploaded_files:
+                st.sidebar.write(f"Files selected: {len(uploaded_files)}")
+                for file in uploaded_files:
+                    st.sidebar.write(f"- {file.name}")
+
                 temp_dir = tempfile.mkdtemp()
+                st.sidebar.write(f"Temporary directory created: {temp_dir}")
+
+                saved_files = []
                 for uploaded_file in uploaded_files:
                     file_path = os.path.join(temp_dir, uploaded_file.name)
-                    with open(file_path, 'wb') as f:
-                        f.write(uploaded_file.getbuffer())
+                    try:
+                        with open(file_path, 'wb') as f:
+                            f.write(uploaded_file.getbuffer())
+                        saved_files.append(file_path)
+                        st.sidebar.write(f"✓ Saved: {uploaded_file.name}")
+                    except Exception as e:
+                        st.sidebar.error(f"Error saving {uploaded_file.name}: {str(e)}")
 
-                if st.sidebar.button("Run Analysis"):
+                if saved_files and st.sidebar.button("Run Analysis"):
                     analysis_triggered = True
                     repo_path = temp_dir
+                    st.sidebar.write(f"Analysis path: {repo_path}")
 
         else:
             repo_path = st.sidebar.text_input("Enter Repository Path")
-            if repo_path and st.sidebar.button("Run Analysis"):
-                analysis_triggered = True
+            if repo_path:
+                if os.path.exists(repo_path):
+                    st.sidebar.write("✓ Valid repository path")
+                    if st.sidebar.button("Run Analysis"):
+                        analysis_triggered = True
+                else:
+                    st.sidebar.error("Invalid repository path")
 
-        if analysis_triggered:
+        if analysis_triggered and repo_path:
             try:
                 with st.spinner("Analyzing code..."):
+                    st.write(f"Starting analysis of: {repo_path}")
                     analyzer = CodeAnalyzer(repo_path, app_name)
                     progress_bar = st.progress(0)
 
@@ -470,16 +490,24 @@ def display_code_analysis():
                     results = analyzer.scan_repository()
                     progress_bar.progress(100)
 
-                    # Display analysis results
-                    display_analysis_results(results)
+                    if results['summary']['files_analyzed'] == 0:
+                        st.warning("No files were analyzed. Please check if the uploaded files are valid source code files.")
+                    else:
+                        # Display analysis results
+                        display_analysis_results(results)
 
             except Exception as e:
                 st.error(f"Error during analysis: {str(e)}")
+                logging.error(f"Analysis error: {str(e)}", exc_info=True)
 
             finally:
                 if temp_dir:
-                    import shutil
-                    shutil.rmtree(temp_dir)
+                    try:
+                        import shutil
+                        shutil.rmtree(temp_dir)
+                        st.sidebar.write("Cleaned up temporary files")
+                    except Exception as e:
+                        st.sidebar.error(f"Error cleaning up: {str(e)}")
 
     with tab2:
         st.header("Analysis Dashboard")

@@ -128,20 +128,33 @@ class CodeAnalyzer:
         Get all supported code files in the repository, excluding test files and folders
         """  
         code_files = []  
-        for root, dirs, files in os.walk(self.repo_path):
-            # Skip test directories
-            dirs[:] = [d for d in dirs if 'test' not in d.lower()]
+        try:
+            self.logger.info(f"Scanning directory: {self.repo_path}")
+            for root, dirs, files in os.walk(self.repo_path):
+                # Skip test directories
+                dirs[:] = [d for d in dirs if 'test' not in d.lower()]
 
-            for file in files:  
-                file_path = Path(root) / file  
-                # Skip test files and include only supported extensions
-                if (file_path.suffix in self.supported_extensions and 
-                    'test' not in file_path.stem.lower()):
-                    self.logger.info(f"Including file: {file_path}")
-                    code_files.append(file_path)
-                elif file_path.suffix in self.supported_extensions:
-                    self.logger.info(f"Skipping test file: {file_path}")
-        return code_files
+                self.logger.info(f"Scanning folder: {root}")
+                self.logger.info(f"Found files: {len(files)}")
+
+                for file in files:  
+                    file_path = Path(root) / file  
+                    # Skip test files and include only supported extensions
+                    if (file_path.suffix in self.supported_extensions and 
+                        'test' not in file_path.stem.lower()):
+                        self.logger.info(f"Including file: {file_path}")
+                        code_files.append(file_path)
+                    elif file_path.suffix in self.supported_extensions:
+                        self.logger.info(f"Skipping test file: {file_path}")
+                    else:
+                        self.logger.debug(f"Skipping unsupported file: {file_path}")
+
+            self.logger.info(f"Total files to analyze: {len(code_files)}")
+            return code_files
+
+        except Exception as e:
+            self.logger.error(f"Error scanning files: {str(e)}", exc_info=True)
+            raise
 
     def analyze_file(self, file_path: Path) -> Dict:  
         """  
