@@ -6,7 +6,7 @@ from pathlib import Path
 import logging  
 from dataclasses import dataclass  
 from datetime import datetime  
- 
+
 @dataclass  
 class IntegrationPattern:  
     pattern_type: str  
@@ -14,19 +14,19 @@ class IntegrationPattern:
     line_number: int  
     code_snippet: str  
     data_fields: Set[str]  
- 
+
 @dataclass  
 class DemographicData:  
     field_name: str  
     data_type: str  
     occurrences: List[Dict]  
- 
+
 class CodeAnalyzer:  
     def __init__(self, repo_path: str, app_name: str):  
         self.repo_path = Path(repo_path)
         self.app_name = app_name
         self.setup_logging()  
- 
+
         # Define demographic data patterns  
         self.demographic_patterns = {  
             'id': r'\b(customerId|cm_15)\b',
@@ -76,7 +76,7 @@ class CodeAnalyzer:
             '.rb': 'Ruby',
             '.xsd': 'XSD'  
         }  
- 
+
     def setup_logging(self):  
         logging.basicConfig(  
             level=logging.INFO,  
@@ -87,7 +87,7 @@ class CodeAnalyzer:
             ]  
         )  
         self.logger = logging.getLogger(__name__)  
- 
+
     def scan_repository(self) -> Dict:  
         """  
         Main method to scan the repository and analyze code  
@@ -108,33 +108,41 @@ class CodeAnalyzer:
                 'file_details': []
             }  
         }  
- 
+
         try:  
             for file_path in self.get_code_files():  
                 self.logger.info(f"Analyzing file: {file_path}")  
                 file_results = self.analyze_file(file_path)  
                 self.update_results(results, file_results, file_path)  
                 results['summary']['files_analyzed'] += 1  
- 
+
             self.generate_report(results)  
             return results  
- 
+
         except Exception as e:  
             self.logger.error(f"Error during repository scan: {str(e)}")  
             raise  
- 
+
     def get_code_files(self) -> List[Path]:  
         """  
-        Get all supported code files in the repository  
+        Get all supported code files in the repository, excluding test files and folders
         """  
         code_files = []  
-        for root, _, files in os.walk(self.repo_path):  
+        for root, dirs, files in os.walk(self.repo_path):
+            # Skip test directories
+            dirs[:] = [d for d in dirs if 'test' not in d.lower()]
+
             for file in files:  
                 file_path = Path(root) / file  
-                if file_path.suffix in self.supported_extensions:  
-                    code_files.append(file_path)  
-        return code_files  
- 
+                # Skip test files and include only supported extensions
+                if (file_path.suffix in self.supported_extensions and 
+                    'test' not in file_path.stem.lower()):
+                    self.logger.info(f"Including file: {file_path}")
+                    code_files.append(file_path)
+                elif file_path.suffix in self.supported_extensions:
+                    self.logger.info(f"Skipping test file: {file_path}")
+        return code_files
+
     def analyze_file(self, file_path: Path) -> Dict:  
         """  
         Analyze a single file for demographic data and integration patterns  
@@ -143,11 +151,11 @@ class CodeAnalyzer:
             'demographic_data': {},  
             'integration_patterns': []  
         }  
- 
+
         try:  
             with open(file_path, 'r', encoding='utf-8') as f:  
                 content = f.readlines()  
- 
+
             for line_num, line in enumerate(content, 1):  
                 # Check for demographic data  
                 for data_type, pattern in self.demographic_patterns.items():  
@@ -165,7 +173,7 @@ class CodeAnalyzer:
                             'line_number': line_num,  
                             'code_snippet': line.strip()  
                         })  
- 
+
                 # Check for integration patterns  
                 for pattern_category, sub_patterns in self.integration_patterns.items():
                     for sub_type, pattern in sub_patterns.items():
@@ -177,12 +185,12 @@ class CodeAnalyzer:
                                 'line_number': line_num,
                                 'code_snippet': line.strip()
                             })
- 
+
         except Exception as e:  
             self.logger.error(f"Error analyzing file {file_path}: {str(e)}")  
- 
+
         return results  
- 
+
     def update_results(self, main_results: Dict, file_results: Dict, file_path: Path):  
         """  
         Update the main results dictionary with results from a single file  
@@ -200,13 +208,13 @@ class CodeAnalyzer:
                         main_results['demographic_data'][file][field_name]['occurrences'].extend(data['occurrences'])  
             demographic_fields_count += sum(len(data['occurrences']) for data in fields.values())  
             main_results['summary']['unique_demographic_fields'].update(fields.keys())  
- 
+
         # Update integration patterns  
         integration_patterns_count = len(file_results['integration_patterns'])  
         main_results['integration_patterns'].extend(  
             file_results['integration_patterns']  
         )  
- 
+
         # Update summary  
         main_results['summary']['demographic_fields_found'] = sum(  
             sum(len(data['occurrences']) for data in fields.values())  
@@ -215,26 +223,26 @@ class CodeAnalyzer:
         main_results['summary']['integration_patterns_found'] = len(  
             main_results['integration_patterns']  
         )  
- 
+
         # Add file details to summary  
         main_results['summary']['file_details'].append({  
             'file_path': str(file_path),  
             'demographic_fields_found': demographic_fields_count,  
             'integration_patterns_found': integration_patterns_count  
         })  
- 
+
     def generate_report(self, results: Dict):  
         """  
         Generate a detailed HTML report of the analysis  
         """  
         results['summary']['unique_demographic_fields'] = list(results['summary']['unique_demographic_fields'])  
- 
+
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')  
         html_report = f'{self.app_name}_CodeLens_{timestamp}.html'  
         self.generate_html_report(results, html_report)  
- 
+
         self.logger.info(f"Analysis report generated: {html_report}")  
- 
+
     def generate_html_report(self, results: Dict, filename: str):
         """Generate an HTML report for better visualization"""
         self.results = results  # Store results for use in other methods
@@ -270,18 +278,16 @@ class CodeAnalyzer:
                 <p>Unique Demographic Fields: {len(unique_fields)} [{', '.join(unique_fields)}]</p>
                 <p>Demographic Fields Occurrences Found: {results['summary']['demographic_fields_found']}</p>
                 <p>Integration Patterns Found: {results['summary']['integration_patterns_found']}</p>
- 
                 {self._generate_field_frequency_html(results)}
- 
                 {self._generate_demographic_summary_html(results['summary']['file_details'])}
                 {self._generate_integration_summary_html(results['summary']['file_details'])}
             </div>
- 
+
             <div class="section">
                 <h2>Demographic Data Fields by File</h2>
                 {self._generate_demographic_html(results['demographic_data'])}
             </div>
- 
+
             <div class="section">
                 <h2>Integration Patterns</h2>
                 {self._generate_integration_html(results['integration_patterns'])}
@@ -289,18 +295,18 @@ class CodeAnalyzer:
         </body>
         </html>
         """
- 
+
         with open(filename, 'w') as f:
             f.write(html_content)
- 
+
     def _generate_demographic_summary_html(self, file_details: List[Dict]) -> str:
         """Generate HTML table for demographic field summary"""
         # Filter out entries with zero demographic fields
         demographic_files = [f for f in file_details if f['demographic_fields_found'] > 0]
- 
+
         if not demographic_files:
             return ""
- 
+
         html = """
         <h3>Demographic Fields Summary</h3>
         <table>
@@ -311,14 +317,14 @@ class CodeAnalyzer:
                 <th>Fields</th>
             </tr>
         """
- 
+
         for index, file_detail in enumerate(demographic_files, 1):
             # Get unique fields for this file from demographic_data
             file_path = file_detail['file_path']
             unique_fields = []
             if file_path in self.results['demographic_data']:
                 unique_fields = list(self.results['demographic_data'][file_path].keys())
- 
+
             html += f"""
             <tr>
                 <td>{index}</td>
@@ -328,15 +334,15 @@ class CodeAnalyzer:
             </tr>
             """
         return html + "</table>"
- 
+
     def _generate_integration_summary_html(self, file_details: List[Dict]) -> str:
         """Generate HTML table for integration patterns summary"""
         # Filter out entries with zero integration patterns
         integration_files = [f for f in file_details if f['integration_patterns_found'] > 0]
- 
+
         if not integration_files:
             return ""
- 
+
         html = """
         <h3>Integration Patterns Summary</h3>
         <table>
@@ -347,7 +353,7 @@ class CodeAnalyzer:
                 <th>Patterns Found Details</th>
             </tr>
         """
- 
+
         for index, file_detail in enumerate(integration_files, 1):
             # Get pattern details for this file
             file_path = file_detail['file_path']
@@ -355,7 +361,7 @@ class CodeAnalyzer:
             for pattern in self.results['integration_patterns']:
                 if pattern['file_path'] == file_path:
                     pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
- 
+
             html += f"""
             <tr>
                 <td>{index}</td>
@@ -365,7 +371,7 @@ class CodeAnalyzer:
             </tr>
             """
         return html + "</table>"
- 
+
     def _generate_demographic_html(self, demographic_data: Dict) -> str:  
         html = ""  
         for file_path, fields in demographic_data.items():  
@@ -381,7 +387,7 @@ class CodeAnalyzer:
                     html += "</div>"  
                 html += "</div>"  
         return html  
- 
+
     def _generate_integration_html(self, integration_patterns: List) -> str:  
         html = ""  
         for pattern in integration_patterns:  
@@ -397,7 +403,7 @@ class CodeAnalyzer:
             html += "</div>"
             html += "</div>"
         return html
- 
+
     def _generate_field_frequency_html(self, results: Dict) -> str:
         """Generate HTML table for field frequency"""
         # Calculate field frequencies
@@ -411,7 +417,7 @@ class CodeAnalyzer:
                     }
                 else:
                     field_frequencies[field_name]['count'] += len(data['occurrences'])
- 
+
         # Generate HTML table with consistent styling
         html = """
         <div class="section">
@@ -425,7 +431,7 @@ class CodeAnalyzer:
                     <th style="width: 30%;">Total Occurrences</th>
                 </tr>
         """
- 
+
         for idx, (field_name, data) in enumerate(sorted(field_frequencies.items(), key=lambda x: x[1]['count'], reverse=True), 1):
             html += f"""
                 <tr>
@@ -435,14 +441,14 @@ class CodeAnalyzer:
                     <td>{data['count']}</td>
                 </tr>
             """
- 
+
         html += """
             </table>
         </div>
         <br>
         """
         return html
- 
+
 def main():  
     """
     Main function to run the code analyzer
@@ -456,10 +462,10 @@ def main():
         print(f"Analysis complete. Check the generated reports for details.")  
     except Exception as e:
        print(f"Error during analysis: {str(e)}")
- 
+
 if __name__ == "__main__":  
     main()  
- 
+
 # Created/Modified files during execution:  
 # - code_analysis.log  
 # - code_analysis_report_[timestamp].html
