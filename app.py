@@ -33,7 +33,7 @@ st.sidebar.markdown("*Advanced Code Analysis Platform*")
 
 # Navigation
 st.sidebar.markdown("### Navigation")
-page = st.sidebar.radio("", ["Code Analysis", "Demographic Analysis"])
+page = st.sidebar.radio("", ["Code Analysis", "Demographic Analysis", "About"])
 
 # Creator information in sidebar footer
 st.sidebar.markdown("""
@@ -474,13 +474,109 @@ def display_code_analysis():
                 import shutil
                 shutil.rmtree(temp_dir)
 
+def display_about_page():
+    st.title("ℹ️ About CodeLens")
+    st.markdown("### Advanced Code Analysis Platform")
+
+    # Technical Stack Table
+    st.subheader("🛠️ Technical Stack")
+    tech_stack_data = {
+        "Technology": [
+            "Streamlit",
+            "Pandas",
+            "Plotly",
+            "RapidFuzz",
+            "Streamlit-AgGrid",
+            "Pygments",
+            "OpenAI API" #This line was added
+        ],
+        "Purpose": [
+            "Web application framework for data apps",
+            "Data manipulation and analysis",
+            "Interactive data visualization",
+            "Fuzzy string matching and search",
+            "Advanced interactive data tables",
+            "Code syntax highlighting",
+            "AI-powered code analysis"
+        ],
+        "Key Benefits": [
+            "Rapid development, interactive UI components",
+            "Efficient handling of large datasets",
+            "Rich, interactive charts and dashboards",
+            "Intelligent search capabilities",
+            "Enhanced data grid with sorting and filtering",
+            "Beautiful code presentation",
+            "Intelligent code pattern recognition"
+        ]
+    }
+
+    tech_df = pd.DataFrame(tech_stack_data)
+    st.table(tech_df)
+
+    # Features Section
+    st.subheader("🎯 Key Features")
+
+    features = {
+        "Feature": [
+            "Code Analysis",
+            "Demographic Data Analysis",
+            "Fuzzy Search",
+            "Interactive Visualizations",
+            "Export Capabilities",
+            "Pattern Recognition"
+        ],
+        "Description": [
+            "Deep analysis of source code for patterns and integrations",
+            "Analysis of demographic data with advanced filtering",
+            "Intelligent search using fuzzy matching algorithms",
+            "Interactive charts and dashboards for data insights",
+            "Export results to Excel for further analysis",
+            "Identification of code patterns and potential issues"
+        ],
+        "Details": [
+            "Supports multiple programming languages, identifies integration patterns",
+            "Excel file analysis with column-based searching",
+            "Uses RapidFuzz with adjustable similarity threshold (50-100%)",
+            "Powered by Plotly for dynamic, interactive charts",
+            "Generate detailed reports in Excel format",
+            "AI-powered pattern detection and code structure analysis"
+        ]
+    }
+
+    features_df = pd.DataFrame(features)
+    st.table(features_df)
+
+    # Fuzzy Logic Section
+    st.subheader("🔍 Fuzzy Search Technology")
+    st.markdown("""
+    CodeLens implements advanced fuzzy search capabilities using the RapidFuzz library, which provides:
+
+    - **Similarity Matching**: Uses Levenshtein distance algorithm to find approximate matches
+    - **Adjustable Threshold**: Customizable similarity threshold (50-100%)
+    - **Case-Insensitive**: Matches regardless of letter case
+    - **Performance**: Optimized for large datasets
+
+    #### How it Works
+    1. User enters a search term
+    2. System calculates similarity ratio between search term and each value
+    3. Returns matches above the specified threshold
+    4. Results are ranked by similarity score
+
+    #### Use Cases
+    - Finding similar names or terms
+    - Matching patterns in code
+    - Identifying related demographic data
+    - Handling typos and variations in search
+    """)
+
 def main():
     # Navigation menu in sidebar
-
     if page == "Code Analysis":
         display_code_analysis()
-    else:
+    elif page == "Demographic Analysis":
         display_demographic_analysis()
+    else:
+        display_about_page()
 
 if __name__ == "__main__":
     main()
