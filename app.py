@@ -14,7 +14,7 @@ from collections import Counter
 
 # Page config
 st.set_page_config(
-    page_title="CodeLens - Code Utility",
+    page_title="CodeLens - Code Analysis Platform",
     page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -23,8 +23,9 @@ st.set_page_config(
 # Apply custom styles
 apply_custom_styles()
 
-# Creator information
+# Creator information in sidebar footer
 st.sidebar.markdown("""
+---
 ### Created by:
 **Zensar Project Diamond Team**
 """)
@@ -156,11 +157,116 @@ def create_dashboard_charts(results):
     )
     st.plotly_chart(fig_correlation)
 
-def main():
-    st.title("🔍 CodeLens")
-    st.markdown("### Code Analysis Utility")
 
-    # Sidebar
+def display_analysis_results(results):
+    # Summary Stats
+    st.subheader("Summary")
+    stats_cols = st.columns(4)
+    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+
+    # Demographic Fields Summary Table
+    st.subheader("Demographic Fields Summary")
+    demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
+    if demographic_files:
+        cols = st.columns([0.5, 2, 1, 2])
+        cols[0].markdown("**#**")
+        cols[1].markdown("**File Analyzed**")
+        cols[2].markdown("**Fields Found**")
+        cols[3].markdown("**Fields**")
+
+        for idx, file_detail in enumerate(demographic_files, 1):
+            file_path = file_detail['file_path']
+            unique_fields = []
+            if file_path in results['demographic_data']:
+                unique_fields = list(results['demographic_data'][file_path].keys())
+
+            cols = st.columns([0.5, 2, 1, 2])
+            cols[0].text(str(idx))
+            cols[1].text(os.path.basename(file_path))
+            cols[2].text(str(file_detail['demographic_fields_found']))
+            cols[3].text(', '.join(unique_fields))
+
+    # Integration Patterns Summary Table
+    st.subheader("Integration Patterns Summary")
+    integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
+    if integration_files:
+        cols = st.columns([0.5, 2, 1, 2])
+        cols[0].markdown("**#**")
+        cols[1].markdown("**File Name**")
+        cols[2].markdown("**Patterns Found**")
+        cols[3].markdown("**Pattern Details**")
+
+        for idx, file_detail in enumerate(integration_files, 1):
+            file_path = file_detail['file_path']
+            pattern_details = set()
+            for pattern in results['integration_patterns']:
+                if pattern['file_path'] == file_path:
+                    pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
+
+            cols = st.columns([0.5, 2, 1, 2])
+            cols[0].text(str(idx))
+            cols[1].text(os.path.basename(file_path))
+            cols[2].text(str(file_detail['integration_patterns_found']))
+            cols[3].text(', '.join(pattern_details))
+
+def display_export_reports(app_name):
+    st.header("Available Reports")
+
+    # Get all report files and filter by app_name
+    report_files = [
+        f for f in os.listdir()
+        if f.endswith('.html')
+        and 'CodeLens' in f
+        and f.startswith(app_name)
+    ]
+
+    # Sort files by timestamp in descending order
+    report_files.sort(key=parse_timestamp_from_filename, reverse=True)
+
+    if report_files:
+        # Create a table with five columns
+        cols = st.columns([1, 3, 2, 2, 2])
+        cols[0].markdown("**S.No**")
+        cols[1].markdown("**File Name**")
+        cols[2].markdown("**Date**")
+        cols[3].markdown("**Time**")
+        cols[4].markdown("**Download**")
+
+        # List all reports
+        for idx, report_file in enumerate(report_files, 1):
+            cols = st.columns([1, 3, 2, 2, 2])
+
+            # Serial number column
+            cols[0].text(f"{idx}")
+
+            # File name column without .html extension
+            display_name = report_file.replace('.html', '')
+            cols[1].text(display_name)
+
+            # Extract timestamp and format date and time separately
+            timestamp = parse_timestamp_from_filename(report_file)
+            # Date in DD-MMM-YYYY format
+            cols[2].text(timestamp.strftime('%d-%b-%Y'))
+            # Time in 12-hour format with AM/PM
+            cols[3].text(timestamp.strftime('%I:%M:%S %p'))
+
+            # Download button column (last)
+            cols[4].markdown(
+                get_file_download_link(report_file),
+                unsafe_allow_html=True
+            )
+    else:
+        st.info("No reports available for this application.")
+
+
+def display_code_analysis():
+    st.title("🔍 Code Analysis")
+    st.markdown("### Source Code Analysis Utility")
+
+    # Analysis Settings in sidebar
     st.sidebar.header("Analysis Settings")
 
     # Input method selection
@@ -220,107 +326,10 @@ def main():
                     create_dashboard_charts(results)
 
                 with tab2:
-                    # Summary Stats
-                    st.subheader("Summary")
-                    stats_cols = st.columns(4)
-                    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
-                    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
-                    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
-                    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
-
-                    # Demographic Fields Summary Table
-                    st.subheader("Demographic Fields Summary")
-                    demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
-                    if demographic_files:
-                        cols = st.columns([0.5, 2, 1, 2])
-                        cols[0].markdown("**#**")
-                        cols[1].markdown("**File Analyzed**")
-                        cols[2].markdown("**Fields Found**")
-                        cols[3].markdown("**Fields**")
-
-                        for idx, file_detail in enumerate(demographic_files, 1):
-                            file_path = file_detail['file_path']
-                            unique_fields = []
-                            if file_path in results['demographic_data']:
-                                unique_fields = list(results['demographic_data'][file_path].keys())
-
-                            cols = st.columns([0.5, 2, 1, 2])
-                            cols[0].text(str(idx))
-                            cols[1].text(os.path.basename(file_path))
-                            cols[2].text(str(file_detail['demographic_fields_found']))
-                            cols[3].text(', '.join(unique_fields))
-
-                    # Integration Patterns Summary Table
-                    st.subheader("Integration Patterns Summary")
-                    integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
-                    if integration_files:
-                        cols = st.columns([0.5, 2, 1, 2])
-                        cols[0].markdown("**#**")
-                        cols[1].markdown("**File Name**")
-                        cols[2].markdown("**Patterns Found**")
-                        cols[3].markdown("**Pattern Details**")
-
-                        for idx, file_detail in enumerate(integration_files, 1):
-                            file_path = file_detail['file_path']
-                            pattern_details = set()
-                            for pattern in results['integration_patterns']:
-                                if pattern['file_path'] == file_path:
-                                    pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
-
-                            cols = st.columns([0.5, 2, 1, 2])
-                            cols[0].text(str(idx))
-                            cols[1].text(os.path.basename(file_path))
-                            cols[2].text(str(file_detail['integration_patterns_found']))
-                            cols[3].text(', '.join(pattern_details))
+                    display_analysis_results(results)
 
                 with tab3:
-                    st.header("Available Reports")
-
-                    # Get all report files and filter by app_name
-                    report_files = [
-                        f for f in os.listdir()
-                        if f.endswith('.html')
-                        and 'CodeLens' in f
-                        and f.startswith(app_name)
-                    ]
-
-                    # Sort files by timestamp in descending order
-                    report_files.sort(key=parse_timestamp_from_filename, reverse=True)
-
-                    if report_files:
-                        # Create a table with five columns
-                        cols = st.columns([1, 3, 2, 2, 2])
-                        cols[0].markdown("**S.No**")
-                        cols[1].markdown("**File Name**")
-                        cols[2].markdown("**Date**")
-                        cols[3].markdown("**Time**")
-                        cols[4].markdown("**Download**")
-
-                        # List all reports
-                        for idx, report_file in enumerate(report_files, 1):
-                            cols = st.columns([1, 3, 2, 2, 2])
-
-                            # Serial number column
-                            cols[0].text(f"{idx}")
-
-                            # File name column without .html extension
-                            display_name = report_file.replace('.html', '')
-                            cols[1].text(display_name)
-
-                            # Extract timestamp and format date and time separately
-                            timestamp = parse_timestamp_from_filename(report_file)
-                            # Date in DD-MMM-YYYY format
-                            cols[2].text(timestamp.strftime('%d-%b-%Y'))
-                            # Time in 12-hour format with AM/PM
-                            cols[3].text(timestamp.strftime('%I:%M:%S %p'))
-
-                            # Download button column (last)
-                            cols[4].markdown(
-                                get_file_download_link(report_file),
-                                unsafe_allow_html=True
-                            )
-                    else:
-                        st.info("No reports available for this application.")
+                    display_export_reports(app_name)
 
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")
@@ -329,6 +338,17 @@ def main():
             if temp_dir:
                 import shutil
                 shutil.rmtree(temp_dir)
+
+def main():
+    # Navigation menu in sidebar
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Select Page", ["Code Analysis", "Excel Analysis"])
+
+    if page == "Code Analysis":
+        display_code_analysis()
+    else:
+        # The Excel Analysis page is handled by the pages/excel_analyzer.py file
+        pass
 
 if __name__ == "__main__":
     main()
