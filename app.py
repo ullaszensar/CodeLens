@@ -104,7 +104,6 @@ def display_demographic_analysis():
 
             # Display original data in a compact grid
             st.subheader("Original Data Preview")
-            from st_aggrid import AgGrid, GridOptionsBuilder
             gb = GridOptionsBuilder.from_dataframe(df)
             gb.configure_pagination(paginationAutoPageSize=True)
             gb.configure_side_bar()
@@ -127,10 +126,28 @@ def display_demographic_analysis():
                 columns = list(df.columns)
                 selected_column = st.selectbox("Select column to search", columns)
 
+            # Add fuzzy search threshold slider
+            fuzzy_threshold = st.slider(
+                "Fuzzy Search Similarity Threshold (%)",
+                min_value=50,
+                max_value=100,
+                value=80,
+                help="Lower values will return more approximate matches"
+            )
+
             # Filter data based on search criteria
             if search_term and selected_column:
-                # Case-insensitive search
-                filtered_df = df[df[selected_column].astype(str).str.contains(search_term, case=False, na=False)]
+                # Initialize empty mask for fuzzy matching
+                mask = pd.Series(False, index=df.index)
+
+                # Perform fuzzy matching on the selected column
+                for idx, value in df[selected_column].astype(str).items():
+                    # Calculate similarity ratio between search term and value
+                    similarity = fuzz.ratio(search_term.lower(), value.lower())
+                    if similarity >= fuzzy_threshold:
+                        mask.at[idx] = True
+
+                filtered_df = df[mask]
 
                 st.subheader("Search Results")
                 if not filtered_df.empty:
@@ -145,6 +162,18 @@ def display_demographic_analysis():
                     )
 
                     st.info(f"Found {len(filtered_df)} matches")
+
+                    # Export results button
+                    output = BytesIO()
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        filtered_df.to_excel(writer, index=False, sheet_name='Search Results')
+
+                    st.download_button(
+                        label="📥 Export Search Results to Excel",
+                        data=output.getvalue(),
+                        file_name="search_results.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
                 else:
                     st.warning("No matches found")
 
