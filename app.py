@@ -14,7 +14,6 @@ from collections import Counter
 import pandas as pd
 from rapidfuzz import fuzz, process
 from io import BytesIO
-from st_aggrid import AgGrid, GridOptionsBuilder
 
 # Page config
 st.set_page_config(
@@ -102,16 +101,12 @@ def display_demographic_analysis():
             # Load the Excel file
             df = pd.read_excel(uploaded_file)
 
-            # Display original data in a compact grid
+            # Display original data in a standard table
             st.subheader("Original Data Preview")
-            gb = GridOptionsBuilder.from_dataframe(df)
-            gb.configure_pagination(paginationAutoPageSize=True)
-            gb.configure_side_bar()
-            grid_response = AgGrid(
+            st.dataframe(
                 df,
-                gridOptions=gb.build(),
                 height=300,
-                data_return_mode='AS_INPUT'
+                use_container_width=True
             )
 
             # Search interface
@@ -143,7 +138,7 @@ def display_demographic_analysis():
                 # Perform fuzzy matching on the selected column
                 for idx, value in df[selected_column].astype(str).items():
                     # Calculate similarity ratio between search term and value
-                    similarity = fuzz.ratio(search_term.lower(), value.lower())
+                    similarity = fuzz.ratio(search_term.lower(), str(value).lower())
                     if similarity >= fuzzy_threshold:
                         mask.at[idx] = True
 
@@ -151,14 +146,11 @@ def display_demographic_analysis():
 
                 st.subheader("Search Results")
                 if not filtered_df.empty:
-                    # Display filtered results in a grid
-                    gb_filtered = GridOptionsBuilder.from_dataframe(filtered_df)
-                    gb_filtered.configure_pagination(paginationAutoPageSize=True)
-                    AgGrid(
+                    # Display filtered results in a standard table
+                    st.dataframe(
                         filtered_df,
-                        gridOptions=gb_filtered.build(),
                         height=300,
-                        data_return_mode='AS_INPUT'
+                        use_container_width=True
                     )
 
                     st.info(f"Found {len(filtered_df)} matches")
@@ -486,27 +478,21 @@ def display_about_page():
             "Pandas",
             "Plotly",
             "RapidFuzz",
-            "Streamlit-AgGrid",
-            "Pygments",
-            "OpenAI API" #This line was added
+            "Pygments"
         ],
         "Purpose": [
             "Web application framework for data apps",
             "Data manipulation and analysis",
             "Interactive data visualization",
             "Fuzzy string matching and search",
-            "Advanced interactive data tables",
-            "Code syntax highlighting",
-            "AI-powered code analysis"
+            "Code syntax highlighting"
         ],
         "Key Benefits": [
             "Rapid development, interactive UI components",
             "Efficient handling of large datasets",
             "Rich, interactive charts and dashboards",
             "Intelligent search capabilities",
-            "Enhanced data grid with sorting and filtering",
-            "Beautiful code presentation",
-            "Intelligent code pattern recognition"
+            "Beautiful code presentation"
         ]
     }
 
@@ -531,7 +517,7 @@ def display_about_page():
             "Intelligent search using fuzzy matching algorithms",
             "Interactive charts and dashboards for data insights",
             "Export results to Excel for further analysis",
-            "Identification of code patterns and potential issues"
+            "AI-powered pattern detection and code structure analysis"
         ],
         "Details": [
             "Supports multiple programming languages, identifies integration patterns",
