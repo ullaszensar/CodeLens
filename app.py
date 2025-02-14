@@ -494,7 +494,6 @@ def display_about_page():
 
     # Features Section
     st.subheader("🎯 Key Features")
-
     features = {
         "Feature": [
             "Code Analysis",
@@ -510,7 +509,7 @@ def display_about_page():
             "Match and compare data between Excel files",
             "Interactive charts and dashboards for data insights",
             "Export results to Excel for further analysis",
-            "AI-powered pattern detection and code structure analysis"
+            "Regex-based pattern detection for code structure analysis"
         ],
         "Details": [
             "Supports multiple programming languages, identifies integration patterns",
@@ -518,7 +517,7 @@ def display_about_page():
             "Match records using 'sub Group' identifiers across files",
             "Powered by Plotly for dynamic, interactive charts",
             "Generate detailed reports in Excel format",
-            "AI-powered pattern detection and code structure analysis"
+            "Regular expression based pattern detection for demographic data and integration points"
         ]
     }
 
@@ -529,6 +528,12 @@ def display_about_page():
     st.subheader("📊 Data Processing Capabilities")
     st.markdown("""
     CodeLens provides advanced data processing capabilities:
+
+    - **Pattern Detection**
+        - Regular expression based pattern matching
+        - Identification of demographic data fields
+        - Detection of integration patterns (REST, SOAP, Database)
+        - Code structure analysis using regex patterns
 
     - **Excel File Handling**
         - Support for XLSX and XLS formats
