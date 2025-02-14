@@ -26,36 +26,6 @@ st.set_page_config(
 # Apply custom styles
 apply_custom_styles()
 
-# App Description and Benefits
-st.sidebar.markdown("""
-### Key Benefits:
-
-• **Time-Saving Analysis**
-  - Scan multiple code files instantly
-  - Find data patterns automatically
-  - Quick identification of integration points
-
-• **Enhanced Code Understanding**
-  - Visual insights into code structure
-  - Clear view of data flow patterns
-  - Easy tracking of API integrations
-
-• **Smart Excel Comparison**
-  - Compare Excel files intelligently
-  - Find matching columns automatically
-  - Identify data discrepancies quickly
-
-• **Better Documentation**
-  - Auto-generate detailed reports
-  - Track findings systematically
-  - Export results in multiple formats
-
-• **Integration Detection**
-  - Find API endpoints automatically
-  - Identify database connections
-  - Spot messaging system usage
-""")
-
 # Creator information in sidebar footer
 st.sidebar.markdown("""
 ---
@@ -78,7 +48,7 @@ def parse_timestamp_from_filename(filename):
     except:
         return datetime.min
 
-# Excel Analysis Functions
+# Demographic Analysis Functions (Previously Excel Analysis)
 def load_excel_file(uploaded_file):
     """Load Excel file and return DataFrame"""
     try:
@@ -119,11 +89,11 @@ def compare_dataframes(df1, df2, matched_columns):
 
     return pd.DataFrame(comparison_results)
 
-def display_excel_analysis():
-    st.title("📊 Excel File Analysis")
+def display_demographic_analysis():
+    st.title("📊 Demographic Data Analysis")
 
     # Sidebar settings
-    st.sidebar.header("Excel Analysis Settings")
+    st.sidebar.header("Demographic Analysis Settings")
     match_threshold = st.sidebar.slider(
         "Column Matching Threshold",
         min_value=50,
@@ -181,9 +151,9 @@ def display_excel_analysis():
 
                 # Offer download
                 st.download_button(
-                    label="Download Excel Analysis",
+                    label="Download Demographic Analysis",
                     data=output.getvalue(),
-                    file_name="excel_analysis_results.xlsx",
+                    file_name="demographic_analysis_results.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         else:
@@ -485,12 +455,12 @@ def display_code_analysis():
 def main():
     # Navigation menu in sidebar
     st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Select Page", ["Code Analysis", "Excel Analysis"])
+    page = st.sidebar.radio("Select Page", ["Code Analysis", "Demographic Analysis"])
 
     if page == "Code Analysis":
         display_code_analysis()
     else:
-        display_excel_analysis()
+        display_demographic_analysis()
 
 if __name__ == "__main__":
     main()
