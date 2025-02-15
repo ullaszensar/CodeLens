@@ -23,9 +23,16 @@ class DemographicData:
 
 class CodeAnalyzer:  
     def __init__(self, repo_path: str, app_name: str):  
+        # Convert Windows path to Unix-style path
+        repo_path = repo_path.replace('\\', '/')
         self.repo_path = Path(repo_path)
         self.app_name = app_name
         self.setup_logging()  
+
+        # Log repository path information
+        self.logger.info(f"Initializing CodeAnalyzer for repository: {self.repo_path}")
+        self.logger.info(f"Repository exists: {self.repo_path.exists()}")
+        self.logger.info(f"Repository is directory: {self.repo_path.is_dir() if self.repo_path.exists() else False}")
 
         # Define demographic data patterns  
         self.demographic_patterns = {  
@@ -36,7 +43,6 @@ class CodeAnalyzer:
             'identity': r'\b(ssn|social_security|tax_id|passport)\b',  
             'demographics': r'\b(age|gender|dob|date_of_birth|nationality|ethnicity)\b'  
         }  
-    
         self.integration_patterns = {
             'rest_api': {
                 'http_methods': r'\b(get|post|put|delete|patch)\b.*\b(api|endpoint)\b',
@@ -155,7 +161,7 @@ class CodeAnalyzer:
         except Exception as e:
             self.logger.error(f"Error scanning files: {str(e)}", exc_info=True)
             raise
-
+    
     def analyze_file(self, file_path: Path) -> Dict:  
         """  
         Analyze a single file for demographic data and integration patterns  

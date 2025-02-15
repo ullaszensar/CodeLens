@@ -472,12 +472,37 @@ def display_code_analysis():
         else:
             repo_path = st.sidebar.text_input("Enter Repository Path")
             if repo_path:
-                if os.path.exists(repo_path):
+                # Convert any Windows-style paths to Unix-style
+                repo_path = repo_path.replace('\\', '/')
+
+                # Expand user home directory if path starts with ~
+                if repo_path.startswith('~'):
+                    repo_path = os.path.expanduser(repo_path)
+
+                # Convert relative path to absolute path
+                repo_path = os.path.abspath(repo_path)
+
+                # Check if path exists and is a directory
+                if os.path.exists(repo_path) and os.path.isdir(repo_path):
                     st.sidebar.write("✓ Valid repository path")
                     if st.sidebar.button("Run Analysis"):
                         analysis_triggered = True
                 else:
-                    st.sidebar.error("Invalid repository path")
+                    st.sidebar.error("""
+                    Invalid repository path. Please note:
+
+                    For Mac/Linux:
+                    - Use forward slashes (/)
+                    - Absolute path example: /Users/username/projects/mycode
+                    - Relative path example: ./mycode or ../projects/mycode
+                    - Home directory example: ~/projects/mycode
+
+                    For Windows:
+                    - Use forward slashes (/) instead of backslashes (\\)
+                    - Example: C:/Users/username/projects/mycode
+
+                    Make sure the path exists and is accessible.
+                    """)
 
         if analysis_triggered and repo_path:
             try:
@@ -531,7 +556,11 @@ def display_code_analysis():
 
 def display_about_page():
     st.title("ℹ️ About CodeLens")
-    st.markdown("### Advanced Code Analysis Platform")
+    st.markdown("### Advanced Code Analysis & Data Visualization Platform")
+    st.markdown("""
+    CodeLens is an advanced data analysis and visualization platform designed to streamline 
+    cross-file data exploration and intelligent matching.
+    """)
 
     # Technical Stack Table
     st.subheader("🛠️ Technical Stack")
@@ -541,21 +570,24 @@ def display_about_page():
             "Pandas",
             "Plotly",
             "Openpyxl",
-            "Pygments"
+            "Pygments",
+            "Twilio"
         ],
         "Purpose": [
             "Web application framework for data apps",
             "Data manipulation and analysis",
             "Interactive data visualization",
             "Excel file processing and handling",
-            "Code syntax highlighting"
+            "Code syntax highlighting",
+            "SMS notifications and alerts"
         ],
         "Key Benefits": [
             "Rapid development, interactive UI components",
             "Efficient handling of large datasets",
             "Rich, interactive charts and dashboards",
             "Seamless Excel file operations",
-            "Beautiful code presentation"
+            "Beautiful code presentation",
+            "Real-time notification delivery"
         ]
     }
 
@@ -568,26 +600,26 @@ def display_about_page():
         "Feature": [
             "Code Analysis",
             "Demographic Data Analysis",
-            "Excel Data Matching",
+            "Cross-File Data Matching",
             "Interactive Visualizations",
-            "Export Capabilities",
-            "Pattern Recognition"
+            "Pattern Recognition",
+            "SMS Notifications"
         ],
         "Description": [
             "Deep analysis of source code for patterns and integrations",
             "Analysis of demographic data with advanced filtering",
-            "Match and compare data between Excel files",
+            "Match and compare data between multiple files",
             "Interactive charts and dashboards for data insights",
-            "Export results to Excel for further analysis",
-            "Regex-based pattern detection for code structure analysis"
+            "Regex-based pattern detection for code structure analysis",
+            "Real-time alerts via SMS for important updates"
         ],
         "Details": [
             "Supports multiple programming languages, identifies integration patterns",
             "Excel file analysis with column-based searching",
-            "Match records using 'sub Group' identifiers across files",
+            "Match records using identifiers across multiple files",
             "Powered by Plotly for dynamic, interactive charts",
-            "Generate detailed reports in Excel format",
-            "Regular expression based pattern detection for demographic data and integration points"
+            "Regular expression based pattern detection for data fields",
+            "Twilio-powered SMS notifications for alerts and updates"
         ]
     }
 
@@ -605,29 +637,31 @@ def display_about_page():
         - Detection of integration patterns (REST, SOAP, Database)
         - Code structure analysis using regex patterns
 
-    - **Excel File Handling**
-        - Support for XLSX and XLS formats
+    - **File Processing**
+        - Support for multiple file formats (Excel, Code files)
         - Multiple file upload capabilities
         - Column-based searching and filtering
-        - Data matching between files
+        - Cross-file data matching
 
     - **Search and Match Features**
-        - Simple text-based search across columns
+        - Advanced text-based search across columns
         - Cross-file data matching using key columns
         - Results preview with pagination
         - Export functionality for matched records
 
-    - **Data Analysis Tools**
-        - Column-based data filtering
-        - Record matching across files
-        - Export capabilities for further analysis
-        - Interactive data previews
+    - **Notification System**
+        - SMS alerts for important updates
+        - Real-time notification delivery
+        - Configurable alert thresholds
+        - Status updates via messaging
 
     #### Use Cases
-    - Cross-referencing data between Excel files
+    - Cross-referencing data between multiple files
     - Finding matching records across datasets
-    - Analyzing demographic data patterns
+    - Analyzing code patterns and structures
+    - Monitoring analysis progress via SMS
     - Generating filtered data exports
+    - Receiving real-time analysis updates
     """)
 
 def main():
