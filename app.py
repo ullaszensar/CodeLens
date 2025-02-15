@@ -56,123 +56,32 @@ def read_log_file():
     except Exception as e:
         return [f"Error reading log file: {str(e)}"]
 
-def create_dashboard_charts(results):
-    """Create visualization charts for the dashboard"""
-    # Summary Stats at the top
-    st.subheader("Summary")
-    stats_cols = st.columns(4)
-    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
-    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
-    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
-    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
-
-    st.markdown("----")  # Add a separator line
-
-    # 1. Demographic Fields Distribution - Side by side charts
-    field_frequencies = {}
-    for file_data in results['demographic_data'].values():
-        for field_name, data in file_data.items():
-            if field_name not in field_frequencies:
-                field_frequencies[field_name] = len(data['occurrences'])
-            else:
-                field_frequencies[field_name] += len(data['occurrences'])
-
-    # Create two columns for side-by-side charts
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Pie Chart
-        fig_demo_pie = px.pie(
-            values=list(field_frequencies.values()),
-            names=list(field_frequencies.keys()),
-            title="Distribution of Demographic Fields (Pie Chart)",
-            color_discrete_sequence=px.colors.qualitative.Set3
-        )
-        st.plotly_chart(fig_demo_pie, use_container_width=True)
-
-    with col2:
-        # Bar Chart
-        fig_demo_bar = px.bar(
-            x=list(field_frequencies.keys()),
-            y=list(field_frequencies.values()),
-            title="Distribution of Demographic Fields (Bar Chart)",
-            labels={'x': 'Field Name', 'y': 'Occurrences'},
-            color=list(field_frequencies.keys()),
-            color_discrete_sequence=px.colors.qualitative.Set3
-        )
-        fig_demo_bar.update_layout(showlegend=False)
-        st.plotly_chart(fig_demo_bar, use_container_width=True)
-
-    # 2. Files by Language Bar Chart
-    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
-    file_counts = Counter(file_extensions)
-
-    fig_files = px.bar(
-        x=list(file_counts.keys()),
-        y=list(file_counts.values()),
-        title="Files by Language",
-        labels={'x': 'File Extension', 'y': 'Count'},
-        color=list(file_counts.keys()),
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
-    fig_files.update_layout(showlegend=False)
-    st.plotly_chart(fig_files)
-
-    # 3. Integration Patterns Line Graph
-    pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
-
-    fig_patterns = go.Figure()
-    fig_patterns.add_trace(go.Scatter(
-        x=list(pattern_types.keys()),
-        y=list(pattern_types.values()),
-        mode='lines+markers',
-        name='Pattern Count',
-        line=dict(color='#0066cc', width=2),
-        marker=dict(size=10)
-    ))
-    fig_patterns.update_layout(
-        title="Integration Patterns Distribution",
-        xaxis_title="Pattern Type",
-        yaxis_title="Count",
-        showlegend=False
-    )
-    st.plotly_chart(fig_patterns)
-
-    # 4. Files and Fields Correlation
-    fig_correlation = go.Figure()
-
-    # Extract data for each file
-    file_names = [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']]
-    demographic_counts = [detail['demographic_fields_found'] for detail in results['summary']['file_details']]
-    integration_counts = [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
-
-    fig_correlation.add_trace(go.Bar(
-        name='Demographic Fields',
-        x=file_names,
-        y=demographic_counts,
-        marker_color='#0066cc'
-    ))
-    fig_correlation.add_trace(go.Bar(
-        name='Integration Patterns',
-        x=file_names,
-        y=integration_counts,
-        marker_color='#90EE90'
-    ))
-
-    fig_correlation.update_layout(
-        title="Fields and Patterns by File",
-        xaxis_title="File Name",
-        yaxis_title="Count",
-        barmode='group'
-    )
-    st.plotly_chart(fig_correlation)
-
-def main():
+def show_demographic_analysis():
+    """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
-    st.markdown("### Advanced Code Analysis")
+    st.markdown("### Demographic Data Analysis")
 
     # Sidebar
     st.sidebar.header("Analysis Settings")
+
+    # Application name input
+    app_name = st.sidebar.text_input("Application Name", "MyApp")
+
+    # File uploader specifically for demographic analysis
+    uploaded_files = st.sidebar.file_uploader(
+        "Upload Data Files",
+        accept_multiple_files=True,
+        type=['csv', 'xlsx', 'json']
+    )
+
+    if uploaded_files and st.sidebar.button("Analyze Demographics"):
+        st.info("Demographic data analysis feature will be implemented here")
+        # TODO: Implement demographic data analysis logic
+
+def show_code_analysis():
+    """Display code analysis interface"""
+    st.title("🔍 CodeLens")
+    st.markdown("### Code Analysis")
 
     # Input method selection
     input_method = st.sidebar.radio(
@@ -357,7 +266,6 @@ def main():
                         while True:
                             time.sleep(5)
                             update_logs()
-                            
 
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")
@@ -366,6 +274,130 @@ def main():
             if temp_dir:
                 import shutil
                 shutil.rmtree(temp_dir)
+
+def create_dashboard_charts(results):
+    """Create visualization charts for the dashboard"""
+    # Summary Stats at the top
+    st.subheader("Summary")
+    stats_cols = st.columns(4)
+    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+
+    st.markdown("----")  # Add a separator line
+
+    # 1. Demographic Fields Distribution - Side by side charts
+    field_frequencies = {}
+    for file_data in results['demographic_data'].values():
+        for field_name, data in file_data.items():
+            if field_name not in field_frequencies:
+                field_frequencies[field_name] = len(data['occurrences'])
+            else:
+                field_frequencies[field_name] += len(data['occurrences'])
+
+    # Create two columns for side-by-side charts
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Pie Chart
+        fig_demo_pie = px.pie(
+            values=list(field_frequencies.values()),
+            names=list(field_frequencies.keys()),
+            title="Distribution of Demographic Fields (Pie Chart)",
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        st.plotly_chart(fig_demo_pie, use_container_width=True)
+
+    with col2:
+        # Bar Chart
+        fig_demo_bar = px.bar(
+            x=list(field_frequencies.keys()),
+            y=list(field_frequencies.values()),
+            title="Distribution of Demographic Fields (Bar Chart)",
+            labels={'x': 'Field Name', 'y': 'Occurrences'},
+            color=list(field_frequencies.keys()),
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        fig_demo_bar.update_layout(showlegend=False)
+        st.plotly_chart(fig_demo_bar, use_container_width=True)
+
+    # 2. Files by Language Bar Chart
+    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
+    file_counts = Counter(file_extensions)
+
+    fig_files = px.bar(
+        x=list(file_counts.keys()),
+        y=list(file_counts.values()),
+        title="Files by Language",
+        labels={'x': 'File Extension', 'y': 'Count'},
+        color=list(file_counts.keys()),
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    fig_files.update_layout(showlegend=False)
+    st.plotly_chart(fig_files)
+
+    # 3. Integration Patterns Line Graph
+    pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+
+    fig_patterns = go.Figure()
+    fig_patterns.add_trace(go.Scatter(
+        x=list(pattern_types.keys()),
+        y=list(pattern_types.values()),
+        mode='lines+markers',
+        name='Pattern Count',
+        line=dict(color='#0066cc', width=2),
+        marker=dict(size=10)
+    ))
+    fig_patterns.update_layout(
+        title="Integration Patterns Distribution",
+        xaxis_title="Pattern Type",
+        yaxis_title="Count",
+        showlegend=False
+    )
+    st.plotly_chart(fig_patterns)
+
+    # 4. Files and Fields Correlation
+    fig_correlation = go.Figure()
+
+    # Extract data for each file
+    file_names = [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']]
+    demographic_counts = [detail['demographic_fields_found'] for detail in results['summary']['file_details']]
+    integration_counts = [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
+
+    fig_correlation.add_trace(go.Bar(
+        name='Demographic Fields',
+        x=file_names,
+        y=demographic_counts,
+        marker_color='#0066cc'
+    ))
+    fig_correlation.add_trace(go.Bar(
+        name='Integration Patterns',
+        x=file_names,
+        y=integration_counts,
+        marker_color='#90EE90'
+    ))
+
+    fig_correlation.update_layout(
+        title="Fields and Patterns by File",
+        xaxis_title="File Name",
+        yaxis_title="Count",
+        barmode='group'
+    )
+    st.plotly_chart(fig_correlation)
+
+
+def main():
+    # Sidebar navigation
+    analysis_type = st.sidebar.radio(
+        "Select Analysis Type",
+        ["Code Analysis", "Demographic Data Analysis"]
+    )
+
+    if analysis_type == "Code Analysis":
+        show_code_analysis()
+    else:
+        show_demographic_analysis()
 
 if __name__ == "__main__":
     main()
