@@ -69,29 +69,39 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
         scorer = fuzz.token_sort_ratio
 
     matches = []
-    # Compare customer columns with Meta Data attr_name only
-    for customer_col in df1.columns:
-        # Check against attr_name
-        attr_name_matches = process.extract(
-            customer_col,
-            df2['attr_name'].unique(),
+    # Compare attr_name columns only
+    if 'attr_name' in df1.columns:
+        customer_attrs = df1['attr_name'].dropna().unique()
+    else:
+        # If no attr_name column in customer data, return empty DataFrame
+        return pd.DataFrame()
+
+    # Get unique attr_names from filtered Meta Data
+    meta_attrs = df2['attr_name'].dropna().unique()
+
+    # Compare attributes
+    for customer_attr in customer_attrs:
+        # Get top matches from meta data attr_names
+        attr_matches = process.extract(
+            customer_attr,
+            meta_attrs,
             scorer=scorer,
             limit=3
         )
 
         # Add matches that meet the threshold
-        for meta_attr, score in attr_name_matches:
+        for meta_attr, score in attr_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer_Column_Name': customer_col,
-                    'Meta_Data_Attr_Name': meta_attr,
-                    'Match_Score': score
+                    'Customer Attribute Name': customer_attr,
+                    'Meta Data Attribute Name': meta_attr,
+                    'Match Score (%)': score
                 })
 
     # Create DataFrame and sort by match score
     df_matches = pd.DataFrame(matches)
     if not df_matches.empty:
-        df_matches = df_matches.sort_values('Match_Score', ascending=False)
+        df_matches = df_matches.sort_values('Match Score (%)', ascending=False)
 
     return df_matches
 
