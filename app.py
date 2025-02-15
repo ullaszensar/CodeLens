@@ -6,6 +6,7 @@ import time
 from datetime import datetime
 from typing import List, Dict, Optional
 from collections import Counter
+import pandas as pd
 
 # Custom modules
 from codescan import CodeAnalyzer
@@ -124,93 +125,117 @@ def create_dashboard_charts(results: Dict):
     col1, col2 = st.columns(2)
 
     # Field Distribution Charts
-    field_frequencies = {}
+    field_data = []
     for file_data in results['demographic_data'].values():
         for field_name, data in file_data.items():
-            field_frequencies[field_name] = field_frequencies.get(field_name, 0) + len(data['occurrences'])
+            field_data.append({
+                'Field': field_name,
+                'Count': len(data['occurrences'])
+            })
 
-    with col1:
-        fig_pie = px.pie(
-            values=list(field_frequencies.values()),
-            names=list(field_frequencies.keys()),
-            title="Distribution of Demographic Fields",
-            color_discrete_sequence=px.colors.qualitative.Set3
-        )
-        st.plotly_chart(fig_pie, use_container_width=True)
+    if field_data:
+        field_df = pd.DataFrame(field_data)
+        field_df = field_df.groupby('Field')['Count'].sum().reset_index()
 
-    with col2:
-        fig_bar = px.bar(
-            x=list(field_frequencies.keys()),
-            y=list(field_frequencies.values()),
-            title="Field Occurrences",
-            labels={'x': 'Field Name', 'y': 'Count'},
-            color=list(field_frequencies.keys()),
-            color_discrete_sequence=px.colors.qualitative.Set3
-        )
-        fig_bar.update_layout(showlegend=False)
-        st.plotly_chart(fig_bar, use_container_width=True)
+        with col1:
+            fig_pie = px.pie(
+                field_df,
+                values='Count',
+                names='Field',
+                title="Distribution of Demographic Fields",
+                color_discrete_sequence=px.colors.qualitative.Set3
+            )
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+        with col2:
+            fig_bar = px.bar(
+                field_df,
+                x='Field',
+                y='Count',
+                title="Field Occurrences",
+                color='Field',
+                color_discrete_sequence=px.colors.qualitative.Set3
+            )
+            fig_bar.update_layout(showlegend=False)
+            st.plotly_chart(fig_bar, use_container_width=True)
 
     # Language Distribution Chart
-    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
-    extension_counts = Counter(file_extensions)
-    fig_languages = px.bar(
-        x=list(extension_counts.keys()),
-        y=list(extension_counts.values()),
-        title="Files by Programming Language",
-        labels={'x': 'Language', 'y': 'Count'},
-        color=list(extension_counts.keys()),
-        color_discrete_sequence=px.colors.qualitative.Set3
-    )
-    st.plotly_chart(fig_languages)
+    language_data = []
+    for file_detail in results['summary']['file_details']:
+        language_data.append({
+            'Language': Path(file_detail['file_path']).suffix,
+            'Count': 1
+        })
 
-    # 3. Integration Patterns Line Graph
-    pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+    if language_data:
+        language_df = pd.DataFrame(language_data)
+        language_df = language_df.groupby('Language')['Count'].sum().reset_index()
 
-    fig_patterns = go.Figure()
-    fig_patterns.add_trace(go.Scatter(
-        x=list(pattern_types.keys()),
-        y=list(pattern_types.values()),
-        mode='lines+markers',
-        name='Pattern Count',
-        line=dict(color='#0066cc', width=2),
-        marker=dict(size=10)
-    ))
-    fig_patterns.update_layout(
-        title="Integration Patterns Distribution",
-        xaxis_title="Pattern Type",
-        yaxis_title="Count",
-        showlegend=False
-    )
-    st.plotly_chart(fig_patterns)
+        fig_languages = px.bar(
+            language_df,
+            x='Language',
+            y='Count',
+            title="Files by Programming Language",
+            color='Language',
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        st.plotly_chart(fig_languages)
 
-    # 4. Files and Fields Correlation
-    fig_correlation = go.Figure()
+    # Integration Patterns Chart
+    pattern_data = []
+    for pattern in results['integration_patterns']:
+        pattern_data.append({
+            'Pattern': pattern['pattern_type'],
+            'Count': 1
+        })
 
-    # Extract data for each file
-    file_names = [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']]
-    demographic_counts = [detail['demographic_fields_found'] for detail in results['summary']['file_details']]
-    integration_counts = [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
+    if pattern_data:
+        pattern_df = pd.DataFrame(pattern_data)
+        pattern_df = pattern_df.groupby('Pattern')['Count'].sum().reset_index()
 
-    fig_correlation.add_trace(go.Bar(
-        name='Demographic Fields',
-        x=file_names,
-        y=demographic_counts,
-        marker_color='#0066cc'
-    ))
-    fig_correlation.add_trace(go.Bar(
-        name='Integration Patterns',
-        x=file_names,
-        y=integration_counts,
-        marker_color='#90EE90'
-    ))
+        fig_patterns = go.Figure()
+        fig_patterns.add_trace(go.Scatter(
+            x=pattern_df['Pattern'],
+            y=pattern_df['Count'],
+            mode='lines+markers',
+            name='Pattern Count',
+            line=dict(color='#0066cc', width=2),
+            marker=dict(size=10)
+        ))
+        fig_patterns.update_layout(
+            title="Integration Patterns Distribution",
+            xaxis_title="Pattern Type",
+            yaxis_title="Count",
+            showlegend=False
+        )
+        st.plotly_chart(fig_patterns)
 
-    fig_correlation.update_layout(
-        title="Fields and Patterns by File",
-        xaxis_title="File Name",
-        yaxis_title="Count",
-        barmode='group'
-    )
-    st.plotly_chart(fig_correlation)
+    # Files and Fields Correlation
+    correlation_data = []
+    for detail in results['summary']['file_details']:
+        correlation_data.append({
+            'File': os.path.basename(detail['file_path']),
+            'Type': 'Demographic Fields',
+            'Count': detail['demographic_fields_found']
+        })
+        correlation_data.append({
+            'File': os.path.basename(detail['file_path']),
+            'Type': 'Integration Patterns',
+            'Count': detail['integration_patterns_found']
+        })
+
+    if correlation_data:
+        correlation_df = pd.DataFrame(correlation_data)
+        fig_correlation = px.bar(
+            correlation_df,
+            x='File',
+            y='Count',
+            color='Type',
+            title="Fields and Patterns by File",
+            barmode='group',
+            color_discrete_sequence=['#0066cc', '#90EE90']
+        )
+        st.plotly_chart(fig_correlation)
 
 
 def main():
@@ -292,12 +317,11 @@ def main():
                             st.text(f"Patterns found: {file_detail['integration_patterns_found']}")
 
 
-
                 with tabs[2]:  # Export Reports
                     st.header("Available Reports")
                     report_files = [
                         f for f in os.listdir()
-                        if f.endswith('.html') and 'CodeLens' in f 
+                        if f.endswith('.html') and 'CodeLens' in f
                         and f.startswith(app_name)
                     ]
 
