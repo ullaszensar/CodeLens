@@ -760,8 +760,10 @@ def show_about_page():
 
     # Team Information
     st.markdown("""
-    ### Contributors
+    ### Architect
+    - Ullas Krishnan
 
+    ### Contributors
     - Piyush G
     - Ullas K
     - Subhashis S
@@ -797,3 +799,5 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Failed to start application: {str(e)}")
         st.error(f"Application startup error: {str(e)}")
+
+from collections import Counter

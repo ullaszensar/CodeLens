@@ -1,16 +1,8 @@
-# CodeLens
-
-CodeLens is an advanced data analysis and visualization platform designed to streamline cross-file data exploration and intelligent attribute matching.
-
-## Installation
-
-1. Clone the repository:
-   ```bash
-   git clone [repository-url]
+git clone [repository-url]
    cd CodeLens
    ```
 
-2. Install all required packages:
+2. Install required dependencies:
    ```bash
    pip install streamlit==1.41.1      # Web application framework
    pip install pandas==2.1.4          # Data processing
@@ -21,29 +13,9 @@ CodeLens is an advanced data analysis and visualization platform designed to str
    pip install openpyxl==3.1.2        # Excel file handling
    ```
 
-   Or install all at once:
+   Or install all dependencies at once:
    ```bash
    pip install streamlit pandas plotly fuzzywuzzy python-levenshtein pygments openpyxl
-   ```
-
-3. Configure Streamlit:
-   ```bash
-   mkdir -p .streamlit
-   ```
-
-   Create `.streamlit/config.toml`:
-   ```toml
-   [server]
-   headless = true
-   address = "0.0.0.0"
-   port = 8501
-
-   [theme]
-   primaryColor = "#0066cc"
-   backgroundColor = "#ffffff"
-   secondaryBackgroundColor = "#f0f2f6"
-   textColor = "#262730"
-   font = "sans serif"
    ```
 
 ## Usage
@@ -74,24 +46,6 @@ CodeLens is an advanced data analysis and visualization platform designed to str
    - Analyze data patterns and correlations
    - Export visualizations and reports
 
-## Technical Stack
-
-### Core Technologies
-- Frontend Framework: Streamlit
-- Data Processing: Pandas
-- Visualization: Plotly
-- Pattern Matching: FuzzyWuzzy with Python-Levenshtein
-- Code Analysis: Pygments
-
-### Key Libraries and Versions
-- streamlit (1.41.1): Interactive web application framework
-- pandas (2.1.4): Data manipulation and analysis
-- plotly (5.18.0): Interactive data visualization
-- fuzzywuzzy (0.18.0): Fuzzy string matching
-- python-levenshtein: Fast string comparison
-- pygments (2.18.0): Syntax highlighting
-- openpyxl (3.1.2): Excel file handling
-
 ## Project Structure
 ```
 CodeLens/
@@ -102,4 +56,3 @@ CodeLens/
 ├── styles.py           # Custom styling
 ├── utils.py           # Utility functions
 └── README.md          # Documentation
-```
