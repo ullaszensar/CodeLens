@@ -127,6 +127,32 @@ def show_demographic_analysis():
     # Table name filter with fuzzy search
     st.markdown("### Filter Meta Data by Table Name")
     if meta_data_file is not None:
+        # Fuzzy search settings
+        st.markdown("#### Search Settings")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            # Algorithm selection
+            algorithm = st.selectbox(
+                "Select Fuzzy Matching Algorithm",
+                [
+                    "Levenshtein Ratio (Basic)",
+                    "Partial Ratio (Substring)",
+                    "Token Sort Ratio (Word Order)"
+                ]
+            )
+
+        with col2:
+            # Similarity threshold
+            threshold = st.slider(
+                "Similarity Threshold (%)",
+                min_value=0,
+                max_value=100,
+                value=60,
+                help="Minimum similarity score required for a match"
+            )
+
+        # Search input
         table_name = st.text_input("Enter Table Name to Filter:", "")
 
         if table_name:
@@ -134,32 +160,57 @@ def show_demographic_analysis():
                 # Get unique table names
                 unique_tables = df_meta['table_name'].unique()
 
+                # Select scoring function based on algorithm choice
+                if algorithm == "Levenshtein Ratio (Basic)":
+                    scorer = fuzz.ratio
+                    algorithm_description = """
+                    **Levenshtein Ratio:** Calculates the minimum number of character edits required to transform one string into another.
+                    Best for exact matches with minor typos.
+                    """
+                elif algorithm == "Partial Ratio (Substring)":
+                    scorer = fuzz.partial_ratio
+                    algorithm_description = """
+                    **Partial Ratio:** Finds the best matching substring, useful when the search term is a part of the full table name.
+                    Best for partial matches and substrings.
+                    """
+                else:  # Token Sort Ratio
+                    scorer = fuzz.token_sort_ratio
+                    algorithm_description = """
+                    **Token Sort Ratio:** Sorts the words in both strings before comparing, making it order-independent.
+                    Best for matching strings with the same words in different orders.
+                    """
+
+                # Display algorithm description
+                st.markdown(algorithm_description)
+
                 # Perform fuzzy matching
                 matches = process.extract(
                     table_name,
                     unique_tables,
-                    scorer=fuzz.partial_ratio,
-                    limit=5  # Show top 5 matches
+                    scorer=scorer,
+                    limit=5
                 )
 
-                # Filter matches above threshold (60%)
-                good_matches = [match[0] for match in matches if match[1] >= 60]
+                # Filter matches above threshold
+                good_matches = [match for match in matches if match[1] >= threshold]
 
                 if good_matches:
-                    # Filter data for all matching table names
-                    filtered_data = df_meta[df_meta['table_name'].isin(good_matches)]
+                    # Display matches with scores
+                    st.markdown("**Matching Tables Found:**")
+                    for match, score in good_matches:
+                        st.markdown(f"- {match} (Similarity: {score}%)")
+
+                    # Filter and display data
+                    matched_tables = [match[0] for match in good_matches]
+                    filtered_data = df_meta[df_meta['table_name'].isin(matched_tables)]
 
                     if len(filtered_data) > 0:
-                        st.markdown("**Matching Tables Found:**")
-                        for match in good_matches:
-                            st.markdown(f"- {match}")
-
                         st.markdown(f"**Filtered Results:**")
                         st.dataframe(filtered_data)
                     else:
                         st.warning("No data found for the matched table names")
                 else:
-                    st.warning(f"No similar table names found for: {table_name}")
+                    st.warning(f"No similar table names found for: {table_name} (threshold: {threshold}%)")
             except Exception as e:
                 st.error(f"Error filtering data: {str(e)}")
     else:
