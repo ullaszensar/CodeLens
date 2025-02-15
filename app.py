@@ -4,26 +4,51 @@ import os
 from pathlib import Path
 import time
 from datetime import datetime
-from codescan import CodeAnalyzer
-from utils import display_code_with_highlights, create_file_tree
-from styles import apply_custom_styles
-import base64
-import plotly.express as px
-import plotly.graph_objects as go
-from collections import Counter
-import pandas as pd
-from fuzzywuzzy import process, fuzz
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('streamlit_debug.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+try:
+    # Test imports
+    logger.info("Importing dependencies...")
+    import pandas as pd
+    import plotly.express as px
+    import plotly.graph_objects as go
+    from fuzzywuzzy import process, fuzz
+    from codescan import CodeAnalyzer
+    from utils import display_code_with_highlights, create_file_tree
+    from styles import apply_custom_styles
+    import base64
+    logger.info("All dependencies imported successfully")
+except Exception as e:
+    logger.error(f"Error importing dependencies: {str(e)}")
+    raise
 
 # Page config
-st.set_page_config(
-    page_title="CodeLens - Code Utility",
-    page_icon="🔍",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+try:
+    logger.info("Setting up page configuration...")
+    st.set_page_config(
+        page_title="CodeLens - Code Utility",
+        page_icon="🔍",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    logger.info("Page configuration completed")
+except Exception as e:
+    logger.error(f"Error in page configuration: {str(e)}")
+    raise
 
-# Apply custom styles
-apply_custom_styles()
+# Test output
+st.write("Debug: Application is starting...")
 
 # Creator information
 st.sidebar.markdown("""
@@ -213,11 +238,11 @@ def show_demographic_analysis():
         st.markdown("""
             <style>
             .table-filter-label {
-                color: black;
-                font-weight: bold;
+                color: black !important;
+                font-weight: bold !important;
             }
             .stDataFrame thead th {
-                background-color: cyan !important;
+                background-color: #00FFFF !important;
                 color: black !important;
                 font-weight: bold !important;
             }
@@ -425,11 +450,11 @@ def show_code_analysis():
                 repo_path = temp_dir
 
     else:
-        repo_path = st.sidebar.text_input("Enter Repository Path")
+        repo_path = st.sidebar.text_input("Enter Repository Path", value="")
         if repo_path and st.sidebar.button("Run Analysis"):
             analysis_triggered = True
 
-    if analysis_triggered:
+    if analysis_triggered and repo_path:  # Ensure repo_path exists before using
         try:
             with st.spinner("Analyzing code..."):
                 analyzer = CodeAnalyzer(repo_path, app_name)
@@ -572,11 +597,9 @@ def show_code_analysis():
                     # Initial log display
                     update_logs()
 
-                    # Auto-refresh logs every 5 seconds if enabled
+                    # Use Streamlit's rerun mechanism instead of infinite loop
                     if auto_refresh:
-                        while True:
-                            time.sleep(5)
-                            update_logs()
+                        st.rerun()
 
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")
@@ -765,4 +788,12 @@ def main():
         show_demographic_analysis()
 
 if __name__ == "__main__":
-    main()
+    try:
+        # Initialize logging (already done above)
+        logger.info("Starting CodeLens application...")
+
+        # Start the application
+        main()
+    except Exception as e:
+        logger.error(f"Failed to start application: {str(e)}")
+        st.error(f"Application startup error: {str(e)}")
