@@ -12,6 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
 import pandas as pd
+from fuzzywuzzy import process, fuzz
 
 # Page config
 st.set_page_config(
@@ -139,19 +140,42 @@ def show_demographic_analysis():
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
 
-    # Table name filter
+    # Table name filter with fuzzy search
     st.markdown("### Filter Meta Data by Table Name")
     if meta_data_file is not None:
         table_name = st.text_input("Enter Table Name to Filter:", "")
 
         if table_name:
             try:
-                filtered_data = df_meta[df_meta['table_name'] == table_name]
-                if len(filtered_data) > 0:
-                    st.markdown(f"**Filtered Results for Table: {table_name}**")
-                    st.dataframe(filtered_data)
+                # Get unique table names
+                unique_tables = df_meta['table_name'].unique()
+
+                # Perform fuzzy matching
+                matches = process.extract(
+                    table_name,
+                    unique_tables,
+                    scorer=fuzz.partial_ratio,
+                    limit=5  # Show top 5 matches
+                )
+
+                # Filter matches above threshold (60%)
+                good_matches = [match[0] for match in matches if match[1] >= 60]
+
+                if good_matches:
+                    # Filter data for all matching table names
+                    filtered_data = df_meta[df_meta['table_name'].isin(good_matches)]
+
+                    if len(filtered_data) > 0:
+                        st.markdown("**Matching Tables Found:**")
+                        for match in good_matches:
+                            st.markdown(f"- {match}")
+
+                        st.markdown(f"**Filtered Results:**")
+                        st.dataframe(filtered_data)
+                    else:
+                        st.warning("No data found for the matched table names")
                 else:
-                    st.warning(f"No data found for table name: {table_name}")
+                    st.warning(f"No similar table names found for: {table_name}")
             except Exception as e:
                 st.error(f"Error filtering data: {str(e)}")
     else:
