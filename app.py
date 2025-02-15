@@ -95,6 +95,8 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
                 matches.append({
                     'Customer Attribute Name': customer_attr,
                     'Meta Data Attribute Name': meta_attr,
+                    'Meta_Match_Type': 'Attribute Name',
+                    'Meta_Value': meta_attr,
                     'Match Score (%)': score
                 })
 
