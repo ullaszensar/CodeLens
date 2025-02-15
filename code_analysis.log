@@ -46,3 +46,5 @@
 2025-01-16 18:42:38,624 - INFO - Analysis report generated: MyApp_CodeLens_20250116_184238.html
 2025-02-15 17:24:53,489 - INFO - Analysis report generated: MyApp_CodeLens_20250215_172453.html
 2025-02-15 17:30:03,267 - INFO - Analysis report generated: MyApp_CodeLens_20250215_173003.html
+2025-02-15 17:30:27,875 - INFO - Analyzing file: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java
+2025-02-15 17:30:27,881 - INFO - Analysis report generated: MyApp_CodeLens_20250215_173027.html

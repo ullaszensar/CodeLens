@@ -45,6 +45,17 @@ def parse_timestamp_from_filename(filename):
     except:
         return datetime.min
 
+def read_log_file():
+    """Read and format the log file content"""
+    try:
+        if os.path.exists('code_analysis.log'):
+            with open('code_analysis.log', 'r') as f:
+                logs = f.readlines()
+            return logs
+        return []
+    except Exception as e:
+        return [f"Error reading log file: {str(e)}"]
+
 def create_dashboard_charts(results):
     """Create visualization charts for the dashboard"""
     # Summary Stats at the top
@@ -208,8 +219,8 @@ def main():
                 results = analyzer.scan_repository()
                 progress_bar.progress(100)
 
-                # Create tabs for Dashboard, Analysis Results, and Export Reports
-                tab1, tab2, tab3 = st.tabs(["Dashboard", "Analysis Results", "Export Reports"])
+                # Create tabs for Dashboard, Analysis Results, Export Reports, and Logs
+                tab1, tab2, tab3, tab4 = st.tabs(["Dashboard", "Analysis Results", "Export Reports", "Log"])
 
                 with tab1:
                     st.header("Analysis Dashboard")
@@ -321,6 +332,32 @@ def main():
                             )
                     else:
                         st.info("No reports available for this application.")
+
+                with tab4:
+                    st.header("Analysis Log")
+                    # Add auto-refresh checkbox
+                    auto_refresh = st.checkbox("Auto-refresh logs", value=True)
+
+                    # Create a container for logs
+                    log_container = st.empty()
+
+                    def update_logs():
+                        logs = read_log_file()
+                        if logs:
+                            log_content = "".join(logs)
+                            log_container.code(log_content, language="text")
+                        else:
+                            log_container.info("No logs available")
+
+                    # Initial log display
+                    update_logs()
+
+                    # Auto-refresh logs every 5 seconds if enabled
+                    if auto_refresh:
+                        while True:
+                            time.sleep(5)
+                            update_logs()
+                            
 
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")

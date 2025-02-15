@@ -1,0 +1,179 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>MyApp - Code Analysis Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .section { margin-bottom: 30px; }
+                .pattern { margin-bottom: 20px; padding: 10px; border: 1px solid #ddd; }
+                .code { background-color: #f5f5f5; padding: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                .metadata { background-color: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>MyApp - Code Analysis Report</h1>
+                <div class="metadata">
+                    <p><strong>Application Name:</strong> MyApp</p>
+                    <p><strong>Generated:</strong> 2025-02-15 17:30:27</p>
+                    <p><strong>Repository Path:</strong> /tmp/tmpzpl0gnzh</p>
+                </div>
+            </div>
+            <div class="section">
+                <h2>Summary</h2>
+                <p>Files Analyzed: 1</p>
+                <p>Unique Demographic Fields: 1 [name]</p>
+                <p>Demographic Fields Occurrences Found: 3</p>
+                <p>Integration Patterns Found: 6</p>
+
+                
+        <div class="section">
+            <h3>Field Frequency Analysis</h3>
+            <p>Below table shows how many times each demographic field appears across all analyzed files:</p>
+            <table>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 35%;">Field Name</th>
+                    <th style="width: 30%;">Field Type</th>
+                    <th style="width: 30%;">Total Occurrences</th>
+                </tr>
+        
+                <tr>
+                    <td>1</td>
+                    <td>name</td>
+                    <td>name</td>
+                    <td>3</td>
+                </tr>
+            
+            </table>
+        </div>
+        <br>
+        
+
+                
+        <h3>Demographic Fields Summary</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>File Analyzed</th>
+                <th>Demographic Fields Occurrences</th>
+                <th>Fields</th>
+            </tr>
+        
+            <tr>
+                <td>1</td>
+                <td>/tmp/tmpzpl0gnzh/EmployeeEndpoint.java</td>
+                <td>3</td>
+                <td>name</td>
+            </tr>
+            </table>
+                
+        <h3>Integration Patterns Summary</h3>
+        <table>
+            <tr>
+                <th>#</th>
+                <th>File Name</th>
+                <th>Integration Patterns Found</th>
+                <th>Patterns Found Details</th>
+            </tr>
+        
+            <tr>
+                <td>1</td>
+                <td>/tmp/tmpzpl0gnzh/EmployeeEndpoint.java</td>
+                <td>6</td>
+                <td>soap_services: xml_namespaces, rest_api: url_patterns</td>
+            </tr>
+            </table>
+            </div>
+
+            <div class="section">
+                <h2>Demographic Data Fields by File</h2>
+                <h3>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</h3>  
+                <div class="pattern">  
+                    <h4>Field: name (Type: name)</h4>  
+                      
+                    <div class="code">  
+                        <p>Line 29: }name</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 39: }name</p>  
+                    </div>  
+                      
+                    <div class="code">  
+                        <p>Line 44: }name</p>  
+                    </div>  
+                    </div>
+            </div>
+
+            <div class="section">
+                <h2>Integration Patterns</h2>
+                  
+            <div class="pattern">
+                <h3>Pattern Type: rest_api</h3>
+                <p>Sub Type: url_patterns</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 18</p>
+                <div class="code">
+                    <p>//private static final String NAMESPACE_URI = "http://www.jpworks.com/employee";</p>
+                </div>
+            </div>
+              
+            <div class="pattern">
+                <h3>Pattern Type: soap_services</h3>
+                <p>Sub Type: xml_namespaces</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 18</p>
+                <div class="code">
+                    <p>//private static final String NAMESPACE_URI = "http://www.jpworks.com/employee";</p>
+                </div>
+            </div>
+              
+            <div class="pattern">
+                <h3>Pattern Type: rest_api</h3>
+                <p>Sub Type: url_patterns</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 20</p>
+                <div class="code">
+                    <p>@PayloadRoot(namespace = "http://www.jpworks.com/employee", localPart = "EmployeeByNameRequest")</p>
+                </div>
+            </div>
+              
+            <div class="pattern">
+                <h3>Pattern Type: soap_services</h3>
+                <p>Sub Type: xml_namespaces</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 20</p>
+                <div class="code">
+                    <p>@PayloadRoot(namespace = "http://www.jpworks.com/employee", localPart = "EmployeeByNameRequest")</p>
+                </div>
+            </div>
+              
+            <div class="pattern">
+                <h3>Pattern Type: rest_api</h3>
+                <p>Sub Type: url_patterns</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 33</p>
+                <div class="code">
+                    <p>@PayloadRoot(namespace = "http://www.jpworks.com/employee", localPart = "EmployeeByIdRequest")</p>
+                </div>
+            </div>
+              
+            <div class="pattern">
+                <h3>Pattern Type: soap_services</h3>
+                <p>Sub Type: xml_namespaces</p>
+                <p>File: /tmp/tmpzpl0gnzh/EmployeeEndpoint.java</p>
+                <p>Line: 33</p>
+                <div class="code">
+                    <p>@PayloadRoot(namespace = "http://www.jpworks.com/employee", localPart = "EmployeeByIdRequest")</p>
+                </div>
+            </div>
+            
+            </div>
+        </body>
+        </html>
+        
