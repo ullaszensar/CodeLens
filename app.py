@@ -81,7 +81,7 @@ def show_demographic_analysis():
 def show_code_analysis():
     """Display code analysis interface"""
     st.title("🔍 CodeLens")
-    st.markdown("### Code Analysis")
+    st.markdown("### Code Analysis Utility")
 
     # Input method selection
     input_method = st.sidebar.radio(
