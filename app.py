@@ -45,6 +45,54 @@ def parse_timestamp_from_filename(filename):
     except:
         return datetime.min
 
+def read_log_file():
+    """Read and format the log file contents"""
+    try:
+        if os.path.exists('code_analysis.log'):
+            with open('code_analysis.log', 'r') as f:
+                logs = f.readlines()
+            return [log.strip() for log in logs]
+        return []
+    except Exception as e:
+        return [f"Error reading log file: {str(e)}"]
+
+def display_logs():
+    """Display logs with formatting"""
+    logs = read_log_file()
+    if logs:
+        # Group logs by level for better organization
+        info_logs = []
+        error_logs = []
+        other_logs = []
+
+        for log in logs:
+            if 'INFO' in log:
+                info_logs.append(('ℹ️', log))
+            elif 'ERROR' in log:
+                error_logs.append(('❌', log))
+            else:
+                other_logs.append(('📝', log))
+
+        # Display errors first
+        if error_logs:
+            st.subheader("Errors")
+            for icon, log in error_logs:
+                st.markdown(f"{icon} {log}")
+
+        # Display info logs
+        if info_logs:
+            st.subheader("Information")
+            for icon, log in info_logs:
+                st.markdown(f"{icon} {log}")
+
+        # Display other logs
+        if other_logs:
+            st.subheader("Other Logs")
+            for icon, log in other_logs:
+                st.markdown(f"{icon} {log}")
+    else:
+        st.info("No logs available yet. Run an analysis to generate logs.")
+
 def create_dashboard_charts(results):
     """Create visualization charts for the dashboard"""
     # Summary Stats at the top
@@ -208,8 +256,8 @@ def main():
                 results = analyzer.scan_repository()
                 progress_bar.progress(100)
 
-                # Create tabs for Dashboard, Analysis Results, and Export Reports
-                tab1, tab2, tab3 = st.tabs(["Dashboard", "Analysis Results", "Export Reports"])
+                # Create tabs for Dashboard, Analysis Results, Export Reports, and Logs
+                tab1, tab2, tab3, tab4 = st.tabs(["Dashboard", "Analysis Results", "Export Reports", "Logs"])
 
                 with tab1:
                     st.header("Analysis Dashboard")
@@ -321,6 +369,14 @@ def main():
                             )
                     else:
                         st.info("No reports available for this application.")
+
+                with tab4:
+                    st.header("Analysis Logs")
+                    st.markdown("""
+                    This section shows the detailed logs of the code analysis process, 
+                    including information about files being processed and any errors encountered.
+                    """)
+                    display_logs()
 
         except Exception as e:
             st.error(f"Error during analysis: {str(e)}")
