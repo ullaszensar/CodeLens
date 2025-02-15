@@ -673,15 +673,68 @@ def create_dashboard_charts(results):
     st.plotly_chart(fig_correlation)
 
 
+def show_about_page():
+    """Display About page with technical stack and team information"""
+    st.title("🔍 CodeLens - About")
+
+    # Application Overview
+    st.markdown("""
+    ### Application Overview
+    CodeLens is an advanced data analysis and visualization platform designed to streamline 
+    cross-file data exploration and intelligent attribute matching.
+    """)
+
+    # Technical Stack
+    st.markdown("""
+    ### Technical Stack
+    #### Core Technologies
+    - **Frontend Framework:** Streamlit
+    - **Data Processing:** Pandas, NumPy
+    - **Visualization:** Plotly
+    - **Pattern Matching:** FuzzyWuzzy with Python-Levenshtein
+    - **Code Analysis:** Pygments
+
+    #### Key Libraries
+    - **streamlit:** Interactive web application framework
+    - **pandas:** Data manipulation and analysis
+    - **plotly:** Interactive data visualization
+    - **fuzzywuzzy:** Fuzzy string matching
+    - **python-levenshtein:** Fast string comparison
+    - **pygments:** Syntax highlighting
+    - **openpyxl:** Excel file handling
+
+    #### Features
+    - Multi-file Excel data analysis
+    - Advanced fuzzy matching algorithms
+    - Dynamic column comparison
+    - Cross-platform path handling
+    - Intelligent attribute matching system
+    """)
+
+    # Team Information
+    st.markdown("""
+    ### Design and Development
+    #### Zensar Project Diamond Team
+
+    **Architect**  
+    Ullas Krishnan
+
+    ---
+
+    *Built with ❤️ by the Zensar Project Diamond Team*
+    """)
+
 def main():
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
-        "Select Analysis Type",
-        ["Code Analysis", "Demographic Data Analysis"]
+        "Select Option",
+        ["Code Analysis", "Demographic Data Analysis", "About"]
     )
 
     if analysis_type == "Code Analysis":
         show_code_analysis()
+    elif analysis_type == "About":
+        show_about_page()
     else:
         show_demographic_analysis()
 
