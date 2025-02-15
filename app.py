@@ -58,6 +58,34 @@ def read_log_file():
     except Exception as e:
         return [f"Error reading log file: {str(e)}"]
 
+def compare_attributes(df1, df2, algorithm_type, threshold):
+    """Compare attributes between two dataframes using fuzzy matching"""
+    # Select scoring function based on algorithm type
+    if algorithm_type == "Levenshtein Ratio (Basic)":
+        scorer = fuzz.ratio
+    elif algorithm_type == "Partial Ratio (Substring)":
+        scorer = fuzz.partial_ratio
+    else:  # Token Sort Ratio
+        scorer = fuzz.token_sort_ratio
+
+    matches = []
+    for attr1 in df1['attr_name'].unique():
+        best_matches = process.extract(
+            attr1,
+            df2['attr_name'].unique(),
+            scorer=scorer,
+            limit=3
+        )
+        for attr2, score in best_matches:
+            if score >= threshold:
+                matches.append({
+                    'Customer_Attribute': attr1,
+                    'Meta_Attribute': attr2,
+                    'Similarity_Score': score
+                })
+
+    return pd.DataFrame(matches)
+
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -139,7 +167,8 @@ def show_demographic_analysis():
                     "Levenshtein Ratio (Basic)",
                     "Partial Ratio (Substring)",
                     "Token Sort Ratio (Word Order)"
-                ]
+                ],
+                key="table_algorithm"
             )
 
         with col2:
@@ -149,12 +178,14 @@ def show_demographic_analysis():
                 min_value=0,
                 max_value=100,
                 value=60,
-                help="Minimum similarity score required for a match"
+                help="Minimum similarity score required for a match",
+                key="table_threshold"
             )
 
         # Search input
         table_name = st.text_input("Enter Table Name to Filter:", "")
 
+        filtered_data = None
         if table_name:
             try:
                 # Get unique table names
@@ -213,8 +244,55 @@ def show_demographic_analysis():
                     st.warning(f"No similar table names found for: {table_name} (threshold: {threshold}%)")
             except Exception as e:
                 st.error(f"Error filtering data: {str(e)}")
+
+        # Attribute comparison section
+        if filtered_data is not None and customer_demo_file is not None:
+            st.markdown("### Compare Attributes")
+            st.markdown("#### Attribute Matching Settings")
+
+            # Algorithm selection for attribute matching
+            col1, col2 = st.columns(2)
+            with col1:
+                attr_algorithm = st.selectbox(
+                    "Select Attribute Matching Algorithm",
+                    [
+                        "Levenshtein Ratio (Basic)",
+                        "Partial Ratio (Substring)",
+                        "Token Sort Ratio (Word Order)"
+                    ],
+                    key="attr_algorithm"
+                )
+
+            with col2:
+                attr_threshold = st.slider(
+                    "Attribute Similarity Threshold (%)",
+                    min_value=0,
+                    max_value=100,
+                    value=60,
+                    help="Minimum similarity score required for attribute matches",
+                    key="attr_threshold"
+                )
+
+            # Compare attributes
+            attribute_matches = compare_attributes(
+                df_customer, #Corrected order of dataframes
+                filtered_data, #Corrected order of dataframes
+                attr_algorithm,
+                attr_threshold
+            )
+
+            if not attribute_matches.empty:
+                st.markdown("#### Matching Attributes")
+                st.dataframe(
+                    attribute_matches.sort_values('Similarity_Score', ascending=False),
+                    hide_index=True
+                )
+            else:
+                st.info("No matching attributes found with the current threshold")
+
     else:
         st.info("Please upload Meta Data file to use the filter functionality")
+
 
 def show_code_analysis():
     """Display code analysis interface"""
