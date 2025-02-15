@@ -93,7 +93,7 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
         for meta_attr, score in attr_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer Attribute Name': customer_attr,
+                    'C360 Attribute Name': customer_attr,
                     'Meta Data Attribute Name': meta_attr,
                     'Meta_Match_Type': 'Attribute Name',
                     'Meta_Value': meta_attr,
@@ -110,11 +110,17 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
-    st.markdown("### Demographic Data Analysis")
+    st.markdown("### C360 Demographic & Meta Data Analysis")
 
     # Application name input in sidebar
     st.sidebar.header("Analysis Settings")
     app_name = st.sidebar.text_input("Application Name", "MyApp")
+
+    # Initialize session state for dataframes if not present
+    if 'df_customer' not in st.session_state:
+        st.session_state.df_customer = None
+    if 'df_meta' not in st.session_state:
+        st.session_state.df_meta = None
 
     # Main content area with two columns
     col1, col2 = st.columns(2)
@@ -130,18 +136,18 @@ def show_demographic_analysis():
 
         if customer_demo_file is not None:
             try:
-                df_customer = pd.read_excel(customer_demo_file)
+                st.session_state.df_customer = pd.read_excel(customer_demo_file)
                 st.success("✅ Customer Demographic file loaded successfully")
 
                 # Display summary
                 st.markdown("**File Summary:**")
                 summary_cols = st.columns(2)
-                summary_cols[0].metric("Total Rows", len(df_customer))
-                summary_cols[1].metric("Total Columns", len(df_customer.columns))
+                summary_cols[0].metric("Total Rows", len(st.session_state.df_customer))
+                summary_cols[1].metric("Total Columns", len(st.session_state.df_customer.columns))
 
                 # Display data overview
                 st.markdown("**Data Preview:**")
-                st.dataframe(df_customer.head(5))
+                st.dataframe(st.session_state.df_customer.head(5))
 
             except Exception as e:
                 st.error(f"Error loading customer demographic file: {str(e)}")
@@ -157,25 +163,25 @@ def show_demographic_analysis():
 
         if meta_data_file is not None:
             try:
-                df_meta = pd.read_excel(meta_data_file)
+                st.session_state.df_meta = pd.read_excel(meta_data_file)
                 st.success("✅ Meta Data file loaded successfully")
 
                 # Display summary
                 st.markdown("**File Summary:**")
                 summary_cols = st.columns(2)
-                summary_cols[0].metric("Total Rows", len(df_meta))
-                summary_cols[1].metric("Total Columns", len(df_meta.columns))
+                summary_cols[0].metric("Total Rows", len(st.session_state.df_meta))
+                summary_cols[1].metric("Total Columns", len(st.session_state.df_meta.columns))
 
                 # Display data overview
                 st.markdown("**Data Preview:**")
-                st.dataframe(df_meta.head(5))
+                st.dataframe(st.session_state.df_meta.head(5))
 
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
 
     # Table name filter with fuzzy search
     st.markdown("### Filter Meta Data by Table Name")
-    if meta_data_file is not None:
+    if st.session_state.df_meta is not None:
         # Fuzzy search settings
         st.markdown("#### Search Settings")
         col1, col2 = st.columns(2)
@@ -203,14 +209,33 @@ def show_demographic_analysis():
                 key="table_threshold"
             )
 
-        # Search input
-        table_name = st.text_input("Enter Table Name to Filter:", "")
+        # Modify table name filter text style
+        st.markdown("""
+            <style>
+            .table-filter-label {
+                color: black;
+                font-weight: bold;
+            }
+            .stDataFrame thead th {
+                background-color: cyan !important;
+                color: black !important;
+                font-weight: bold !important;
+            }
+            .stDataFrame tbody tr:hover {
+                background-color: #f5f5f5;
+            }
+            </style>
+            <div class='table-filter-label'>Enter Table Name to Filter:</div>
+            """, 
+            unsafe_allow_html=True
+        )
+        table_name = st.text_input("", key="table_filter")
 
         filtered_data = None
         if table_name:
             try:
                 # Get unique table names
-                unique_tables = df_meta['table_name'].unique()
+                unique_tables = st.session_state.df_meta['table_name'].unique()
 
                 # Select scoring function based on algorithm choice
                 if algorithm == "Levenshtein Ratio (Basic)":
@@ -254,7 +279,7 @@ def show_demographic_analysis():
 
                     # Filter and display data
                     matched_tables = [match[0] for match in good_matches]
-                    filtered_data = df_meta[df_meta['table_name'].isin(matched_tables)]
+                    filtered_data = st.session_state.df_meta[st.session_state.df_meta['table_name'].isin(matched_tables)]
 
                     if len(filtered_data) > 0:
                         st.markdown(f"**Filtered Results:**")
@@ -278,7 +303,7 @@ def show_demographic_analysis():
                             st.dataframe(filtered_data)
 
                             # Attribute comparison section
-                            if customer_demo_file is not None:
+                            if st.session_state.df_customer is not None:
                                 st.markdown("### Compare Attributes")
                                 st.markdown("#### Attribute Matching Settings")
 
@@ -307,7 +332,7 @@ def show_demographic_analysis():
 
                                 # Compare attributes
                                 attribute_matches = compare_attributes(
-                                    df_customer,
+                                    st.session_state.df_customer,
                                     filtered_data,
                                     attr_algorithm,
                                     attr_threshold
@@ -339,12 +364,6 @@ def show_demographic_analysis():
                                         .stDataFrame {
                                             max-height: 400px;
                                             overflow-y: auto;
-                                        }
-                                        /* Style for table headers */
-                                        .stDataFrame thead th {
-                                            background-color: cyan !important;
-                                            color: black !important;
-                                            font-weight: bold !important;
                                         }
                                         </style>
                                         """,
@@ -718,13 +737,10 @@ def show_about_page():
 
     # Team Information
     st.markdown("""
-    ### Design and Development
-    #### Zensar Project Diamond Team
+    ### Coding & Development
 
-    | Role | Name |
-    |------|------|
-    | **Sr Project Manager** | Piyush Gupta |
-    | **Architect** | Ullas Krishnan |
+    **Architect**  
+    Ullas Krishnan
 
     ---
 
