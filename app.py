@@ -101,31 +101,45 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
         for meta_attr, score in attr_name_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer_Column': customer_col,
-                    'Meta_Match_Type': 'Attribute Name',
-                    'Meta_Value': meta_attr,
+                    'Customer_Attribute': customer_col,
+                    'Meta_Attribute': meta_attr,
+                    'Match_Type': 'Attribute Name',
+                    'Meta_Field': 'attr_name',
                     'Similarity_Score': score
                 })
 
         for business_name, score in business_name_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer_Column': customer_col,
-                    'Meta_Match_Type': 'Business Name',
-                    'Meta_Value': business_name,
+                    'Customer_Attribute': customer_col,
+                    'Meta_Attribute': business_name,
+                    'Match_Type': 'Business Name',
+                    'Meta_Field': 'business_name',
                     'Similarity_Score': score
                 })
 
         for desc, score in attr_desc_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer_Column': customer_col,
-                    'Meta_Match_Type': 'Description',
-                    'Meta_Value': desc,
+                    'Customer_Attribute': customer_col,
+                    'Meta_Attribute': desc,
+                    'Match_Type': 'Description',
+                    'Meta_Field': 'attr_description',
                     'Similarity_Score': score
                 })
 
-    return pd.DataFrame(matches)
+    # Create DataFrame and reorder columns to show attribute names first
+    df_matches = pd.DataFrame(matches)
+    if not df_matches.empty:
+        df_matches = df_matches[[
+            'Customer_Attribute',
+            'Meta_Attribute',
+            'Meta_Field',
+            'Match_Type',
+            'Similarity_Score'
+        ]]
+
+    return df_matches
 
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
