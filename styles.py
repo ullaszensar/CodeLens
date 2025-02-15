@@ -85,36 +85,6 @@ def apply_custom_styles():
             color: #0066cc;
         }
 
-        /* Tables */
-        div[data-testid="stTable"] {
-            border: none !important;
-        }
-
-        table {
-            border-collapse: collapse;
-            margin: 0 !important;
-        }
-
-        th, td {
-            border: none !important;
-            text-align: left;
-            padding: 8px;
-            background-color: transparent !important;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f8f9fa;
-        }
-
-        /* Remove default table styles */
-        .dataframe {
-            border: none !important;
-        }
-
-        .dataframe th, .dataframe td {
-            border: none !important;
-        }
-
         /* File tree */
         pre {
             background-color: #f8f9fa;
@@ -149,7 +119,7 @@ def apply_custom_styles():
         div[data-testid="stHorizontalBlock"] {
             background: white;
             padding: 0;
-            border: none !important;
+            border: none;
             border-radius: 0;
             margin: 0;
             min-height: 0;
@@ -157,14 +127,14 @@ def apply_custom_styles():
         }
 
         div[data-testid="stHorizontalBlock"] > div {
-            border: none !important;
+            border-right: none;
             padding: 5px 10px;
             margin: 0;
             min-height: 0;
         }
 
         div[data-testid="stHorizontalBlock"] > div:last-child {
-            border: none !important;
+            border-right: none;
         }
 
         /* Table headers in Analysis tab */
@@ -188,7 +158,7 @@ def apply_custom_styles():
         /* Additional styles for table rows */
         div[data-testid="column"] {
             padding: 0;
-            border: none !important;
+            border: none;
         }
 
         div[data-testid="stVerticalBlock"] > div {
@@ -197,7 +167,7 @@ def apply_custom_styles():
 
         .element-container {
             margin: 0 !important;
-            border: none !important;
+            border: none;
         }
         </style>
     """, unsafe_allow_html=True)
