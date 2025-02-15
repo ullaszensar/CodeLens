@@ -340,6 +340,12 @@ def show_demographic_analysis():
                                             max-height: 400px;
                                             overflow-y: auto;
                                         }
+                                        /* Style for table headers */
+                                        .stDataFrame thead th {
+                                            background-color: cyan !important;
+                                            color: black !important;
+                                            font-weight: bold !important;
+                                        }
                                         </style>
                                         """,
                                         unsafe_allow_html=True
