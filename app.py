@@ -734,10 +734,10 @@ def main():
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
         "Select Option",
-        ["Code Analysis", "Demographic Data Analysis", "About"]
+        ["Code Analysis Utility - Demographic", "C360 Demographic & Meta Data Analysis", "About"]
     )
 
-    if analysis_type == "Code Analysis":
+    if analysis_type == "Code Analysis Utility - Demographic":
         show_code_analysis()
     elif analysis_type == "About":
         show_about_page()
