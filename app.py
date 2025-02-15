@@ -94,14 +94,6 @@ def show_demographic_analysis():
                 st.markdown("**Data Preview:**")
                 st.dataframe(df_customer.head(5))
 
-                # Column summary
-                st.markdown("**Column Summary:**")
-                col_summary = pd.DataFrame({
-                    'Column': df_customer.columns,
-                    'Data Type': df_customer.dtypes,
-                    'Non-Null Count': df_customer.count()
-                })
-                st.dataframe(col_summary)
             except Exception as e:
                 st.error(f"Error loading customer demographic file: {str(e)}")
 
@@ -129,14 +121,6 @@ def show_demographic_analysis():
                 st.markdown("**Data Preview:**")
                 st.dataframe(df_meta.head(5))
 
-                # Column summary
-                st.markdown("**Column Summary:**")
-                col_summary = pd.DataFrame({
-                    'Column': df_meta.columns,
-                    'Data Type': df_meta.dtypes,
-                    'Non-Null Count': df_meta.count()
-                })
-                st.dataframe(col_summary)
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
 
