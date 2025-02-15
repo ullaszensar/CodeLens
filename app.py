@@ -324,9 +324,21 @@ def show_demographic_analysis():
 
             if not attribute_matches.empty:
                 st.markdown("#### Matching Attributes")
+                st.markdown(
+                    """
+                    <style>
+                    .stDataFrame {
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
                 st.dataframe(
                     attribute_matches.sort_values('Similarity_Score', ascending=False),
-                    hide_index=True
+                    hide_index=True,
+                    height=400
                 )
             else:
                 st.info("No matching attributes found with the current threshold")
