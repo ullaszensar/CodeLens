@@ -55,7 +55,7 @@ def create_dashboard_charts(results):
     stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
     stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
 
-    st.markdown("---")  # Add a separator line
+    st.markdown("----")  # Add a separator line
 
     # 1. Demographic Fields Distribution - Side by side charts
     field_frequencies = {}
@@ -158,7 +158,7 @@ def create_dashboard_charts(results):
 
 def main():
     st.title("🔍 CodeLens")
-    st.markdown("### Code Analysis Utility")
+    st.markdown("### Advanced Code Analysis")
 
     # Sidebar
     st.sidebar.header("Analysis Settings")
