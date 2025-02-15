@@ -258,7 +258,99 @@ def show_demographic_analysis():
 
                     if len(filtered_data) > 0:
                         st.markdown(f"**Filtered Results:**")
-                        st.dataframe(filtered_data)
+                        # Add summary sections for Filtered Results and Matching Attributes
+                        if filtered_data is not None:
+                            st.markdown("### Filtered Results Summary")
+                            filtered_summary_cols = st.columns(3)
+                            filtered_summary_cols[0].metric(
+                                "Tables Found",
+                                len(filtered_data['table_name'].unique())
+                            )
+                            filtered_summary_cols[1].metric(
+                                "Total Attributes",
+                                len(filtered_data['attr_name'].unique())
+                            )
+                            filtered_summary_cols[2].metric(
+                                "Total Records",
+                                len(filtered_data)
+                            )
+
+                            st.dataframe(filtered_data)
+
+                            # Attribute comparison section
+                            if customer_demo_file is not None:
+                                st.markdown("### Compare Attributes")
+                                st.markdown("#### Attribute Matching Settings")
+
+                                # Algorithm selection for attribute matching
+                                col1, col2 = st.columns(2)
+                                with col1:
+                                    attr_algorithm = st.selectbox(
+                                        "Select Attribute Matching Algorithm",
+                                        [
+                                            "Levenshtein Ratio (Basic)",
+                                            "Partial Ratio (Substring)",
+                                            "Token Sort Ratio (Word Order)"
+                                        ],
+                                        key="attr_algorithm"
+                                    )
+
+                                with col2:
+                                    attr_threshold = st.slider(
+                                        "Attribute Similarity Threshold (%)",
+                                        min_value=0,
+                                        max_value=100,
+                                        value=60,
+                                        help="Minimum similarity score required for attribute matches",
+                                        key="attr_threshold"
+                                    )
+
+                                # Compare attributes
+                                attribute_matches = compare_attributes(
+                                    df_customer,
+                                    filtered_data,
+                                    attr_algorithm,
+                                    attr_threshold
+                                )
+
+                                if not attribute_matches.empty:
+                                    # Add Matching Attributes Summary
+                                    st.markdown("#### Matching Attributes Summary")
+                                    match_summary_cols = st.columns(3)
+                                    high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
+
+                                    match_summary_cols[0].metric(
+                                        "Total Matches",
+                                        len(attribute_matches)
+                                    )
+                                    match_summary_cols[1].metric(
+                                        "High Confidence Matches (≥80%)",
+                                        high_confidence_matches
+                                    )
+                                    match_summary_cols[2].metric(
+                                        "Average Match Score",
+                                        f"{attribute_matches['Match Score (%)'].mean():.1f}%"
+                                    )
+
+                                    st.markdown("#### Matching Attributes Details")
+                                    st.markdown(
+                                        """
+                                        <style>
+                                        .stDataFrame {
+                                            max-height: 400px;
+                                            overflow-y: auto;
+                                        }
+                                        </style>
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
+                                    st.dataframe(
+                                        attribute_matches,
+                                        hide_index=True,
+                                        height=400
+                                    )
+                                else:
+                                    st.info("No matching attributes found with the current threshold")
                     else:
                         st.warning("No data found for the matched table names")
                 else:
@@ -266,62 +358,7 @@ def show_demographic_analysis():
             except Exception as e:
                 st.error(f"Error filtering data: {str(e)}")
 
-        # Attribute comparison section
-        if filtered_data is not None and customer_demo_file is not None:
-            st.markdown("### Compare Attributes")
-            st.markdown("#### Attribute Matching Settings")
-
-            # Algorithm selection for attribute matching
-            col1, col2 = st.columns(2)
-            with col1:
-                attr_algorithm = st.selectbox(
-                    "Select Attribute Matching Algorithm",
-                    [
-                        "Levenshtein Ratio (Basic)",
-                        "Partial Ratio (Substring)",
-                        "Token Sort Ratio (Word Order)"
-                    ],
-                    key="attr_algorithm"
-                )
-
-            with col2:
-                attr_threshold = st.slider(
-                    "Attribute Similarity Threshold (%)",
-                    min_value=0,
-                    max_value=100,
-                    value=60,
-                    help="Minimum similarity score required for attribute matches",
-                    key="attr_threshold"
-                )
-
-            # Compare attributes
-            attribute_matches = compare_attributes(
-                df_customer,
-                filtered_data,
-                attr_algorithm,
-                attr_threshold
-            )
-
-            if not attribute_matches.empty:
-                st.markdown("#### Matching Attributes")
-                st.markdown(
-                    """
-                    <style>
-                    .stDataFrame {
-                        max-height: 400px;
-                        overflow-y: auto;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
-                st.dataframe(
-                    attribute_matches,
-                    hide_index=True,
-                    height=400
-                )
-            else:
-                st.info("No matching attributes found with the current threshold")
+        # Attribute comparison section (moved inside the if filtered_data is not None block)
 
     else:
         st.info("Please upload Meta Data file to use the filter functionality")
