@@ -11,6 +11,7 @@ import base64
 import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
+import pandas as pd
 
 # Page config
 st.set_page_config(
@@ -61,22 +62,100 @@ def show_demographic_analysis():
     st.title("🔍 CodeLens")
     st.markdown("### Demographic Data Analysis")
 
-    # Sidebar
+    # Application name input in sidebar
     st.sidebar.header("Analysis Settings")
-
-    # Application name input
     app_name = st.sidebar.text_input("Application Name", "MyApp")
 
-    # File uploader specifically for demographic analysis
-    uploaded_files = st.sidebar.file_uploader(
-        "Upload Data Files",
-        accept_multiple_files=True,
-        type=['csv', 'xlsx', 'json']
-    )
+    # Main content area with two columns
+    col1, col2 = st.columns(2)
 
-    if uploaded_files and st.sidebar.button("Analyze Demographics"):
-        st.info("Demographic data analysis feature will be implemented here")
-        # TODO: Implement demographic data analysis logic
+    # First Excel Upload - Customer Demographic
+    with col1:
+        st.subheader("1. Customer Demographic Data")
+        customer_demo_file = st.file_uploader(
+            "Upload Customer Demographic Excel",
+            type=['xlsx', 'xls'],
+            key='customer_demo'
+        )
+
+        if customer_demo_file is not None:
+            try:
+                df_customer = pd.read_excel(customer_demo_file)
+                st.success("✅ Customer Demographic file loaded successfully")
+
+                # Display summary
+                st.markdown("**File Summary:**")
+                summary_cols = st.columns(2)
+                summary_cols[0].metric("Total Rows", len(df_customer))
+                summary_cols[1].metric("Total Columns", len(df_customer.columns))
+
+                # Display data overview
+                st.markdown("**Data Preview:**")
+                st.dataframe(df_customer.head(5))
+
+                # Column summary
+                st.markdown("**Column Summary:**")
+                col_summary = pd.DataFrame({
+                    'Column': df_customer.columns,
+                    'Data Type': df_customer.dtypes,
+                    'Non-Null Count': df_customer.count()
+                })
+                st.dataframe(col_summary)
+            except Exception as e:
+                st.error(f"Error loading customer demographic file: {str(e)}")
+
+    # Second Excel Upload - Meta Data
+    with col2:
+        st.subheader("2. Meta Data")
+        meta_data_file = st.file_uploader(
+            "Upload Meta Data Excel",
+            type=['xlsx', 'xls'],
+            key='meta_data'
+        )
+
+        if meta_data_file is not None:
+            try:
+                df_meta = pd.read_excel(meta_data_file)
+                st.success("✅ Meta Data file loaded successfully")
+
+                # Display summary
+                st.markdown("**File Summary:**")
+                summary_cols = st.columns(2)
+                summary_cols[0].metric("Total Rows", len(df_meta))
+                summary_cols[1].metric("Total Columns", len(df_meta.columns))
+
+                # Display data overview
+                st.markdown("**Data Preview:**")
+                st.dataframe(df_meta.head(5))
+
+                # Column summary
+                st.markdown("**Column Summary:**")
+                col_summary = pd.DataFrame({
+                    'Column': df_meta.columns,
+                    'Data Type': df_meta.dtypes,
+                    'Non-Null Count': df_meta.count()
+                })
+                st.dataframe(col_summary)
+            except Exception as e:
+                st.error(f"Error loading meta data file: {str(e)}")
+
+    # Table name filter
+    st.markdown("### Filter Meta Data by Table Name")
+    if meta_data_file is not None:
+        table_name = st.text_input("Enter Table Name to Filter:", "")
+
+        if table_name:
+            try:
+                filtered_data = df_meta[df_meta['table_name'] == table_name]
+                if len(filtered_data) > 0:
+                    st.markdown(f"**Filtered Results for Table: {table_name}**")
+                    st.dataframe(filtered_data)
+                else:
+                    st.warning(f"No data found for table name: {table_name}")
+            except Exception as e:
+                st.error(f"Error filtering data: {str(e)}")
+    else:
+        st.info("Please upload Meta Data file to use the filter functionality")
 
 def show_code_analysis():
     """Display code analysis interface"""
