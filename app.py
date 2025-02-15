@@ -69,7 +69,7 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
         scorer = fuzz.token_sort_ratio
 
     matches = []
-    # Compare customer columns with all relevant meta data columns
+    # Compare customer columns with Meta Data attr_name only
     for customer_col in df1.columns:
         # Check against attr_name
         attr_name_matches = process.extract(
@@ -79,65 +79,19 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
             limit=3
         )
 
-        # Check against business_name
-        business_name_matches = process.extract(
-            customer_col,
-            df2['business_name'].unique(),
-            scorer=scorer,
-            limit=3
-        )
-
-        # Check against attr_description if it exists
-        attr_desc_matches = []
-        if 'attr_description' in df2.columns:
-            attr_desc_matches = process.extract(
-                customer_col,
-                df2['attr_description'].dropna().unique(),
-                scorer=scorer,
-                limit=3
-            )
-
-        # Combine all matches that meet the threshold
+        # Add matches that meet the threshold
         for meta_attr, score in attr_name_matches:
             if score >= threshold:
                 matches.append({
-                    'Customer_Attribute': customer_col,
-                    'Meta_Attribute': meta_attr,
-                    'Match_Type': 'Attribute Name',
-                    'Meta_Field': 'attr_name',
-                    'Similarity_Score': score
+                    'Customer_Column_Name': customer_col,
+                    'Meta_Data_Attr_Name': meta_attr,
+                    'Match_Score': score
                 })
 
-        for business_name, score in business_name_matches:
-            if score >= threshold:
-                matches.append({
-                    'Customer_Attribute': customer_col,
-                    'Meta_Attribute': business_name,
-                    'Match_Type': 'Business Name',
-                    'Meta_Field': 'business_name',
-                    'Similarity_Score': score
-                })
-
-        for desc, score in attr_desc_matches:
-            if score >= threshold:
-                matches.append({
-                    'Customer_Attribute': customer_col,
-                    'Meta_Attribute': desc,
-                    'Match_Type': 'Description',
-                    'Meta_Field': 'attr_description',
-                    'Similarity_Score': score
-                })
-
-    # Create DataFrame and reorder columns to show attribute names first
+    # Create DataFrame and sort by match score
     df_matches = pd.DataFrame(matches)
     if not df_matches.empty:
-        df_matches = df_matches[[
-            'Customer_Attribute',
-            'Meta_Attribute',
-            'Meta_Field',
-            'Match_Type',
-            'Similarity_Score'
-        ]]
+        df_matches = df_matches.sort_values('Match_Score', ascending=False)
 
     return df_matches
 
@@ -350,7 +304,7 @@ def show_demographic_analysis():
                     unsafe_allow_html=True
                 )
                 st.dataframe(
-                    attribute_matches.sort_values('Similarity_Score', ascending=False),
+                    attribute_matches,
                     hide_index=True,
                     height=400
                 )
