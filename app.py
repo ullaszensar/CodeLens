@@ -737,10 +737,13 @@ def show_about_page():
 
     # Team Information
     st.markdown("""
-    ### Coding & Development
+    ### Contributors
 
-    **Architect**  
-    Ullas Krishnan
+    - Piyush G
+    - Ullas K
+    - Subhashis S
+    - Tushar P
+    - Sunil Nilawar
 
     ---
 
