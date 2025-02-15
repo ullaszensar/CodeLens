@@ -678,7 +678,6 @@ def create_dashboard_charts(results):
     )
     st.plotly_chart(fig_correlation)
 
-
 def show_about_page():
     """Display About page with technical stack and team information"""
     st.title("🔍 CodeLens - About")
@@ -722,8 +721,10 @@ def show_about_page():
     ### Design and Development
     #### Zensar Project Diamond Team
 
-    **Architect**  
-    Ullas Krishnan
+    | Role | Name |
+    |------|------|
+    | **Sr Project Manager** | Piyush Gupta |
+    | **Architect** | Ullas Krishnan |
 
     ---
 
@@ -734,10 +735,10 @@ def main():
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
         "Select Option",
-        ["Code Analysis Utility - Demographic", "C360 Demographic & Meta Data Analysis", "About"]
+        ["Code Analysis Utility", "C360 - Meta Demographic Analysis", "About"]
     )
 
-    if analysis_type == "Code Analysis Utility - Demographic":
+    if analysis_type == "Code Analysis Utility":
         show_code_analysis()
     elif analysis_type == "About":
         show_about_page()
