@@ -598,7 +598,7 @@ def create_dashboard_charts(results):
 
     st.markdown("----")  # Add a separator line
 
-    # 1. Demographic Fields Distribution - Side by side charts
+    # 1. Demographic Fields Distribution
     field_frequencies = {}
     for file_data in results['demographic_data'].values():
         for field_name, data in file_data.items():
@@ -607,14 +607,21 @@ def create_dashboard_charts(results):
             else:
                 field_frequencies[field_name] += len(data['occurrences'])
 
+    # Create DataFrame for Plotly charts
+    df_demographics = pd.DataFrame({
+        'Field_Name': list(field_frequencies.keys()),
+        'Count': list(field_frequencies.values())
+    })
+
     # Create two columns for side-by-side charts
     col1, col2 = st.columns(2)
 
     with col1:
         # Pie Chart
         fig_demo_pie = px.pie(
-            values=list(field_frequencies.values()),
-            names=list(field_frequencies.keys()),
+            df_demographics,
+            values='Count',
+            names='Field_Name',
             title="Distribution of Demographic Fields (Pie Chart)",
             color_discrete_sequence=px.colors.qualitative.Set3
         )
@@ -623,11 +630,11 @@ def create_dashboard_charts(results):
     with col2:
         # Bar Chart
         fig_demo_bar = px.bar(
-            x=list(field_frequencies.keys()),
-            y=list(field_frequencies.values()),
+            df_demographics,
+            x='Field_Name',
+            y='Count',
             title="Distribution of Demographic Fields (Bar Chart)",
-            labels={'x': 'Field Name', 'y': 'Occurrences'},
-            color=list(field_frequencies.keys()),
+            color='Field_Name',
             color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig_demo_bar.update_layout(showlegend=False)
@@ -635,14 +642,17 @@ def create_dashboard_charts(results):
 
     # 2. Files by Language Bar Chart
     file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
-    file_counts = Counter(file_extensions)
+    df_files = pd.DataFrame({
+        'Extension': file_extensions,
+        'Count': [1] * len(file_extensions)
+    }).groupby('Extension').count().reset_index()
 
     fig_files = px.bar(
-        x=list(file_counts.keys()),
-        y=list(file_counts.values()),
+        df_files,
+        x='Extension',
+        y='Count',
         title="Files by Language",
-        labels={'x': 'File Extension', 'y': 'Count'},
-        color=list(file_counts.keys()),
+        color='Extension',
         color_discrete_sequence=px.colors.qualitative.Set3
     )
     fig_files.update_layout(showlegend=False)
@@ -650,52 +660,42 @@ def create_dashboard_charts(results):
 
     # 3. Integration Patterns Line Graph
     pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+    df_patterns = pd.DataFrame({
+        'Pattern_Type': list(pattern_types.keys()),
+        'Count': list(pattern_types.values())
+    })
 
-    fig_patterns = go.Figure()
-    fig_patterns.add_trace(go.Scatter(
-        x=list(pattern_types.keys()),
-        y=list(pattern_types.values()),
-        mode='lines+markers',
-        name='Pattern Count',
-        line=dict(color='#0066cc', width=2),
-        marker=dict(size=10)
-    ))
-    fig_patterns.update_layout(
+    fig_patterns = px.line(
+        df_patterns,
+        x='Pattern_Type',
+        y='Count',
         title="Integration Patterns Distribution",
-        xaxis_title="Pattern Type",
-        yaxis_title="Count",
-        showlegend=False
+        markers=True
     )
+    fig_patterns.update_traces(line_color='#0066cc', marker=dict(size=10))
+    fig_patterns.update_layout(showlegend=False)
     st.plotly_chart(fig_patterns)
 
     # 4. Files and Fields Correlation
-    fig_correlation = go.Figure()
+    df_correlation = pd.DataFrame({
+        'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
+        'Demographic_Fields': [detail['demographic_fields_found'] for detail in results['summary']['file_details']],
+        'Integration_Patterns': [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
+    })
 
-    # Extract data for each file
-    file_names = [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']]
-    demographic_counts = [detail['demographic_fields_found'] for detail in results['summary']['file_details']]
-    integration_counts = [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
-
-    fig_correlation.add_trace(go.Bar(
-        name='Demographic Fields',
-        x=file_names,
-        y=demographic_counts,
-        marker_color='#0066cc'
-    ))
-    fig_correlation.add_trace(go.Bar(
-        name='Integration Patterns',
-        x=file_names,
-        y=integration_counts,
-        marker_color='#90EE90'
-    ))
-
-    fig_correlation.update_layout(
+    fig_correlation = px.bar(
+        df_correlation,
+        x='File_Name',
+        y=['Demographic_Fields', 'Integration_Patterns'],
         title="Fields and Patterns by File",
-        xaxis_title="File Name",
-        yaxis_title="Count",
-        barmode='group'
+        barmode='group',
+        color_discrete_map={
+            'Demographic_Fields': '#0066cc',
+            'Integration_Patterns': '#90EE90'
+        }
     )
     st.plotly_chart(fig_correlation)
+
 
 def show_about_page():
     """Display About page with technical stack and team information"""
