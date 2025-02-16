@@ -739,15 +739,9 @@ def show_about_page():
     st.markdown("""
     ### Contributors
 
-    - Piyush G
-    - Ullas K
-    - Subhashis S
-    - Tushar P
-    - Sunil Nilawar
+    *Built with ❤️ by the Zensar Project Diamond Team*
 
     ---
-
-    *Built with ❤️ by the Zensar Project Diamond Team*
     """)
 
 def main():
