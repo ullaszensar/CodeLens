@@ -13,14 +13,14 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Start application"
+args = "Streamlit App"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Streamlit App"
+args = "Start application"
 
 [[workflows.workflow]]
-name = "Start application"
+name = "Streamlit App"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -35,7 +35,7 @@ args = "streamlit run app.py"
 waitForPort = 5000
 
 [[workflows.workflow]]
-name = "Streamlit App"
+name = "Start application"
 author = "agent"
 
 [workflows.workflow.metadata]
