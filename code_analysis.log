@@ -61,3 +61,10 @@
 2025-02-16 19:14:11,923 - INFO - Analysis report generated: MyApp_CodeLens_20250216_191411.html
 2025-02-16 19:14:33,763 - INFO - Analyzing file: /tmp/tmp16hpjtzl/MainApplication.java
 2025-02-16 19:14:33,765 - INFO - Analysis report generated: MyApp_CodeLens_20250216_191433.html
+2025-02-16 19:16:24,315 - INFO - Analyzing file: /tmp/tmpe34i371k/MainApplication.java
+2025-02-16 19:16:24,319 - INFO - Analysis report generated: MyApp_CodeLens_20250216_191624.html
+2025-02-16 19:16:51,143 - INFO - Analyzing file: /tmp/tmpp7for9qu/EmployeeEndpoint.java
+2025-02-16 19:16:51,148 - INFO - Analysis report generated: MyApp_CodeLens_20250216_191651.html
+2025-02-17 05:20:59,641 - INFO - Analysis report generated: MyApp_CodeLens_20250217_052059.html
+2025-02-17 05:21:11,967 - INFO - Analyzing file: /tmp/tmplctk2iwu/EmployeeEndpoint.java
+2025-02-17 05:21:11,974 - INFO - Analysis report generated: MyApp_CodeLens_20250217_052111.html
