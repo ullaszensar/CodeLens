@@ -125,15 +125,27 @@ class CodeAnalyzer:
 
     def get_code_files(self) -> List[Path]:  
         """  
-        Get all supported code files in the repository  
+        Get all supported code files in the repository, excluding test files
         """  
         code_files = []  
+        test_patterns = [
+            'test_',
+            '_test.',
+            '/tests/',
+            '/test/'
+        ]
+
         for root, _, files in os.walk(self.repo_path):  
             for file in files:  
-                file_path = Path(root) / file  
+                file_path = Path(root) / file
+                # Skip test files
+                if any(pattern in str(file_path).lower() for pattern in test_patterns):
+                    self.logger.info(f"Skipping test file: {file_path}")
+                    continue
+
                 if file_path.suffix in self.supported_extensions:  
                     code_files.append(file_path)  
-        return code_files  
+        return code_files
 
     def analyze_file(self, file_path: Path) -> Dict:  
         """  
