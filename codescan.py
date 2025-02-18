@@ -125,24 +125,27 @@ class CodeAnalyzer:
 
     def get_code_files(self) -> List[Path]:  
         """  
-        Get all supported code files in the repository, excluding test files
+        Get all supported code files in the repository, excluding test files.
+        Returns a list of Path objects for all non-test code files.
         """  
         code_files = []  
+        # Define patterns that identify test files
         test_patterns = [
-            'test_',
-            '_test.',
-            '/tests/',
-            '/test/'
+            'test_',        # Files starting with test_
+            '_test.',      # Files ending with _test
+            '/tests/',     # Files in a tests directory
+            '/test/'       # Files in a test directory
         ]
 
         for root, _, files in os.walk(self.repo_path):  
             for file in files:  
                 file_path = Path(root) / file
-                # Skip test files
+                # Check if the file path contains any test patterns
                 if any(pattern in str(file_path).lower() for pattern in test_patterns):
                     self.logger.info(f"Skipping test file: {file_path}")
                     continue
 
+                # Only include files with supported extensions
                 if file_path.suffix in self.supported_extensions:  
                     code_files.append(file_path)  
         return code_files
