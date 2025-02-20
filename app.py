@@ -81,6 +81,9 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
 
     # Compare attributes
     for customer_attr in customer_attrs:
+        # Get customer business_name for this attribute
+        customer_business = df1[df1['attr_name'] == customer_attr]['business_name'].iloc[0] if 'business_name' in df1.columns else 'N/A'
+
         # Get top matches from meta data attr_names
         attr_matches = process.extract(
             customer_attr,
@@ -92,9 +95,14 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
         # Add matches that meet the threshold
         for meta_attr, score in attr_matches:
             if score >= threshold:
+                # Get meta business_name for this attribute
+                meta_business = df2[df2['attr_name'] == meta_attr]['business_name'].iloc[0] if 'business_name' in df2.columns else 'N/A'
+
                 matches.append({
                     'C360 Attribute Name': customer_attr,
+                    'C360 Business Name': customer_business,
                     'Meta Data Attribute Name': meta_attr,
+                    'Meta Data Business Name': meta_business,
                     'Meta_Match_Type': 'Attribute Name',
                     'Meta_Value': meta_attr,
                     'Match Score (%)': score
