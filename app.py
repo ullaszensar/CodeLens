@@ -58,7 +58,7 @@ def read_log_file():
     except Exception as e:
         return [f"Error reading log file: {str(e)}"]
 
-def compare_attributes(df1, df2, algorithm_type, threshold):
+def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
     """Compare attributes between two dataframes using fuzzy matching"""
     # Select scoring function based on algorithm type
     if algorithm_type == "Levenshtein Ratio (Basic)":
@@ -98,7 +98,7 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
                 # Get meta business_name for this attribute
                 meta_business = df2[df2['attr_name'] == meta_attr]['business_name'].iloc[0] if 'business_name' in df2.columns else 'N/A'
 
-                matches.append({
+                match_entry = {
                     'C360 Attribute Name': customer_attr,
                     'C360 Business Name': customer_business,
                     'Meta Data Attribute Name': meta_attr,
@@ -106,7 +106,11 @@ def compare_attributes(df1, df2, algorithm_type, threshold):
                     'Meta_Match_Type': 'Attribute Name',
                     'Meta_Value': meta_attr,
                     'Match Score (%)': score
-                })
+                }
+
+                # Add match based on selected type
+                if match_type == "All" or match_type == match_entry['Meta_Match_Type']:
+                    matches.append(match_entry)
 
     # Create DataFrame and sort by match score
     df_matches = pd.DataFrame(matches)
@@ -316,7 +320,7 @@ def show_demographic_analysis():
                                 st.markdown("#### Attribute Matching Settings")
 
                                 # Algorithm selection for attribute matching
-                                col1, col2 = st.columns(2)
+                                col1, col2, col3 = st.columns(3)
                                 with col1:
                                     attr_algorithm = st.selectbox(
                                         "Select Attribute Matching Algorithm",
@@ -338,12 +342,25 @@ def show_demographic_analysis():
                                         key="attr_threshold"
                                     )
 
+                                with col3:
+                                    match_type = st.selectbox(
+                                        "Select Match Type",
+                                        [
+                                            "All",
+                                            "Attribute Name",
+                                            "Business Name",
+                                            "Technical Name"
+                                        ],
+                                        key="match_type"
+                                    )
+
                                 # Compare attributes
                                 attribute_matches = compare_attributes(
                                     st.session_state.df_customer,
                                     filtered_data,
                                     attr_algorithm,
-                                    attr_threshold
+                                    attr_threshold,
+                                    match_type  # Pass the selected match type
                                 )
 
                                 if not attribute_matches.empty:
