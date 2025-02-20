@@ -6,12 +6,8 @@ requires-python = ">=3.11"
 dependencies = [
     "codescan>=0.2.0",
     "fuzzywuzzy==0.18.0",
-    "graphviz>=0.20.3",
-    "javalang>=0.13.0",
-    "networkx>=3.4.2",
     "openpyxl==3.1.2",
     "pandas==2.1.4",
-    "plantuml>=0.3.0",
     "plotly==5.18.0",
     "pygments==2.18.0",
     "python-levenshtein==0.23.0",

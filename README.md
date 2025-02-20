@@ -1,6 +1,10 @@
+Alternatively, you can install all packages at once using:
+
+```bash
+pip install -r requirements.txt
 ```
+
 Contents of `requirements.txt`:
-```
 ```
 streamlit==1.41.1
 plotly==5.18.0
@@ -54,44 +58,6 @@ The application uses three different fuzzy matching algorithms, each specialized
   String 2: "last_name first_name"
   Score: 100% (perfect match despite different word order)
   ```
-
-### Java Project Analysis Features
-
-| Category | Feature | Description |
-|----------|---------|-------------|
-| 📂 Java Code Analysis | Extract Java Classes & Methods | Analyze class structure, method signatures, inheritance, and parameters. |
-| | Track Function Calls & Dependencies | Identify interdependencies between classes, services, and functions. |
-| | Extract API Endpoints & Services | Detect Spring Boot API endpoints, @RequestMapping, @GetMapping. |
-| | Analyze JMS & Message Queues | Extract message-based communication, including JMS & Kafka usage. |
-| | Identify Database Queries | Detect SQL queries inside Java services & repositories. |
-| | Find Security Issues | Scan for hardcoded credentials, SQL injection risks, and bad authentication patterns. |
-
-| 🔗 Microservices & API Tracking | Analyze REST API Calls | Identify external/internal API calls made via RestTemplate, FeignClient. |
-| | Track Microservice Dependencies | Map how services communicate with each other (e.g., Eureka, Feign, Kafka). |
-| | Generate Service-to-Service Graph | Visualize interaction between microservices in a Spring Boot project. |
-
-| 📊 Diagram & Visualization | Generate UML Class Diagram | Convert Java classes & relationships into a UML diagram (PlantUML). |
-| | Generate Function Call Graph | Show function dependencies and flow (Graphviz). |
-| | Create Sequence Diagrams | Track function execution order using sequence diagrams. |
-
-### Required Dependencies
-Java analysis capabilities are powered by these Python packages:
-
-| Functionality | Python Library | Installation |
-|--------------|----------------|--------------|
-| Java Code Parsing | javalang | `pip install javalang` |
-| Bytecode Analysis | pyjvm | `pip install pyjvm` |
-| UML Class Diagrams | plantuml | `pip install plantuml` |
-| Sequence Diagrams | graphviz | `pip install graphviz` |
-| Function Call Tracking | networkx | `pip install networkx` |
-| Database & ORM Analysis | sqlalchemy | `pip install sqlalchemy` |
-| Web Framework | Flask | `pip install flask` |
-| Frontend UI (Optional) | Streamlit | `pip install streamlit` |
-
-### Configuration
-1. Ensure Java code files have proper package declarations
-2. Spring Boot applications should follow standard conventions
-3. Database configurations should be properly annotated
 
 ### 2. Configure Streamlit
 
