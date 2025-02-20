@@ -83,6 +83,7 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
     for customer_attr in customer_attrs:
         # Get customer business_name for this attribute
         customer_business = df1[df1['attr_name'] == customer_attr]['business_name'].iloc[0] if 'business_name' in df1.columns else 'N/A'
+        customer_desc = df1[df1['attr_name'] == customer_attr]['attr_description'].iloc[0] if 'attr_description' in df1.columns else 'N/A'
 
         # Get top matches from meta data attr_names
         attr_matches = process.extract(
@@ -95,16 +96,22 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
         # Add matches that meet the threshold
         for meta_attr, score in attr_matches:
             if score >= threshold:
-                # Get meta business_name for this attribute
+                # Get meta business_name and description for this attribute
                 meta_business = df2[df2['attr_name'] == meta_attr]['business_name'].iloc[0] if 'business_name' in df2.columns else 'N/A'
+                meta_desc = df2[df2['attr_name'] == meta_attr]['attr_description'].iloc[0] if 'attr_description' in df2.columns else 'N/A'
 
                 match_entry = {
                     'C360 Attribute Name': customer_attr,
                     'C360 Business Name': customer_business,
+                    'C360 Attribute Description': customer_desc,
                     'Meta Data Attribute Name': meta_attr,
                     'Meta Data Business Name': meta_business,
-                    'Meta_Match_Type': 'Attribute Name',
-                    'Meta_Value': meta_attr,
+                    'Meta Data Attribute Description': meta_desc,
+                    'Meta_Match_Type': match_type if match_type != "All" else "Attribute Name",
+                    'Meta_Value': meta_attr if match_type in ["All", "Attribute Name"] else (
+                        meta_business if match_type == "Business Name" else (
+                        meta_desc if match_type == "Attribute Description" else ""
+                    )),
                     'Match Score (%)': score
                 }
 
@@ -349,7 +356,8 @@ def show_demographic_analysis():
                                             "All",
                                             "Attribute Name",
                                             "Business Name",
-                                            "Technical Name"
+                                            "Technical Name",
+                                            "Attribute Description"
                                         ],
                                         key="match_type"
                                     )
