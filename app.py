@@ -271,6 +271,14 @@ def show_demographic_analysis():
                 )
 
                 st.markdown("#### Matching Attributes Details")
+                # Add Download button at the top right
+                col1, col2 = st.columns([8, 2])
+                with col2:
+                    st.markdown(
+                        download_dataframe(attribute_matches, "matching_attributes", "excel", button_text="Download"),
+                        unsafe_allow_html=True
+                    )
+
                 st.markdown(
                     """
                     <style>
@@ -289,20 +297,6 @@ def show_demographic_analysis():
                     use_container_width=True  # Make the grid full width
                 )
 
-                # Add download buttons in a row
-                st.markdown("#### Download Options")
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown(
-                        download_dataframe(attribute_matches, "matching_attributes", "csv"),
-                        unsafe_allow_html=True
-                    )
-                with col2:
-                    st.markdown(
-                        download_dataframe(attribute_matches, "matching_attributes", "excel"),
-                        unsafe_allow_html=True
-                    )
-
             else:
                 st.info("No matching attributes found with the current threshold")
         else:
@@ -311,21 +305,13 @@ def show_demographic_analysis():
         st.info("Please upload Meta Data file to use the matching functionality")
 
 
-def download_dataframe(df, file_name, file_format='csv'):
-    """Generate a download link for a dataframe in CSV or Excel format"""
-    if file_format == 'csv':
-        data = df.to_csv(index=False)
-        b64 = base64.b64encode(data.encode()).decode()
-        file_ext = 'csv'
-        mime_type = 'text/csv'
-    else:  # Excel format
-        buffer = io.BytesIO()
-        df.to_excel(buffer, index=False)
-        b64 = base64.b64encode(buffer.getvalue()).decode()
-        file_ext = 'xlsx'
-        mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-
-    download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.{file_ext}" class="download-button">Download {file_ext.upper()}</a>'
+def download_dataframe(df, file_name, file_format='excel', button_text="Download"):
+    """Generate a download link for a dataframe in Excel format"""
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False)
+    b64 = base64.b64encode(buffer.getvalue()).decode()
+    mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.xlsx" class="download-button">{button_text}</a>'
     return download_link
 
 
