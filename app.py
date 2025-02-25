@@ -155,10 +155,17 @@ def clean_dataframe(df, name="dataset"):
         r'^[\d]*$'
     ]
 
+    # Data type patterns to check in attr_name
+    data_type_pattern = r'^(string|varchar|char|text|int|bigint|smallint|decimal|numeric|float|double|real|date|datetime|timestamp|boolean|bool|binary|varbinary|blob|clob|time)$'
+
     # Remove rows where business_name matches any of the patterns
     if 'business_name' in df.columns:
         for pattern in patterns:
             df = df[~df['business_name'].str.match(pattern, na=False)]
+
+    # Remove rows where attr_name contains data type strings
+    if 'attr_name' in df.columns:
+        df = df[~df['attr_name'].str.match(data_type_pattern, case=False, na=False)]
 
     # Remove rows where attr_description contains only one number
     if 'attr_description' in df.columns:
@@ -168,7 +175,11 @@ def clean_dataframe(df, name="dataset"):
     # Calculate removed rows
     removed_rows = initial_rows - len(df)
     if removed_rows > 0:
-        st.warning(f"⚠️ Cleaned {name}: Removed {removed_rows} rows containing invalid patterns.")
+        st.warning(f"""⚠️ Cleaned {name}:
+        - Removed {removed_rows} rows containing:
+          • Invalid business name patterns
+          • Data type strings in attribute names
+          • Single numbers in attribute descriptions""")
 
     return df
 
