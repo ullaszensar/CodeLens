@@ -142,6 +142,36 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
 
     return df_matches
 
+def clean_dataframe(df, name="dataset"):
+    """Clean dataframe by removing rows with unwanted patterns"""
+    initial_rows = len(df)
+
+    # Store original data before cleaning
+    df_original = df.copy()
+
+    # Patterns to check in business_name
+    patterns = [
+        r'^[\w\s]*$',
+        r'^[\d]*$'
+    ]
+
+    # Remove rows where business_name matches any of the patterns
+    if 'business_name' in df.columns:
+        for pattern in patterns:
+            df = df[~df['business_name'].str.match(pattern, na=False)]
+
+    # Remove rows where attr_description contains only one number
+    if 'attr_description' in df.columns:
+        # Remove rows where attr_description is a single integer
+        df = df[~df['attr_description'].str.match(r'^\d+$', na=False)]
+
+    # Calculate removed rows
+    removed_rows = initial_rows - len(df)
+    if removed_rows > 0:
+        st.warning(f"⚠️ Cleaned {name}: Removed {removed_rows} rows containing invalid patterns.")
+
+    return df
+
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -171,7 +201,9 @@ def show_demographic_analysis():
 
         if customer_demo_file is not None:
             try:
-                st.session_state.df_customer = pd.read_excel(customer_demo_file)
+                # Load and clean customer demographic data
+                df_raw = pd.read_excel(customer_demo_file)
+                st.session_state.df_customer = clean_dataframe(df_raw, "Customer Demographic")
                 st.success("✅ Customer Demographic file loaded successfully")
 
                 # Display summary
@@ -198,7 +230,9 @@ def show_demographic_analysis():
 
         if meta_data_file is not None:
             try:
-                st.session_state.df_meta = pd.read_excel(meta_data_file)
+                # Load and clean meta data
+                df_raw = pd.read_excel(meta_data_file)
+                st.session_state.df_meta = clean_dataframe(df_raw, "Meta Data")
                 st.success("✅ Meta Data file loaded successfully")
 
                 # Display summary
