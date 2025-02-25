@@ -163,9 +163,12 @@ def clean_dataframe(df, name="dataset"):
         for pattern in patterns:
             df = df[~df['business_name'].str.match(pattern, na=False)]
 
-    # Remove rows where attr_name contains data type strings
+    # Remove rows where attr_name exactly matches data type strings
     if 'attr_name' in df.columns:
-        df = df[~df['attr_name'].str.match(data_type_pattern, case=False, na=False)]
+        # Convert to lowercase for case-insensitive comparison
+        df['attr_name_lower'] = df['attr_name'].str.lower()
+        df = df[~df['attr_name_lower'].str.match(data_type_pattern, na=False)]
+        df = df.drop('attr_name_lower', axis=1)  # Remove temporary column
 
     # Remove rows where attr_description contains only one number
     if 'attr_description' in df.columns:
@@ -178,7 +181,7 @@ def clean_dataframe(df, name="dataset"):
         st.warning(f"""⚠️ Cleaned {name}:
         - Removed {removed_rows} rows containing:
           • Invalid business name patterns
-          • Data type strings in attribute names
+          • Exact data type matches in attribute names (e.g., "string", "int")
           • Single numbers in attribute descriptions""")
 
     return df
