@@ -71,59 +71,74 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
 
     matches = []
     # Compare attr_name columns only
-    if 'attr_name' in df1.columns:
-        customer_attrs = df1['attr_name'].dropna().unique()
-    else:
-        # If no attr_name column in customer data, return empty DataFrame
+    if 'attr_name' not in df1.columns:
         return pd.DataFrame()
 
-    # Get unique attr_names from filtered Meta Data
-    meta_attrs = df2['attr_name'].dropna().unique()
+    # Get unique values from both dataframes based on match type
+    if match_type == "Business Name":
+        customer_values = df1['business_name'].dropna().unique()
+        meta_values = df2['business_name'].dropna().unique()
+    elif match_type == "Attribute Description":
+        customer_values = df1['attr_description'].dropna().unique()
+        meta_values = df2['attr_description'].dropna().unique()
+    else:  # Default to Attribute Name
+        customer_values = df1['attr_name'].dropna().unique()
+        meta_values = df2['attr_name'].dropna().unique()
 
-    # Compare attributes
-    for customer_attr in customer_attrs:
-        # Get customer business_name for this attribute
-        customer_business = df1[df1['attr_name'] == customer_attr]['business_name'].iloc[0] if 'business_name' in df1.columns else 'N/A'
-        customer_desc = df1[df1['attr_name'] == customer_attr]['attr_description'].iloc[0] if 'attr_description' in df1.columns else 'N/A'
+    # Compare values based on match type
+    for customer_value in customer_values:
+        # Get all relevant information for the customer value
+        if match_type == "Business Name":
+            customer_record = df1[df1['business_name'] == customer_value].iloc[0]
+        elif match_type == "Attribute Description":
+            customer_record = df1[df1['attr_description'] == customer_value].iloc[0]
+        else:
+            customer_record = df1[df1['attr_name'] == customer_value].iloc[0]
 
-        # Get top matches from meta data attr_names
-        attr_matches = process.extract(
-            customer_attr,
-            meta_attrs,
+        # Get top matches from meta data
+        value_matches = process.extract(
+            customer_value,
+            meta_values,
             scorer=scorer,
             limit=3
         )
 
         # Add matches that meet the threshold
-        for meta_attr, score in attr_matches:
+        for meta_value, score in value_matches:
             if score >= threshold:
-                # Get meta business_name and description for this attribute
-                meta_business = df2[df2['attr_name'] == meta_attr]['business_name'].iloc[0] if 'business_name' in df2.columns else 'N/A'
-                meta_desc = df2[df2['attr_name'] == meta_attr]['attr_description'].iloc[0] if 'attr_description' in df2.columns else 'N/A'
+                # Get meta record information
+                if match_type == "Business Name":
+                    meta_record = df2[df2['business_name'] == meta_value].iloc[0]
+                elif match_type == "Attribute Description":
+                    meta_record = df2[df2['attr_description'] == meta_value].iloc[0]
+                else:
+                    meta_record = df2[df2['attr_name'] == meta_value].iloc[0]
 
                 match_entry = {
-                    'C360 Attribute Name': customer_attr,
-                    'C360 Business Name': customer_business,
-                    'C360 Attribute Description': customer_desc,
-                    'Meta Data Attribute Name': meta_attr,
-                    'Meta Data Business Name': meta_business,
-                    'Meta Data Attribute Description': meta_desc,
-                    'Meta_Match_Type': match_type if match_type != "All" else "Attribute Name",
-                    'Meta_Value': meta_attr if match_type in ["All", "Attribute Name"] else (
-                        meta_business if match_type == "Business Name" else (
-                            meta_desc if match_type == "Attribute Description" else ""
-                        )),
+                    'C360 Attribute Name': customer_record['attr_name'] if 'attr_name' in customer_record else 'N/A',
+                    'Meta Data Attribute Name': meta_record['attr_name'] if 'attr_name' in meta_record else 'N/A',
+                    'C360 Business Name': customer_record['business_name'] if 'business_name' in customer_record else 'N/A',
+                    'Meta Data Business Name': meta_record['business_name'] if 'business_name' in meta_record else 'N/A',
+                    'C360 Attribute Description': customer_record['attr_description'] if 'attr_description' in customer_record else 'N/A',
+                    'Meta Data Attribute Description': meta_record['attr_description'] if 'attr_description' in meta_record else 'N/A',
+                    'Meta_Match_Type': match_type,
+                    'Meta_Value': meta_value,
                     'Match Score (%)': score
                 }
 
-                # Add match based on selected type
-                if match_type == "All" or match_type == match_entry['Meta_Match_Type']:
-                    matches.append(match_entry)
+                matches.append(match_entry)
 
     # Create DataFrame and sort by match score
     df_matches = pd.DataFrame(matches)
     if not df_matches.empty:
-        df_matches = df_matches.sort_values('Match Score (%)', ascending=False)
+        # Reorder columns to show attribute names first
+        column_order = [
+            'C360 Attribute Name', 'Meta Data Attribute Name',
+            'C360 Business Name', 'Meta Data Business Name',
+            'C360 Attribute Description', 'Meta Data Attribute Description',
+            'Meta_Match_Type', 'Meta_Value', 'Match Score (%)'
+        ]
+        df_matches = df_matches[column_order].sort_values('Match Score (%)', ascending=False)
 
     return df_matches
 
