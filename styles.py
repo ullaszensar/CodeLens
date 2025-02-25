@@ -97,16 +97,15 @@ def apply_custom_styles():
         .download-button {
             background-color: #0066cc;
             color: white !important;
-            padding: 0.3rem 0.8rem;
+            padding: 0.5rem 1rem;
             border-radius: 4px;
             text-decoration: none;
             font-size: 0.9rem;
             transition: background-color 0.3s;
             display: inline-block;
-            white-space: nowrap;
             text-align: center;
             min-width: 120px;
-            margin: 0 auto;
+            margin: 10px 0;
         }
 
         .download-button:hover {

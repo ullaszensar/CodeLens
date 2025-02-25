@@ -8,6 +8,7 @@ from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
 import base64
+import io  # Add io import for BytesIO
 import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
@@ -284,14 +285,48 @@ def show_demographic_analysis():
                 st.dataframe(
                     attribute_matches,
                     hide_index=True,
-                    height=400
+                    height=400,
+                    use_container_width=True  # Make the grid full width
                 )
+
+                # Add download buttons in a row
+                st.markdown("#### Download Options")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        download_dataframe(attribute_matches, "matching_attributes", "csv"),
+                        unsafe_allow_html=True
+                    )
+                with col2:
+                    st.markdown(
+                        download_dataframe(attribute_matches, "matching_attributes", "excel"),
+                        unsafe_allow_html=True
+                    )
+
             else:
                 st.info("No matching attributes found with the current threshold")
         else:
             st.info("Please upload Customer Demographic file to compare attributes")
     else:
         st.info("Please upload Meta Data file to use the matching functionality")
+
+
+def download_dataframe(df, file_name, file_format='csv'):
+    """Generate a download link for a dataframe in CSV or Excel format"""
+    if file_format == 'csv':
+        data = df.to_csv(index=False)
+        b64 = base64.b64encode(data.encode()).decode()
+        file_ext = 'csv'
+        mime_type = 'text/csv'
+    else:  # Excel format
+        buffer = io.BytesIO()
+        df.to_excel(buffer, index=False)
+        b64 = base64.b64encode(buffer.getvalue()).decode()
+        file_ext = 'xlsx'
+        mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.{file_ext}" class="download-button">Download {file_ext.upper()}</a>'
+    return download_link
 
 
 def show_code_analysis():
