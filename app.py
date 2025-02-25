@@ -248,78 +248,79 @@ def show_demographic_analysis():
                 match_type = st.selectbox(
                     "Select Match Type",
                     [
-                        "All",
                         "Attribute Name",
                         "Business Name",
                         "Technical Name",
                         "Attribute Description"
                     ],
-                    key="match_type"
+                    key="match_type",
+                    index=0  # Set default to first option (Attribute Name)
                 )
 
-            # Compare attributes
-            attribute_matches = compare_attributes(
-                st.session_state.df_customer,
-                st.session_state.df_meta,  # Use complete meta data instead of filtered
-                attr_algorithm,
-                attr_threshold,
-                match_type
-            )
-
-            if not attribute_matches.empty:
-                # Add Matching Attributes Summary
-                st.markdown("#### Matching Attributes Summary")
-                match_summary_cols = st.columns(3)
-                high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
-
-                match_summary_cols[0].metric(
-                    "Total Matches",
-                    len(attribute_matches)
-                )
-                match_summary_cols[1].metric(
-                    "High Confidence Matches (≥80%)",
-                    high_confidence_matches
-                )
-                match_summary_cols[2].metric(
-                    "Average Match Score",
-                    f"{attribute_matches['Match Score (%)'].mean():.1f}%"
+            # Compare attributes only if match type is selected
+            if match_type:
+                attribute_matches = compare_attributes(
+                    st.session_state.df_customer,
+                    st.session_state.df_meta,
+                    attr_algorithm,
+                    attr_threshold,
+                    match_type
                 )
 
-                st.markdown("#### Matching Attributes Details")
-                # Add Download button at the top right
-                col1, col2 = st.columns([8, 2])
-                with col2:
-                    st.markdown(
-                        download_dataframe(
-                            attribute_matches,
-                            "matching_attributes",
-                            "excel",
-                            button_text="Download",
-                            match_type=match_type
-                        ),
-                        unsafe_allow_html=True
+                if not attribute_matches.empty:
+                    # Add Matching Attributes Summary
+                    st.markdown("#### Matching Attributes Summary")
+                    match_summary_cols = st.columns(3)
+                    high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
+
+                    match_summary_cols[0].metric(
+                        "Total Matches",
+                        len(attribute_matches)
+                    )
+                    match_summary_cols[1].metric(
+                        "High Confidence Matches (≥80%)",
+                        high_confidence_matches
+                    )
+                    match_summary_cols[2].metric(
+                        "Average Match Score",
+                        f"{attribute_matches['Match Score (%)'].mean():.1f}%"
                     )
 
-                st.markdown(
-                    """
-                    <style>
-                    .stDataFrame {
-                        max-height: 400px;
-                        overflow-y: auto;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
-                st.dataframe(
-                    attribute_matches,
-                    hide_index=True,
-                    height=400,
-                    use_container_width=True  # Make the grid full width
-                )
+                    st.markdown("#### Matching Attributes Details")
+                    # Add Download button at the top right
+                    col1, col2 = st.columns([8, 2])
+                    with col2:
+                        st.markdown(
+                            download_dataframe(
+                                attribute_matches,
+                                "matching_attributes",
+                                "excel",
+                                button_text="Download",
+                                match_type=match_type
+                            ),
+                            unsafe_allow_html=True
+                        )
 
-            else:
-                st.info("No matching attributes found with the current threshold")
+                    st.markdown(
+                        """
+                        <style>
+                        .stDataFrame {
+                            max-height: 400px;
+                            overflow-y: auto;
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    st.dataframe(
+                        attribute_matches,
+                        hide_index=True,
+                        height=400,
+                        use_container_width=True  # Make the grid full width
+                    )
+
+                else:
+                    st.info("No matching attributes found with the current threshold")
         else:
             st.info("Please upload Customer Demographic file to compare attributes")
     else:
