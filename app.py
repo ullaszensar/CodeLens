@@ -198,228 +198,100 @@ def show_demographic_analysis():
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
 
-    # Table name filter with fuzzy search
-    st.markdown("### Filter Meta Data by Table Name")
+    # Attribute comparison section
     if st.session_state.df_meta is not None:
-        # Fuzzy search settings
-        st.markdown("#### Search Settings")
-        col1, col2 = st.columns(2)
+        if st.session_state.df_customer is not None:
+            st.markdown("### Compare Attributes")
+            st.markdown("#### Attribute Matching Settings")
 
-        with col1:
-            # Algorithm selection
-            algorithm = st.selectbox(
-                "Select Fuzzy Matching Algorithm",
-                [
-                    "Levenshtein Ratio (Basic)",
-                    "Partial Ratio (Substring)",
-                    "Token Sort Ratio (Word Order)"
-                ],
-                key="table_algorithm"
-            )
-
-        with col2:
-            # Similarity threshold
-            threshold = st.slider(
-                "Similarity Threshold (%)",
-                min_value=0,
-                max_value=100,
-                value=60,
-                help="Minimum similarity score required for a match",
-                key="table_threshold"
-            )
-
-        # Modify table name filter text style
-        st.markdown("""
-            <style>
-            .table-filter-label {
-                color: black;
-                font-weight: bold;
-            }
-            .stDataFrame thead th {
-                background-color: cyan !important;
-                color: black !important;
-                font-weight: bold !important;
-            }
-            .stDataFrame tbody tr:hover {
-                background-color: #f5f5f5;
-            }
-            </style>
-            <div class='table-filter-label'>Enter Table Name to Filter:</div>
-            """, 
-            unsafe_allow_html=True
-        )
-        table_name = st.text_input("", key="table_filter")
-
-        filtered_data = None
-        if table_name:
-            try:
-                # Get unique table names
-                unique_tables = st.session_state.df_meta['table_name'].unique()
-
-                # Select scoring function based on algorithm choice
-                if algorithm == "Levenshtein Ratio (Basic)":
-                    scorer = fuzz.ratio
-                    algorithm_description = """
-                    **Levenshtein Ratio:** Calculates the minimum number of character edits required to transform one string into another.
-                    Best for exact matches with minor typos.
-                    """
-                elif algorithm == "Partial Ratio (Substring)":
-                    scorer = fuzz.partial_ratio
-                    algorithm_description = """
-                    **Partial Ratio:** Finds the best matching substring, useful when the search term is a part of the full table name.
-                    Best for partial matches and substrings.
-                    """
-                else:  # Token Sort Ratio
-                    scorer = fuzz.token_sort_ratio
-                    algorithm_description = """
-                    **Token Sort Ratio:** Sorts the words in both strings before comparing, making it order-independent.
-                    Best for matching strings with the same words in different orders.
-                    """
-
-                # Display algorithm description
-                st.markdown(algorithm_description)
-
-                # Perform fuzzy matching
-                matches = process.extract(
-                    table_name,
-                    unique_tables,
-                    scorer=scorer,
-                    limit=5
+            # Algorithm selection for attribute matching
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                attr_algorithm = st.selectbox(
+                    "Select Attribute Matching Algorithm",
+                    [
+                        "Levenshtein Ratio (Basic)",
+                        "Partial Ratio (Substring)",
+                        "Token Sort Ratio (Word Order)"
+                    ],
+                    key="attr_algorithm"
                 )
 
-                # Filter matches above threshold
-                good_matches = [match for match in matches if match[1] >= threshold]
+            with col2:
+                # Similarity threshold
+                attr_threshold = st.slider(
+                    "Attribute Similarity Threshold (%)",
+                    min_value=0,
+                    max_value=100,
+                    value=60,
+                    help="Minimum similarity score required for attribute matches",
+                    key="attr_threshold"
+                )
 
-                if good_matches:
-                    # Display matches with scores
-                    st.markdown("**Matching Tables Found:**")
-                    for match, score in good_matches:
-                        st.markdown(f"- {match} (Similarity: {score}%)")
+            with col3:
+                match_type = st.selectbox(
+                    "Select Match Type",
+                    [
+                        "All",
+                        "Attribute Name",
+                        "Business Name",
+                        "Technical Name",
+                        "Attribute Description"
+                    ],
+                    key="match_type"
+                )
 
-                    # Filter and display data
-                    matched_tables = [match[0] for match in good_matches]
-                    filtered_data = st.session_state.df_meta[st.session_state.df_meta['table_name'].isin(matched_tables)]
+            # Compare attributes
+            attribute_matches = compare_attributes(
+                st.session_state.df_customer,
+                st.session_state.df_meta,  # Use complete meta data instead of filtered
+                attr_algorithm,
+                attr_threshold,
+                match_type
+            )
 
-                    if len(filtered_data) > 0:
-                        st.markdown(f"**Filtered Results:**")
-                        # Add summary sections for Filtered Results and Matching Attributes
-                        if filtered_data is not None:
-                            st.markdown("### Filtered Results Summary")
-                            filtered_summary_cols = st.columns(3)
-                            filtered_summary_cols[0].metric(
-                                "Tables Found",
-                                len(filtered_data['table_name'].unique())
-                            )
-                            filtered_summary_cols[1].metric(
-                                "Total Attributes",
-                                len(filtered_data['attr_name'].unique())
-                            )
-                            filtered_summary_cols[2].metric(
-                                "Total Records",
-                                len(filtered_data)
-                            )
+            if not attribute_matches.empty:
+                # Add Matching Attributes Summary
+                st.markdown("#### Matching Attributes Summary")
+                match_summary_cols = st.columns(3)
+                high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
 
-                            st.dataframe(filtered_data)
+                match_summary_cols[0].metric(
+                    "Total Matches",
+                    len(attribute_matches)
+                )
+                match_summary_cols[1].metric(
+                    "High Confidence Matches (≥80%)",
+                    high_confidence_matches
+                )
+                match_summary_cols[2].metric(
+                    "Average Match Score",
+                    f"{attribute_matches['Match Score (%)'].mean():.1f}%"
+                )
 
-                            # Attribute comparison section
-                            if st.session_state.df_customer is not None:
-                                st.markdown("### Compare Attributes")
-                                st.markdown("#### Attribute Matching Settings")
-
-                                # Algorithm selection for attribute matching
-                                col1, col2, col3 = st.columns(3)
-                                with col1:
-                                    attr_algorithm = st.selectbox(
-                                        "Select Attribute Matching Algorithm",
-                                        [
-                                            "Levenshtein Ratio (Basic)",
-                                            "Partial Ratio (Substring)",
-                                            "Token Sort Ratio (Word Order)"
-                                        ],
-                                        key="attr_algorithm"
-                                    )
-
-                                with col2:
-                                    attr_threshold = st.slider(
-                                        "Attribute Similarity Threshold (%)",
-                                        min_value=0,
-                                        max_value=100,
-                                        value=60,
-                                        help="Minimum similarity score required for attribute matches",
-                                        key="attr_threshold"
-                                    )
-
-                                with col3:
-                                    match_type = st.selectbox(
-                                        "Select Match Type",
-                                        [
-                                            "All",
-                                            "Attribute Name",
-                                            "Business Name",
-                                            "Technical Name",
-                                            "Attribute Description"
-                                        ],
-                                        key="match_type"
-                                    )
-
-                                # Compare attributes
-                                attribute_matches = compare_attributes(
-                                    st.session_state.df_customer,
-                                    filtered_data,
-                                    attr_algorithm,
-                                    attr_threshold,
-                                    match_type  # Pass the selected match type
-                                )
-
-                                if not attribute_matches.empty:
-                                    # Add Matching Attributes Summary
-                                    st.markdown("#### Matching Attributes Summary")
-                                    match_summary_cols = st.columns(3)
-                                    high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
-
-                                    match_summary_cols[0].metric(
-                                        "Total Matches",
-                                        len(attribute_matches)
-                                    )
-                                    match_summary_cols[1].metric(
-                                        "High Confidence Matches (≥80%)",
-                                        high_confidence_matches
-                                    )
-                                    match_summary_cols[2].metric(
-                                        "Average Match Score",
-                                        f"{attribute_matches['Match Score (%)'].mean():.1f}%"
-                                    )
-
-                                    st.markdown("#### Matching Attributes Details")
-                                    st.markdown(
-                                        """
-                                        <style>
-                                        .stDataFrame {
-                                            max-height: 400px;
-                                            overflow-y: auto;
-                                        }
-                                        </style>
-                                        """,
-                                        unsafe_allow_html=True
-                                    )
-                                    st.dataframe(
-                                        attribute_matches,
-                                        hide_index=True,
-                                        height=400
-                                    )
-                                else:
-                                    st.info("No matching attributes found with the current threshold")
-                    else:
-                        st.warning("No data found for the matched table names")
-                else:
-                    st.warning(f"No similar table names found for: {table_name} (threshold: {threshold}%)")
-            except Exception as e:
-                st.error(f"Error filtering data: {str(e)}")
-
-        # Attribute comparison section (moved inside the if filtered_data is not None block)
-
+                st.markdown("#### Matching Attributes Details")
+                st.markdown(
+                    """
+                    <style>
+                    .stDataFrame {
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+                    </style>
+                    """,
+                    unsafe_allow_html=True
+                )
+                st.dataframe(
+                    attribute_matches,
+                    hide_index=True,
+                    height=400
+                )
+            else:
+                st.info("No matching attributes found with the current threshold")
+        else:
+            st.info("Please upload Customer Demographic file to compare attributes")
     else:
-        st.info("Please upload Meta Data file to use the filter functionality")
+        st.info("Please upload Meta Data file to use the matching functionality")
 
 
 def show_code_analysis():
