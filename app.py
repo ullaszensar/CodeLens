@@ -111,8 +111,8 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
                     'Meta_Match_Type': match_type if match_type != "All" else "Attribute Name",
                     'Meta_Value': meta_attr if match_type in ["All", "Attribute Name"] else (
                         meta_business if match_type == "Business Name" else (
-                        meta_desc if match_type == "Attribute Description" else ""
-                    )),
+                            meta_desc if match_type == "Attribute Description" else ""
+                        )),
                     'Match Score (%)': score
                 }
 
@@ -275,7 +275,13 @@ def show_demographic_analysis():
                 col1, col2 = st.columns([8, 2])
                 with col2:
                     st.markdown(
-                        download_dataframe(attribute_matches, "matching_attributes", "excel", button_text="Download"),
+                        download_dataframe(
+                            attribute_matches,
+                            "matching_attributes",
+                            "excel",
+                            button_text="Download",
+                            match_type=match_type
+                        ),
                         unsafe_allow_html=True
                     )
 
@@ -305,8 +311,13 @@ def show_demographic_analysis():
         st.info("Please upload Meta Data file to use the matching functionality")
 
 
-def download_dataframe(df, file_name, file_format='excel', button_text="Download"):
+def download_dataframe(df, file_name, file_format='excel', button_text="Download", match_type="All"):
     """Generate a download link for a dataframe in Excel format"""
+    # Create a descriptive file name based on match type
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    match_type_name = match_type.replace(" ", "_").lower()
+    file_name = f"attribute_matches_{match_type_name}_{timestamp}"
+
     buffer = io.BytesIO()
     df.to_excel(buffer, index=False)
     b64 = base64.b64encode(buffer.getvalue()).decode()
