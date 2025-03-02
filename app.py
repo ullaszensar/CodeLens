@@ -136,6 +136,7 @@ def preprocess_meta_data(df):
     initial_rows = len(df)
     removed_rows = {
         'regex_pattern': 0,
+        'regex_characters': 0,
         'integer_description': 0
     }
 
@@ -148,6 +149,12 @@ def preprocess_meta_data(df):
         numeric_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
         removed_rows['integer_description'] = numeric_mask.sum()
         processed_df = processed_df[~numeric_mask]
+
+    # Remove rows where any column contains regex special characters
+    regex_chars_pattern = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+    regex_chars_mask = processed_df.apply(lambda x: x.astype(str).str.contains(regex_chars_pattern, regex=True)).any(axis=1)
+    removed_rows['regex_characters'] = regex_chars_mask.sum()
+    processed_df = processed_df[~regex_chars_mask]
 
     # Remove rows where any column matches the regex pattern exactly
     pattern_mask = processed_df.apply(lambda x: x.astype(str).str.match(r'^[\w\s]*$')).all(axis=1)
@@ -244,6 +251,7 @@ def show_demographic_analysis():
                 # Display detailed removal statistics
                 st.markdown("**Rows Removed Details:**")
                 st.markdown(f"- Pattern matched rows: {stats['details']['regex_pattern']}")
+                st.markdown(f"- Rows with regex characters: {stats['details']['regex_characters']}")
                 st.markdown(f"- Integer description rows: {stats['details']['integer_description']}")
 
                 # Display data overview
