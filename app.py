@@ -131,6 +131,39 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
 
     return df_matches
 
+def preprocess_meta_data(df):
+    """Preprocess meta data by removing invalid rows"""
+    initial_rows = len(df)
+    removed_rows = {
+        'regex_pattern': 0,
+        'integer_description': 0
+    }
+
+    # Copy dataframe to avoid modifying original
+    processed_df = df.copy()
+
+    # Remove rows where Description column contains integers
+    if 'attr_description' in processed_df.columns:
+        # Check if description is purely numeric
+        numeric_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
+        removed_rows['integer_description'] = numeric_mask.sum()
+        processed_df = processed_df[~numeric_mask]
+
+    # Remove rows where any column matches the regex pattern exactly
+    pattern_mask = processed_df.apply(lambda x: x.astype(str).str.match(r'^[\w\s]*$')).all(axis=1)
+    removed_rows['regex_pattern'] = pattern_mask.sum()
+    processed_df = processed_df[~pattern_mask]
+
+    # Calculate total rows removed
+    total_removed = initial_rows - len(processed_df)
+
+    return processed_df, {
+        'initial_rows': initial_rows,
+        'final_rows': len(processed_df),
+        'total_removed': total_removed,
+        'details': removed_rows
+    }
+
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -145,6 +178,8 @@ def show_demographic_analysis():
         st.session_state.df_customer = None
     if 'df_meta' not in st.session_state:
         st.session_state.df_meta = None
+    if 'meta_preprocessing_stats' not in st.session_state:
+        st.session_state.meta_preprocessing_stats = None
 
     # Main content area with two columns
     col1, col2 = st.columns(2)
@@ -187,14 +222,29 @@ def show_demographic_analysis():
 
         if meta_data_file is not None:
             try:
-                st.session_state.df_meta = pd.read_excel(meta_data_file)
-                st.success("✅ Meta Data file loaded successfully")
+                # Load and preprocess meta data
+                raw_df_meta = pd.read_excel(meta_data_file)
+                st.session_state.df_meta, st.session_state.meta_preprocessing_stats = preprocess_meta_data(raw_df_meta)
+                st.success("✅ Meta Data file loaded and preprocessed successfully")
 
                 # Display summary
                 st.markdown("**File Summary:**")
                 summary_cols = st.columns(2)
                 summary_cols[0].metric("Total Rows", len(st.session_state.df_meta))
                 summary_cols[1].metric("Total Columns", len(st.session_state.df_meta.columns))
+
+                # Display preprocessing statistics
+                st.markdown("**Preprocessing Summary:**")
+                stats = st.session_state.meta_preprocessing_stats
+                preprocessing_cols = st.columns(3)
+                preprocessing_cols[0].metric("Initial Rows", stats['initial_rows'])
+                preprocessing_cols[1].metric("Rows Removed", stats['total_removed'])
+                preprocessing_cols[2].metric("Final Rows", stats['final_rows'])
+
+                # Display detailed removal statistics
+                st.markdown("**Rows Removed Details:**")
+                st.markdown(f"- Pattern matched rows: {stats['details']['regex_pattern']}")
+                st.markdown(f"- Integer description rows: {stats['details']['integer_description']}")
 
                 # Display data overview
                 st.markdown("**Data Preview:**")
