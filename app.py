@@ -250,7 +250,6 @@ def show_demographic_analysis():
                     [
                         "Attribute Name",
                         "Business Name",
-                        "Technical Name",
                         "Attribute Description"
                     ],
                     key="match_type",
