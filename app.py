@@ -59,7 +59,7 @@ def read_log_file():
     except Exception as e:
         return [f"Error reading log file: {str(e)}"]
 
-def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
+def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribute Name"):
     """Compare attributes between two dataframes using fuzzy matching"""
     # Select scoring function based on algorithm type
     if algorithm_type == "Levenshtein Ratio (Basic)":
@@ -87,13 +87,18 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
 
     # Compare values based on match type
     for customer_value in customer_values:
-        # Get all relevant information for the customer value
+        # Get relevant information based on match type
         if match_type == "Business Name":
-            customer_record = df1[df1['business_name'] == customer_value].iloc[0]
+            customer_value_field = 'business_name'
+            display_field = 'Business Name'
         elif match_type == "Attribute Description":
-            customer_record = df1[df1['attr_description'] == customer_value].iloc[0]
+            customer_value_field = 'attr_description'
+            display_field = 'Attribute Description'
         else:
-            customer_record = df1[df1['attr_name'] == customer_value].iloc[0]
+            customer_value_field = 'attr_name'
+            display_field = 'Attribute Name'
+
+        customer_record = df1[df1[customer_value_field] == customer_value].iloc[0]
 
         # Get top matches from meta data
         value_matches = process.extract(
@@ -106,21 +111,11 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
         # Add matches that meet the threshold
         for meta_value, score in value_matches:
             if score >= threshold:
-                # Get meta record information
-                if match_type == "Business Name":
-                    meta_record = df2[df2['business_name'] == meta_value].iloc[0]
-                elif match_type == "Attribute Description":
-                    meta_record = df2[df2['attr_description'] == meta_value].iloc[0]
-                else:
-                    meta_record = df2[df2['attr_name'] == meta_value].iloc[0]
+                meta_record = df2[df2[customer_value_field] == meta_value].iloc[0]
 
                 match_entry = {
-                    'C360 Attribute Name': customer_record['attr_name'] if 'attr_name' in customer_record else 'N/A',
-                    'Meta Data Attribute Name': meta_record['attr_name'] if 'attr_name' in meta_record else 'N/A',
-                    'C360 Business Name': customer_record['business_name'] if 'business_name' in customer_record else 'N/A',
-                    'Meta Data Business Name': meta_record['business_name'] if 'business_name' in meta_record else 'N/A',
-                    'C360 Attribute Description': customer_record['attr_description'] if 'attr_description' in customer_record else 'N/A',
-                    'Meta Data Attribute Description': meta_record['attr_description'] if 'attr_description' in meta_record else 'N/A',
+                    f'C360 {display_field}': customer_value,
+                    f'Meta Data {display_field}': meta_value,
                     'Meta_Match_Type': match_type,
                     'Meta_Value': meta_value,
                     'Match Score (%)': score
@@ -131,14 +126,8 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="All"):
     # Create DataFrame and sort by match score
     df_matches = pd.DataFrame(matches)
     if not df_matches.empty:
-        # Reorder columns to show attribute names first
-        column_order = [
-            'C360 Attribute Name', 'Meta Data Attribute Name',
-            'C360 Business Name', 'Meta Data Business Name',
-            'C360 Attribute Description', 'Meta Data Attribute Description',
-            'Meta_Match_Type', 'Meta_Value', 'Match Score (%)'
-        ]
-        df_matches = df_matches[column_order].sort_values('Match Score (%)', ascending=False)
+        # Sort by match score
+        df_matches = df_matches.sort_values('Match Score (%)', ascending=False)
 
     return df_matches
 
