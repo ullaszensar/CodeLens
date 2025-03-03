@@ -223,11 +223,15 @@ def show_demographic_analysis():
     # First Excel Upload - Customer Demographic
     with col1:
         st.subheader("1. Customer Demographic Data")
-        customer_demo_file = st.file_uploader(
-            "Upload Customer Demographic Excel",
-            type=['xlsx', 'xls'],
-            key='customer_demo'
-        )
+        st.markdown("---")  # Add separator
+
+        # Add container for file upload
+        with st.container():
+            customer_demo_file = st.file_uploader(
+                "Upload Customer Demographic Excel",
+                type=['xlsx', 'xls'],
+                key='customer_demo'
+            )
 
         if customer_demo_file is not None:
             try:
@@ -235,53 +239,64 @@ def show_demographic_analysis():
                 st.session_state.df_customer, st.session_state.customer_preprocessing_stats = preprocess_customer_data(raw_df_customer)
                 st.success("✅ Customer Demographic file loaded successfully")
 
-                # Display summary
+                st.markdown("---")  # Add separator
+
+                # File Summary
                 st.markdown("**File Summary:**")
                 summary_cols = st.columns(2)
-                summary_cols[0].metric("Total Rows", len(st.session_state.df_customer))
-                summary_cols[1].metric("Total Columns", len(st.session_state.df_customer.columns))
+                with summary_cols[0]:
+                    st.metric("Total Rows", len(st.session_state.df_customer))
+                with summary_cols[1]:
+                    st.metric("Total Columns", len(st.session_state.df_customer.columns))
+
+                st.markdown("---")  # Add separator
 
                 # Preprocessing Summary
                 st.markdown("**Preprocessing Summary:**")
                 preprocessing_cols = st.columns(3)
-                preprocessing_cols[0].metric("Initial Rows", st.session_state.customer_preprocessing_stats['initial_rows'])
-                preprocessing_cols[1].metric("Rows Removed", st.session_state.customer_preprocessing_stats['total_removed'])
-                preprocessing_cols[2].metric("Final Rows", st.session_state.customer_preprocessing_stats['final_rows'])
+                with preprocessing_cols[0]:
+                    st.metric("Initial Rows", st.session_state.customer_preprocessing_stats['initial_rows'])
+                with preprocessing_cols[1]:
+                    st.metric("Rows Removed", st.session_state.customer_preprocessing_stats['total_removed'])
+                with preprocessing_cols[2]:
+                    st.metric("Final Rows", st.session_state.customer_preprocessing_stats['final_rows'])
 
-                # Download buttons
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown(
-                        download_dataframe(
-                            st.session_state.df_customer,
-                            "customer_demographic",
-                            "excel",
-                            button_text="Download Customer Data"
-                        ),
-                        unsafe_allow_html=True
-                    )
-                with col2:
-                    # Create a DataFrame for removed rows
-                    removed_stats = pd.DataFrame({
-                        'Type': ['Regex Characters', 'Integer Description'],
-                        'Rows Removed': [
-                            st.session_state.customer_preprocessing_stats['details']['regex_characters'],
-                            st.session_state.customer_preprocessing_stats['details']['integer_description']
-                        ]
-                    })
-                    st.markdown(
-                        download_dataframe(
-                            removed_stats,
-                            "customer_removed_rows",
-                            "excel",
-                            button_text="Download Removed Rows"
-                        ),
-                        unsafe_allow_html=True
-                    )
+                st.markdown("---")  # Add separator
 
-                # Display data overview
+                # Download buttons in a container
+                with st.container():
+                    download_cols = st.columns(2)
+                    with download_cols[0]:
+                        st.markdown(
+                            download_dataframe(
+                                st.session_state.df_customer,
+                                "customer_demographic",
+                                "excel",
+                                button_text="Download Customer Data"
+                            ),
+                            unsafe_allow_html=True
+                        )
+                    with download_cols[1]:
+                        removed_stats = pd.DataFrame({
+                            'Type': ['Regex Characters', 'Integer Description'],
+                            'Rows Removed': [
+                                st.session_state.customer_preprocessing_stats['details']['regex_characters'],
+                                st.session_state.customer_preprocessing_stats['details']['integer_description']
+                            ]
+                        })
+                        st.markdown(
+                            download_dataframe(
+                                removed_stats,
+                                "customer_removed_rows",
+                                "excel",
+                                button_text="Download Removed Rows"
+                            ),
+                            unsafe_allow_html=True
+                        )
+
+                # Data Preview
                 st.markdown("**Data Preview:**")
-                st.dataframe(st.session_state.df_customer.head(5))
+                st.dataframe(st.session_state.df_customer.head(5), use_container_width=True)
 
             except Exception as e:
                 st.error(f"Error loading customer demographic file: {str(e)}")
@@ -289,66 +304,80 @@ def show_demographic_analysis():
     # Second Excel Upload - Meta Data
     with col2:
         st.subheader("2. Meta Data")
-        meta_data_file = st.file_uploader(
-            "Upload Meta Data Excel",
-            type=['xlsx', 'xls'],
-            key='meta_data'
-        )
+        st.markdown("---")  # Add separator
+
+        # Add container for file upload
+        with st.container():
+            meta_data_file = st.file_uploader(
+                "Upload Meta Data Excel",
+                type=['xlsx', 'xls'],
+                key='meta_data'
+            )
 
         if meta_data_file is not None:
             try:
-                # Load and preprocess meta data
                 raw_df_meta = pd.read_excel(meta_data_file)
                 st.session_state.df_meta, st.session_state.meta_preprocessing_stats = preprocess_meta_data(raw_df_meta)
                 st.success("✅ Meta Data file loaded and preprocessed successfully")
 
-                # Display summary
+                st.markdown("---")  # Add separator
+
+                # File Summary
                 st.markdown("**File Summary:**")
                 summary_cols = st.columns(2)
-                summary_cols[0].metric("Total Rows", len(st.session_state.df_meta))
-                summary_cols[1].metric("Total Columns", len(st.session_state.df_meta.columns))
+                with summary_cols[0]:
+                    st.metric("Total Rows", len(st.session_state.df_meta))
+                with summary_cols[1]:
+                    st.metric("Total Columns", len(st.session_state.df_meta.columns))
+
+                st.markdown("---")  # Add separator
 
                 # Preprocessing Summary
                 st.markdown("**Preprocessing Summary:**")
                 preprocessing_cols = st.columns(3)
-                preprocessing_cols[0].metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
-                preprocessing_cols[1].metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
-                preprocessing_cols[2].metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
+                with preprocessing_cols[0]:
+                    st.metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
+                with preprocessing_cols[1]:
+                    st.metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
+                with preprocessing_cols[2]:
+                    st.metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
 
-                # Download buttons
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown(
-                        download_dataframe(
-                            st.session_state.df_meta,
-                            "meta_data",
-                            "excel",
-                            button_text="Download Meta Data"
-                        ),
-                        unsafe_allow_html=True
-                    )
-                with col2:
-                    # Create a DataFrame for removed rows
-                    removed_stats = pd.DataFrame({
-                        'Type': ['Regex Characters', 'Integer Description'],
-                        'Rows Removed': [
-                            st.session_state.meta_preprocessing_stats['details']['regex_characters'],
-                            st.session_state.meta_preprocessing_stats['details']['integer_description']
-                        ]
-                    })
-                    st.markdown(
-                        download_dataframe(
-                            removed_stats,
-                            "meta_removed_rows",
-                            "excel",
-                            button_text="Download Removed Rows"
-                        ),
-                        unsafe_allow_html=True
-                    )
+                st.markdown("---")  # Add separator
 
-                # Display data overview
+                # Download buttons in a container
+                with st.container():
+                    download_cols = st.columns(2)
+                    with download_cols[0]:
+                        st.markdown(
+                            download_dataframe(
+                                st.session_state.df_meta,
+                                "meta_data",
+                                "excel",
+                                button_text="Download Meta Data"
+                            ),
+                            unsafe_allow_html=True
+                        )
+                    with download_cols[1]:
+                        removed_stats = pd.DataFrame({
+                            'Type': ['Regex Characters', 'Integer Description'],
+                            'Rows Removed': [
+                                st.session_state.meta_preprocessing_stats['details']['regex_characters'],
+                                st.session_state.meta_preprocessing_stats['details']['integer_description']
+                            ]
+                        })
+                        st.markdown(
+                            download_dataframe(
+                                removed_stats,
+                                "meta_removed_rows",
+                                "excel",
+                                button_text="Download Removed Rows"
+                            ),
+                            unsafe_allow_html=True
+                        )
+
+                # Data Preview
                 st.markdown("**Data Preview:**")
-                st.dataframe(st.session_state.df_meta.head(5))
+                st.dataframe(st.session_state.df_meta.head(5), use_container_width=True)
 
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
@@ -816,7 +845,7 @@ def show_about_page():
     - **Frontend Framework:** Streamlit
     - **Data Processing:** Pandas, NumPy
     - **Visualization:** Plotly
-    - **Pattern Matching:** FuzzyWuzzy with Python-Levenshtein
+    - **Pattern Matching:** FuzzyWuzzywith Python-Levenshtein
     - **Code Analysis:** Pygments
 
     #### Key Libraries

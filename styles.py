@@ -9,6 +9,81 @@ def apply_custom_styles():
             padding: 2rem;
         }
 
+        /* File uploader styling */
+        .stUploadedFile {
+            border: 1px solid #e6e6e6;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #ffffff;
+        }
+
+        .uploadedFile {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Metrics styling */
+        [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+            color: #0066cc !important;
+        }
+
+        /* Container styling */
+        [data-testid="stVerticalBlock"] > div {
+            padding: 0.5rem 0;
+        }
+
+        /* Download button styling */
+        .download-button {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: #0066cc;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            margin: 0.5rem 0;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .download-button:hover {
+            background-color: #90EE90;
+            color: #262730 !important;
+            text-decoration: none;
+        }
+
+        /* Success message styling */
+        .stSuccess {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+
+        /* Separator styling */
+        hr {
+            margin: 1.5rem 0;
+            border: 0;
+            border-top: 1px solid #e6e6e6;
+        }
+
+        /* Table styling */
+        .stDataFrame {
+            border: 1px solid #e6e6e6;
+            border-radius: 5px;
+            padding: 0.5rem;
+        }
+
+        /* Section headers */
+        .subheader {
+            color: #0066cc;
+            margin-bottom: 1rem;
+        }
         /* Metrics styling */
         .css-1ht1j8u {
             background-color: #f8f9fa;
@@ -34,12 +109,6 @@ def apply_custom_styles():
             background-color: #0066cc;
         }
 
-        /* File uploader */
-        .uploadedFile {
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            padding: 0.5rem;
-        }
 
         /* Buttons */
         .stButton > button {
@@ -93,26 +162,6 @@ def apply_custom_styles():
             margin: 0.5rem 0;
         }
 
-        /* Download button styling */
-        .download-button {
-            background-color: #0066cc;
-            color: white !important;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background-color 0.3s;
-            display: inline-block;
-            text-align: center;
-            min-width: 120px;
-            margin: 10px 0;
-        }
-
-        .download-button:hover {
-            background-color: #90EE90;
-            color: #262730 !important;
-            text-decoration: none;
-        }
 
         /* Analysis tab tables */
         div[data-testid="stHorizontalBlock"] {
