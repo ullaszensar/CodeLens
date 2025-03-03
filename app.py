@@ -289,7 +289,7 @@ def show_demographic_analysis():
                                 removed_stats,
                                 "customer_removed_rows",
                                 "excel",
-                                button_text="Data Rows Removed"
+                                button_text="Customer Data Removed Rows"
                             ),
                             unsafe_allow_html=True
                         )
@@ -370,7 +370,7 @@ def show_demographic_analysis():
                                 removed_stats,
                                 "meta_removed_rows",
                                 "excel",
-                                button_text="Data Rows Removed"
+                                button_text="Meta Data Removed Rows"
                             ),
                             unsafe_allow_html=True
                         )
