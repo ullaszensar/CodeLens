@@ -165,6 +165,39 @@ def preprocess_meta_data(df):
         'details': removed_rows
     }
 
+def preprocess_customer_data(df):
+    """Preprocess customer data by removing invalid rows"""
+    initial_rows = len(df)
+    removed_rows = {
+        'regex_characters': 0,
+        'integer_description': 0
+    }
+
+    # Copy dataframe to avoid modifying original
+    processed_df = df.copy()
+
+    # Remove rows where Description column contains integers
+    if 'attr_description' in processed_df.columns:
+        numeric_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
+        removed_rows['integer_description'] = numeric_mask.sum()
+        processed_df = processed_df[~numeric_mask]
+
+    # Remove rows where any column contains regex special characters
+    regex_chars_pattern = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+    regex_chars_mask = processed_df.apply(lambda x: x.astype(str).str.contains(regex_chars_pattern, regex=True)).any(axis=1)
+    removed_rows['regex_characters'] = regex_chars_mask.sum()
+    processed_df = processed_df[~regex_chars_mask]
+
+    # Calculate total rows removed
+    total_removed = initial_rows - len(processed_df)
+
+    return processed_df, {
+        'initial_rows': initial_rows,
+        'final_rows': len(processed_df),
+        'total_removed': total_removed,
+        'details': removed_rows
+    }
+
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -181,6 +214,8 @@ def show_demographic_analysis():
         st.session_state.df_meta = None
     if 'meta_preprocessing_stats' not in st.session_state:
         st.session_state.meta_preprocessing_stats = None
+    if 'customer_preprocessing_stats' not in st.session_state:
+        st.session_state.customer_preprocessing_stats = None
 
     # Main content area with two columns
     col1, col2 = st.columns(2)
@@ -196,7 +231,8 @@ def show_demographic_analysis():
 
         if customer_demo_file is not None:
             try:
-                st.session_state.df_customer = pd.read_excel(customer_demo_file)
+                raw_df_customer = pd.read_excel(customer_demo_file)
+                st.session_state.df_customer, st.session_state.customer_preprocessing_stats = preprocess_customer_data(raw_df_customer)
                 st.success("✅ Customer Demographic file loaded successfully")
 
                 # Display summary
@@ -207,18 +243,41 @@ def show_demographic_analysis():
 
                 # Preprocessing Summary
                 st.markdown("**Preprocessing Summary:**")
-                st.metric("Final Rows", len(st.session_state.df_customer))
+                preprocessing_cols = st.columns(3)
+                preprocessing_cols[0].metric("Initial Rows", st.session_state.customer_preprocessing_stats['initial_rows'])
+                preprocessing_cols[1].metric("Rows Removed", st.session_state.customer_preprocessing_stats['total_removed'])
+                preprocessing_cols[2].metric("Final Rows", st.session_state.customer_preprocessing_stats['final_rows'])
 
-                # Download button for Customer Data
-                st.markdown(
-                    download_dataframe(
-                        st.session_state.df_customer,
-                        "customer_demographic",
-                        "excel",
-                        button_text="Download Customer Data"
-                    ),
-                    unsafe_allow_html=True
-                )
+                # Download buttons
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        download_dataframe(
+                            st.session_state.df_customer,
+                            "customer_demographic",
+                            "excel",
+                            button_text="Download Customer Data"
+                        ),
+                        unsafe_allow_html=True
+                    )
+                with col2:
+                    # Create a DataFrame for removed rows
+                    removed_stats = pd.DataFrame({
+                        'Type': ['Regex Characters', 'Integer Description'],
+                        'Rows Removed': [
+                            st.session_state.customer_preprocessing_stats['details']['regex_characters'],
+                            st.session_state.customer_preprocessing_stats['details']['integer_description']
+                        ]
+                    })
+                    st.markdown(
+                        download_dataframe(
+                            removed_stats,
+                            "customer_removed_rows",
+                            "excel",
+                            button_text="Download Removed Rows"
+                        ),
+                        unsafe_allow_html=True
+                    )
 
                 # Display data overview
                 st.markdown("**Data Preview:**")
@@ -271,19 +330,18 @@ def show_demographic_analysis():
                 with col2:
                     # Create a DataFrame for removed rows
                     removed_stats = pd.DataFrame({
-                        'Category': ['Initial Rows', 'Rows Removed', 'Final Rows'],
-                        'Count': [
-                            st.session_state.meta_preprocessing_stats['initial_rows'],
-                            st.session_state.meta_preprocessing_stats['total_removed'],
-                            st.session_state.meta_preprocessing_stats['final_rows']
+                        'Type': ['Regex Characters', 'Integer Description'],
+                        'Rows Removed': [
+                            st.session_state.meta_preprocessing_stats['details']['regex_characters'],
+                            st.session_state.meta_preprocessing_stats['details']['integer_description']
                         ]
                     })
                     st.markdown(
                         download_dataframe(
                             removed_stats,
-                            "preprocessing_summary",
+                            "meta_removed_rows",
                             "excel",
-                            button_text="Download Preprocessing Stats"
+                            button_text="Download Removed Rows"
                         ),
                         unsafe_allow_html=True
                     )
