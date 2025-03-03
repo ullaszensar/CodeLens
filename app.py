@@ -133,10 +133,11 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing rows where description contains only integers"""
+    """Preprocess meta data by removing rows with integer-only descriptions or pattern matching syntax"""
     initial_rows = len(df)
     removed_rows = {
-        'integer_description': 0
+        'integer_description': 0,
+        'pattern_matching': 0
     }
 
     # Copy dataframe to avoid modifying original
@@ -145,14 +146,29 @@ def preprocess_meta_data(df):
     # Check description fields for integer-only content
     desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
     if desc_columns:
-        integer_mask = processed_df[desc_columns].apply(
-            lambda x: x.astype(str).str.match(r'^\d+$')
-        ).any(axis=1)
-        removed_rows['integer_description'] = integer_mask.sum()
-        processed_df = processed_df[~integer_mask]
+        for col in desc_columns:
+            integer_mask = processed_df[col].astype(str).str.match(r'^\d+$')
+            if integer_mask.any():
+                print(f"Found {integer_mask.sum()} rows with integer-only content in column '{col}'")
+                removed_rows['integer_description'] += integer_mask.sum()
+                processed_df = processed_df[~integer_mask]
+
+    # Check for pattern matching syntax in any column
+    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+    for column in processed_df.columns:
+        pattern_mask = processed_df[column].astype(str).str.contains(pattern_chars, regex=True)
+        if pattern_mask.any():
+            print(f"Found {pattern_mask.sum()} rows with pattern matching syntax in column '{column}'")
+            removed_rows['pattern_matching'] += pattern_mask.sum()
+            processed_df = processed_df[~pattern_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
+    print(f"\nPreprocessing Summary for Meta Data:")
+    print(f"Initial rows: {initial_rows}")
+    print(f"Rows removed due to integer-only descriptions: {removed_rows['integer_description']}")
+    print(f"Rows removed due to pattern matching syntax: {removed_rows['pattern_matching']}")
+    print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
         'initial_rows': initial_rows,
@@ -162,10 +178,11 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing rows where description contains only integers"""
+    """Preprocess customer data by removing rows with integer-only descriptions or pattern matching syntax"""
     initial_rows = len(df)
     removed_rows = {
-        'integer_description': 0
+        'integer_description': 0,
+        'pattern_matching': 0
     }
 
     # Copy dataframe to avoid modifying original
@@ -174,14 +191,29 @@ def preprocess_customer_data(df):
     # Check description fields for integer-only content
     desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
     if desc_columns:
-        integer_mask = processed_df[desc_columns].apply(
-            lambda x: x.astype(str).str.match(r'^\d+$')
-        ).any(axis=1)
-        removed_rows['integer_description'] = integer_mask.sum()
-        processed_df = processed_df[~integer_mask]
+        for col in desc_columns:
+            integer_mask = processed_df[col].astype(str).str.match(r'^\d+$')
+            if integer_mask.any():
+                print(f"Found {integer_mask.sum()} rows with integer-only content in column '{col}'")
+                removed_rows['integer_description'] += integer_mask.sum()
+                processed_df = processed_df[~integer_mask]
+
+    # Check for pattern matching syntax in any column
+    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+    for column in processed_df.columns:
+        pattern_mask = processed_df[column].astype(str).str.contains(pattern_chars, regex=True)
+        if pattern_mask.any():
+            print(f"Found {pattern_mask.sum()} rows with pattern matching syntax in column '{column}'")
+            removed_rows['pattern_matching'] += pattern_mask.sum()
+            processed_df = processed_df[~pattern_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
+    print(f"\nPreprocessing Summary for Customer Data:")
+    print(f"Initial rows: {initial_rows}")
+    print(f"Rows removed due to integer-only descriptions: {removed_rows['integer_description']}")
+    print(f"Rows removed due to pattern matching syntax: {removed_rows['pattern_matching']}")
+    print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
         'initial_rows': initial_rows,
@@ -200,6 +232,9 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
+    # Pattern matching regex
+    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
@@ -207,15 +242,24 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
 
         # Check for integer-only description
         desc_columns = [col for col in row.index if 'description' in col.lower()]
-        if desc_columns and any(str(row[col]).isdigit() for col in desc_columns):
-            reason.append("Integer-only description")
+        if desc_columns:
+            for col in desc_columns:
+                if str(row[col]).isdigit():
+                    reason.append(f"Integer-only description in column '{col}'")
 
-        # Add row to data
-        removed_rows_data.append({
-            'Original Row Number': idx + 1,
-            'Removal Reason': ' & '.join(reason),
-            **row.to_dict()
-        })
+        # Check for pattern matching syntax
+        for col in row.index:
+            if pd.notna(row[col]) and re.search(pattern_chars, str(row[col])):
+                reason.append(f"Pattern matching syntax in column '{col}'")
+
+        # Add row to data with detailed reason
+        if reason:
+            removed_rows_data.append({
+                'Original Row Number': idx + 1,
+                'Removal Reason': ' & '.join(reason),
+                **row.to_dict()
+            })
+            print(f"Row {idx + 1} removed: {' & '.join(reason)}")
 
     # Create DataFrame
     removed_df = pd.DataFrame(removed_rows_data)
@@ -558,6 +602,9 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
+    # Pattern matching regex
+    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
+
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
@@ -565,15 +612,24 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
 
         # Check for integer-only description
         desc_columns = [col for col in row.index if 'description' in col.lower()]
-        if desc_columns and any(str(row[col]).isdigit() for col in desc_columns):
-            reason.append("Integer-only description")
+        if desc_columns:
+            for col in desc_columns:
+                if str(row[col]).isdigit():
+                    reason.append(f"Integer-only description in column '{col}'")
 
-        # Add row to data
-        removed_rows_data.append({
-            'Original Row Number': idx + 1,
-            'Removal Reason': ' & '.join(reason),
-            **row.to_dict()
-        })
+        # Check for pattern matching syntax
+        for col in row.index:
+            if pd.notna(row[col]) and re.search(pattern_chars, str(row[col])):
+                reason.append(f"Pattern matching syntax in column '{col}'")
+
+        # Add row to data with detailed reason
+        if reason:
+            removed_rows_data.append({
+                'Original Row Number': idx + 1,
+                'Removal Reason': ' & '.join(reason),
+                **row.to_dict()
+            })
+            print(f"Row {idx + 1} removed: {' & '.join(reason)}")
 
     # Create DataFrame
     removed_df = pd.DataFrame(removed_rows_data)
@@ -859,25 +915,29 @@ def create_dashboard_charts(results):
     fig_files.update_layout(showlegend=False)
     st.plotly_chart(fig_files)
 
-    # 3. Integration Patterns Line Graph
-    pattern_types = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+    # Create visualization for pattern types distribution
+    st.subheader("Integration Patterns Distribution")
+    pattern_counts = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
     df_patterns = pd.DataFrame({
-        'Pattern_Type': list(pattern_types.keys()),
-        'Count': list(pattern_types.values())
+        'Pattern_Type': list(pattern_counts.keys()),
+        'Count': list(pattern_counts.values())
     })
 
-    fig_patterns = px.line(
-        df_patterns,        x='Pattern_Type',
+    fig_patterns = px.bar(
+        df_patterns,
+        x='Pattern_Type',
         y='Count',
         title="Integration Patterns Distribution",
-        markers=True
+        color='Pattern_Type',
+        color_discrete_sequence=px.colors.qualitative.Set3
     )
-    fig_patterns.update_traces(line_color='#0066cc', marker=dict(size=10))
     fig_patterns.update_layout(showlegend=False)
-    st.plotly_chart(fig_patterns)
+    st.plotly_chart(fig_patterns, use_container_width=True)
 
-    # 4. Files and Fields Correlation
-    df_correlation = pd.DataFrame({'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
+    # Files and Fields Correlation
+    st.subheader("Files and Fields Correlation")
+    df_correlation = pd.DataFrame({
+        'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
         'Demographic_Fields': [detail['demographic_fields_found'] for detail in results['summary']['file_details']],
         'Integration_Patterns': [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
     })
@@ -886,15 +946,11 @@ def create_dashboard_charts(results):
         df_correlation,
         x='File_Name',
         y=['Demographic_Fields', 'Integration_Patterns'],
-        title="Fields and Patterns by File",
+        title="Files and Fields Correlation",
         barmode='group',
-        color_discrete_map={
-            'Demographic_Fields': '#0066cc',
-            'Integration_Patterns': '#90EE90'
-        }
+        color_discrete_sequence=['#0066cc', '#90EE90']
     )
-    st.plotly_chart(fig_correlation)
-
+    st.plotly_chart(fig_correlation, use_container_width=True)
 
 def show_about_page():
     """Display About page with technical stack and team information"""
@@ -942,19 +998,18 @@ def show_about_page():
     """)
 
 
+
 def main():
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
-        "Select Option",
-        ["Code Analysis Utility", "C360 - Meta Demographic Analysis", "About"]
+        "Select Analysis Type",
+        ["Demographic Analysis", "Code Analysis"]
     )
 
-    if analysis_type == "Code Analysis Utility":
-        show_code_analysis()
-    elif analysis_type == "About":
-        show_about_page()
-    else:
+    if analysis_type == "Demographic Analysis":
         show_demographic_analysis()
+    else:
+        show_code_analysis()
 
 if __name__ == "__main__":
     main()
