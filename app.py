@@ -133,28 +133,25 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing rows with empty data or only whitespace"""
+    """Preprocess meta data by removing rows containing only basic word characters"""
     initial_rows = len(df)
     removed_rows = {
-        'empty_data': 0,
-        'whitespace_only': 0
+        'basic_word_only': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check for rows where data is empty or contains only whitespace/word characters
-    for column in processed_df.columns:
-        # Check for empty values
-        empty_mask = processed_df[column].isna()
-        # Check for whitespace-only values using regex pattern
-        whitespace_mask = processed_df[column].astype(str).str.match(r'^[\w\s]*$')
-
-        removed_rows['empty_data'] += empty_mask.sum()
-        removed_rows['whitespace_only'] += whitespace_mask.sum()
-
-        # Remove rows with empty or whitespace-only values
-        processed_df = processed_df[~(empty_mask | whitespace_mask)]
+    # Check for cells that contain only basic word characters
+    basic_word_mask = processed_df.apply(
+        lambda row: any(
+            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
+            for val in row if pd.notna(val)
+        ),
+        axis=1
+    )
+    removed_rows['basic_word_only'] = basic_word_mask.sum()
+    processed_df = processed_df[~basic_word_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -167,28 +164,25 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing rows with empty data or only whitespace"""
+    """Preprocess customer data by removing rows containing only basic word characters"""
     initial_rows = len(df)
     removed_rows = {
-        'empty_data': 0,
-        'whitespace_only': 0
+        'basic_word_only': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check for rows where data is empty or contains only whitespace/word characters
-    for column in processed_df.columns:
-        # Check for empty values
-        empty_mask = processed_df[column].isna()
-        # Check for whitespace-only values using regex pattern
-        whitespace_mask = processed_df[column].astype(str).str.match(r'^[\w\s]*$')
-
-        removed_rows['empty_data'] += empty_mask.sum()
-        removed_rows['whitespace_only'] += whitespace_mask.sum()
-
-        # Remove rows with empty or whitespace-only values
-        processed_df = processed_df[~(empty_mask | whitespace_mask)]
+    # Check for cells that contain only basic word characters
+    basic_word_mask = processed_df.apply(
+        lambda row: any(
+            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
+            for val in row if pd.notna(val)
+        ),
+        axis=1
+    )
+    removed_rows['basic_word_only'] = basic_word_mask.sum()
+    processed_df = processed_df[~basic_word_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -199,6 +193,40 @@ def preprocess_customer_data(df):
         'total_removed': total_removed,
         'details': removed_rows
     }
+
+def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
+    """Create a detailed DataFrame of removed rows with reasons"""
+    # Find indices of removed rows
+    original_indices = set(original_df.index)
+    kept_indices = set(processed_df.index)
+    removed_indices = original_indices - kept_indices
+
+    # Create list to store removed row information
+    removed_rows_data = []
+
+    # Check each removed row
+    for idx in removed_indices:
+        row = original_df.loc[idx]
+        reason = []
+
+        # Check if any cell contains only basic word characters
+        if any(
+            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
+            for val in row if pd.notna(val)
+        ):
+            reason.append("Contains cell with only basic word characters")
+
+        # Add row to data
+        removed_rows_data.append({
+            'Original Row Number': idx + 1,
+            'Removal Reason': ' & '.join(reason),
+            **row.to_dict()
+        })
+
+    # Create DataFrame
+    removed_df = pd.DataFrame(removed_rows_data)
+    return removed_df
+
 
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
@@ -541,13 +569,12 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
         row = original_df.loc[idx]
         reason = []
 
-        # Check for empty values
-        if row.isna().any():
-            reason.append("Empty data")
-
-        # Check for whitespace-only values
-        if any(str(val).strip() and re.match(r'^[\w\s]*$', str(val)) for val in row):
-            reason.append("Only contains whitespace/word characters")
+        # Check if any cell contains only basic word characters
+        if any(
+            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
+            for val in row if pd.notna(val)
+        ):
+            reason.append("Contains cell with only basic word characters")
 
         # Add row to data
         removed_rows_data.append({
@@ -796,7 +823,7 @@ def create_dashboard_charts(results):
     })
 
     # Create two columns for side-by-side charts
-    col1, col2 = st.columns(2)
+    col1, col2= st.columns(2)
 
     with col1:
         # Pie Chart
@@ -848,8 +875,7 @@ def create_dashboard_charts(results):
     })
 
     fig_patterns = px.line(
-        df_patterns,
-        x='Pattern_Type',
+        df_patterns,        x='Pattern_Type',
         y='Count',
         title="Integration Patterns Distribution",
         markers=True
