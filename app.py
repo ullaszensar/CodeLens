@@ -133,25 +133,23 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing rows containing only basic word characters"""
+    """Preprocess meta data by removing rows where description contains only integers"""
     initial_rows = len(df)
     removed_rows = {
-        'basic_word_only': 0
+        'integer_description': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check for cells that contain only basic word characters
-    basic_word_mask = processed_df.apply(
-        lambda row: any(
-            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
-            for val in row if pd.notna(val)
-        ),
-        axis=1
-    )
-    removed_rows['basic_word_only'] = basic_word_mask.sum()
-    processed_df = processed_df[~basic_word_mask]
+    # Check description fields for integer-only content
+    desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
+    if desc_columns:
+        integer_mask = processed_df[desc_columns].apply(
+            lambda x: x.astype(str).str.match(r'^\d+$')
+        ).any(axis=1)
+        removed_rows['integer_description'] = integer_mask.sum()
+        processed_df = processed_df[~integer_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -164,25 +162,23 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing rows containing only basic word characters"""
+    """Preprocess customer data by removing rows where description contains only integers"""
     initial_rows = len(df)
     removed_rows = {
-        'basic_word_only': 0
+        'integer_description': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check for cells that contain only basic word characters
-    basic_word_mask = processed_df.apply(
-        lambda row: any(
-            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
-            for val in row if pd.notna(val)
-        ),
-        axis=1
-    )
-    removed_rows['basic_word_only'] = basic_word_mask.sum()
-    processed_df = processed_df[~basic_word_mask]
+    # Check description fields for integer-only content
+    desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
+    if desc_columns:
+        integer_mask = processed_df[desc_columns].apply(
+            lambda x: x.astype(str).str.match(r'^\d+$')
+        ).any(axis=1)
+        removed_rows['integer_description'] = integer_mask.sum()
+        processed_df = processed_df[~integer_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -209,12 +205,10 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
         row = original_df.loc[idx]
         reason = []
 
-        # Check if any cell contains only basic word characters
-        if any(
-            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
-            for val in row if pd.notna(val)
-        ):
-            reason.append("Contains cell with only basic word characters")
+        # Check for integer-only description
+        desc_columns = [col for col in row.index if 'description' in col.lower()]
+        if desc_columns and any(str(row[col]).isdigit() for col in desc_columns):
+            reason.append("Integer-only description")
 
         # Add row to data
         removed_rows_data.append({
@@ -569,12 +563,10 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
         row = original_df.loc[idx]
         reason = []
 
-        # Check if any cell contains only basic word characters
-        if any(
-            str(val).strip() and re.match(r'^[\w\s]*$', str(val))
-            for val in row if pd.notna(val)
-        ):
-            reason.append("Contains cell with only basic word characters")
+        # Check for integer-only description
+        desc_columns = [col for col in row.index if 'description' in col.lower()]
+        if desc_columns and any(str(row[col]).isdigit() for col in desc_columns):
+            reason.append("Integer-only description")
 
         # Add row to data
         removed_rows_data.append({
