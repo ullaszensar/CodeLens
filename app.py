@@ -386,6 +386,9 @@ def show_code_analysis():
     st.title("🔍 CodeLens")
     st.markdown("### Code Analysis Utility")
 
+    # Initialize repo_path
+    repo_path = None
+
     # Input method selection
     input_method = st.sidebar.radio(
         "Choose Input Method",
@@ -423,6 +426,13 @@ def show_code_analysis():
 
     if analysis_triggered:
         try:
+            # Validate repo_path before starting analysis
+            if not repo_path:
+                st.error("Repository path is not set. Please select files or enter a path.")
+                return
+
+            st.info(f"Starting analysis with repository path: {repo_path}")
+
             with st.spinner("Analyzing code..."):
                 analyzer = CodeAnalyzer(repo_path, app_name)
                 progress_bar = st.progress(0)
