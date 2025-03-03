@@ -205,6 +205,21 @@ def show_demographic_analysis():
                 summary_cols[0].metric("Total Rows", len(st.session_state.df_customer))
                 summary_cols[1].metric("Total Columns", len(st.session_state.df_customer.columns))
 
+                # Preprocessing Summary
+                st.markdown("**Preprocessing Summary:**")
+                st.metric("Final Rows", len(st.session_state.df_customer))
+
+                # Download button for Customer Data
+                st.markdown(
+                    download_dataframe(
+                        st.session_state.df_customer,
+                        "customer_demographic",
+                        "excel",
+                        button_text="Download Customer Data"
+                    ),
+                    unsafe_allow_html=True
+                )
+
                 # Display data overview
                 st.markdown("**Data Preview:**")
                 st.dataframe(st.session_state.df_customer.head(5))
@@ -234,18 +249,44 @@ def show_demographic_analysis():
                 summary_cols[0].metric("Total Rows", len(st.session_state.df_meta))
                 summary_cols[1].metric("Total Columns", len(st.session_state.df_meta.columns))
 
-                # Display preprocessing statistics
+                # Preprocessing Summary
                 st.markdown("**Preprocessing Summary:**")
-                stats = st.session_state.meta_preprocessing_stats
                 preprocessing_cols = st.columns(3)
-                preprocessing_cols[0].metric("Initial Rows", stats['initial_rows'])
-                preprocessing_cols[1].metric("Rows Removed", stats['total_removed'])
-                preprocessing_cols[2].metric("Final Rows", stats['final_rows'])
+                preprocessing_cols[0].metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
+                preprocessing_cols[1].metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
+                preprocessing_cols[2].metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
 
-                # Display detailed removal statistics
-                st.markdown("**Rows Removed Details:**")
-                st.markdown(f"- Rows with regex characters: {stats['details']['regex_characters']}")
-                st.markdown(f"- Integer description rows: {stats['details']['integer_description']}")
+                # Download buttons
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(
+                        download_dataframe(
+                            st.session_state.df_meta,
+                            "meta_data",
+                            "excel",
+                            button_text="Download Meta Data"
+                        ),
+                        unsafe_allow_html=True
+                    )
+                with col2:
+                    # Create a DataFrame for removed rows
+                    removed_stats = pd.DataFrame({
+                        'Category': ['Initial Rows', 'Rows Removed', 'Final Rows'],
+                        'Count': [
+                            st.session_state.meta_preprocessing_stats['initial_rows'],
+                            st.session_state.meta_preprocessing_stats['total_removed'],
+                            st.session_state.meta_preprocessing_stats['final_rows']
+                        ]
+                    })
+                    st.markdown(
+                        download_dataframe(
+                            removed_stats,
+                            "preprocessing_summary",
+                            "excel",
+                            button_text="Download Preprocessing Stats"
+                        ),
+                        unsafe_allow_html=True
+                    )
 
                 # Display data overview
                 st.markdown("**Data Preview:**")
