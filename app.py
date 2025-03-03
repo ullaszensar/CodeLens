@@ -135,7 +135,6 @@ def preprocess_meta_data(df):
     """Preprocess meta data by removing invalid rows"""
     initial_rows = len(df)
     removed_rows = {
-        'regex_pattern': 0,
         'regex_characters': 0,
         'integer_description': 0
     }
@@ -155,11 +154,6 @@ def preprocess_meta_data(df):
     regex_chars_mask = processed_df.apply(lambda x: x.astype(str).str.contains(regex_chars_pattern, regex=True)).any(axis=1)
     removed_rows['regex_characters'] = regex_chars_mask.sum()
     processed_df = processed_df[~regex_chars_mask]
-
-    # Remove rows where any column matches the regex pattern exactly
-    pattern_mask = processed_df.apply(lambda x: x.astype(str).str.match(r'^[\w\s]*$')).all(axis=1)
-    removed_rows['regex_pattern'] = pattern_mask.sum()
-    processed_df = processed_df[~pattern_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -250,7 +244,6 @@ def show_demographic_analysis():
 
                 # Display detailed removal statistics
                 st.markdown("**Rows Removed Details:**")
-                st.markdown(f"- Pattern matched rows: {stats['details']['regex_pattern']}")
                 st.markdown(f"- Rows with regex characters: {stats['details']['regex_characters']}")
                 st.markdown(f"- Integer description rows: {stats['details']['integer_description']}")
 
