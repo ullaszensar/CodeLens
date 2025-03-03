@@ -277,16 +277,15 @@ def show_demographic_analysis():
                             unsafe_allow_html=True
                         )
                     with download_cols[1]:
-                        removed_stats = pd.DataFrame({
-                            'Type': ['Regex Characters', 'Integer Description'],
-                            'Rows Removed': [
-                                st.session_state.customer_preprocessing_stats['details']['regex_characters'],
-                                st.session_state.customer_preprocessing_stats['details']['integer_description']
-                            ]
-                        })
+                        # Create detailed removed rows DataFrame
+                        removed_df = create_removed_rows_df(
+                            st.session_state.customer_preprocessing_stats,
+                            raw_df_customer,
+                            st.session_state.df_customer
+                        )
                         st.markdown(
                             download_dataframe(
-                                removed_stats,
+                                removed_df,
                                 "customer_removed_rows",
                                 "excel",
                                 button_text="Customer Data Removed Rows"
@@ -358,16 +357,15 @@ def show_demographic_analysis():
                             unsafe_allow_html=True
                         )
                     with download_cols[1]:
-                        removed_stats = pd.DataFrame({
-                            'Type': ['Regex Characters', 'Integer Description'],
-                            'Rows Removed': [
-                                st.session_state.meta_preprocessing_stats['details']['regex_characters'],
-                                st.session_state.meta_preprocessing_stats['details']['integer_description']
-                            ]
-                        })
+                        # Create detailed removed rows DataFrame
+                        removed_df = create_removed_rows_df(
+                            st.session_state.meta_preprocessing_stats,
+                            raw_df_meta,
+                            st.session_state.df_meta
+                        )
                         st.markdown(
                             download_dataframe(
-                                removed_stats,
+                                removed_df,
                                 "meta_removed_rows",
                                 "excel",
                                 button_text="Meta Data Removed Rows"
@@ -499,14 +497,66 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     # Create a descriptive file name based on match type
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     match_type_name = match_type.replace(" ", "_").lower()
-    file_name = f"attribute_matches_{match_type_name}_{timestamp}"
+    file_name = f"{file_name}_{timestamp}"
 
     buffer = io.BytesIO()
-    df.to_excel(buffer, index=False)
+
+    # If this is a removed rows file, add extra formatting
+    if 'removed' in file_name:
+        # Create Excel writer object with xlsxwriter engine
+        writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
+
+        # Write the main statistics
+        df.to_excel(writer, sheet_name='Summary', index=False)
+
+        # Auto-adjust columns width
+        for column in df:
+            column_width = max(df[column].astype(str).map(len).max(), len(column))
+            col_idx = df.columns.get_loc(column)
+            writer.sheets['Summary'].set_column(col_idx, col_idx, column_width + 2)
+
+        writer.close()
+    else:
+        df.to_excel(buffer, index=False)
+
     b64 = base64.b64encode(buffer.getvalue()).decode()
     mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.xlsx" class="download-button">{button_text}</a>'
     return download_link
+
+def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
+    """Create a detailed DataFrame of removed rows with reasons"""
+    # Find indices of removed rows
+    original_indices = set(original_df.index)
+    kept_indices = set(processed_df.index)
+    removed_indices = original_indices - kept_indices
+
+    # Create list to store removed row information
+    removed_rows_data = []
+
+    # Check each removed row
+    for idx in removed_indices:
+        row = original_df.loc[idx]
+        reason = []
+
+        # Check for regex characters
+        if any(row.astype(str).str.contains(r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]').values):
+            reason.append("Contains regex special characters")
+
+        # Check for integer description
+        if 'attr_description' in row.index and str(row['attr_description']).isdigit():
+            reason.append("Integer description")
+
+        # Add row to data
+        removed_rows_data.append({
+            'Original Row Number': idx + 1,
+            'Removal Reason': ' & '.join(reason),
+            **row.to_dict()
+        })
+
+    # Create DataFrame
+    removed_df = pd.DataFrame(removed_rows_data)
+    return removed_df
 
 
 def show_code_analysis():
@@ -807,8 +857,7 @@ def create_dashboard_charts(results):
     st.plotly_chart(fig_patterns)
 
     # 4. Files and Fields Correlation
-    df_correlation = pd.DataFrame({
-        'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
+    df_correlation = pd.DataFrame({'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
         'Demographic_Fields': [detail['demographic_fields_found'] for detail in results['summary']['file_details']],
         'Integration_Patterns': [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
     })
