@@ -14,6 +14,7 @@ import plotly.graph_objects as go
 from collections import Counter
 import pandas as pd
 from fuzzywuzzy import process, fuzz
+import re
 
 # Page config
 st.set_page_config(
@@ -132,28 +133,28 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing invalid rows"""
+    """Preprocess meta data by removing rows with empty data or only whitespace"""
     initial_rows = len(df)
     removed_rows = {
-        'regex_characters': 0,
-        'integer_description': 0
+        'empty_data': 0,
+        'whitespace_only': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Remove rows where Description column contains integers
-    if 'attr_description' in processed_df.columns:
-        # Check if description is purely numeric
-        numeric_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
-        removed_rows['integer_description'] = numeric_mask.sum()
-        processed_df = processed_df[~numeric_mask]
+    # Check for rows where data is empty or contains only whitespace/word characters
+    for column in processed_df.columns:
+        # Check for empty values
+        empty_mask = processed_df[column].isna()
+        # Check for whitespace-only values using regex pattern
+        whitespace_mask = processed_df[column].astype(str).str.match(r'^[\w\s]*$')
 
-    # Remove rows where any column contains regex special characters
-    regex_chars_pattern = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-    regex_chars_mask = processed_df.apply(lambda x: x.astype(str).str.contains(regex_chars_pattern, regex=True)).any(axis=1)
-    removed_rows['regex_characters'] = regex_chars_mask.sum()
-    processed_df = processed_df[~regex_chars_mask]
+        removed_rows['empty_data'] += empty_mask.sum()
+        removed_rows['whitespace_only'] += whitespace_mask.sum()
+
+        # Remove rows with empty or whitespace-only values
+        processed_df = processed_df[~(empty_mask | whitespace_mask)]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -166,27 +167,28 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing invalid rows"""
+    """Preprocess customer data by removing rows with empty data or only whitespace"""
     initial_rows = len(df)
     removed_rows = {
-        'regex_characters': 0,
-        'integer_description': 0
+        'empty_data': 0,
+        'whitespace_only': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Remove rows where Description column contains integers
-    if 'attr_description' in processed_df.columns:
-        numeric_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
-        removed_rows['integer_description'] = numeric_mask.sum()
-        processed_df = processed_df[~numeric_mask]
+    # Check for rows where data is empty or contains only whitespace/word characters
+    for column in processed_df.columns:
+        # Check for empty values
+        empty_mask = processed_df[column].isna()
+        # Check for whitespace-only values using regex pattern
+        whitespace_mask = processed_df[column].astype(str).str.match(r'^[\w\s]*$')
 
-    # Remove rows where any column contains regex special characters
-    regex_chars_pattern = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-    regex_chars_mask = processed_df.apply(lambda x: x.astype(str).str.contains(regex_chars_pattern, regex=True)).any(axis=1)
-    removed_rows['regex_characters'] = regex_chars_mask.sum()
-    processed_df = processed_df[~regex_chars_mask]
+        removed_rows['empty_data'] += empty_mask.sum()
+        removed_rows['whitespace_only'] += whitespace_mask.sum()
+
+        # Remove rows with empty or whitespace-only values
+        processed_df = processed_df[~(empty_mask | whitespace_mask)]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
@@ -539,13 +541,13 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
         row = original_df.loc[idx]
         reason = []
 
-        # Check for regex characters
-        if any(row.astype(str).str.contains(r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]').values):
-            reason.append("Contains regex special characters")
+        # Check for empty values
+        if row.isna().any():
+            reason.append("Empty data")
 
-        # Check for integer description
-        if 'attr_description' in row.index and str(row['attr_description']).isdigit():
-            reason.append("Integer description")
+        # Check for whitespace-only values
+        if any(str(val).strip() and re.match(r'^[\w\s]*$', str(val)) for val in row):
+            reason.append("Only contains whitespace/word characters")
 
         # Add row to data
         removed_rows_data.append({
