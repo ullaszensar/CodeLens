@@ -592,27 +592,64 @@ def show_demographic_analysis():
                 st.session_state.df_meta, st.session_state.meta_preprocessing_stats = preprocess_meta_data(raw_df_meta)
                 st.success("✅ Target Data Processed Successfully")
 
-                st.markdown("---")  # Add separator
-
                 # File Summary
-                st.markdown("**File Summary:**")
-                summary_cols = st.columns(2)
-                with summary_cols[0]:
-                    st.metric("Total Rows", len(st.session_state.df_meta))
-                with summary_cols[1]:
-                    st.metric("Total Columns", len(st.session_state.df_meta.columns))
+                st.markdown("""
+                    <h4 style='color: #0066cc; margin-bottom: 10px;'>File Summary</h4>
+                    <table class='summary-table'>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Total Rows</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Columns</td>
+                                <td>{}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                """.format(
+                    len(st.session_state.df_meta),
+                    len(st.session_state.df_meta.columns)
+                ), unsafe_allow_html=True)
 
                 st.markdown("---")  # Add separator
 
                 # Preprocessing Summary
-                st.markdown("**Preprocessing Summary:**")
-                preprocessing_cols = st.columns(3)
-                with preprocessing_cols[0]:
-                    st.metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
-                with preprocessing_cols[1]:
-                    st.metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
-                with preprocessing_cols[2]:
-                    st.metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
+                st.markdown("""
+                    <h4 style='color: #0066cc; margin-bottom: 10px;'>Preprocessing Summary</h4>
+                    <table class='summary-table'>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Initial Rows</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
+                                <td>Rows Removed</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
+                                <td>Final Rows</td>
+                                <td>{}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                """.format(
+                    st.session_state.meta_preprocessing_stats['initial_rows'],
+                    st.session_state.meta_preprocessing_stats['total_removed'],
+                    st.session_state.meta_preprocessing_stats['final_rows']
+                ), unsafe_allow_html=True)
 
                 st.markdown("---")  # Add separator
 
@@ -645,9 +682,12 @@ def show_demographic_analysis():
                             unsafe_allow_html=True
                         )
 
-                # Data Preview
-                st.markdown("**Data Preview:**")
-                st.dataframe(st.session_state.df_meta.head(5), use_container_width=True)
+                # Data Preview with reduced height
+                st.markdown("<h4 style='color: #0066cc; margin-bottom: 10px;'>Data Preview</h4>", unsafe_allow_html=True)
+                with st.container():
+                    st.markdown("<div class='detail-section'>", unsafe_allow_html=True)
+                    st.dataframe(st.session_state.df_meta.head(5), use_container_width=True)
+                    st.markdown("</div>", unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"Error loading meta data file: {str(e)}")
@@ -837,7 +877,7 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     separator_format = workbook.add_format({
         'bg_color': '#ADD8E6',  # Light blue color for separator
         'text_wrap': True,
-        'valign': 'vcenter',
+        'valign':'vcenter',
         'align': 'center'
     })
 
