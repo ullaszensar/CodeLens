@@ -133,41 +133,37 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing rows with integer-only descriptions or pattern matching syntax"""
+    """Preprocess meta data by removing rows where attr_description is numeric or empty"""
     initial_rows = len(df)
     removed_rows = {
         'integer_description': 0,
-        'pattern_matching': 0
+        'empty_description': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check description fields for integer-only content
-    desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
-    if desc_columns:
-        for col in desc_columns:
-            integer_mask = processed_df[col].astype(str).str.match(r'^\d+$')
-            if integer_mask.any():
-                print(f"Found {integer_mask.sum()} rows with integer-only content in column '{col}'")
-                removed_rows['integer_description'] += integer_mask.sum()
-                processed_df = processed_df[~integer_mask]
+    if 'attr_description' in processed_df.columns:
+        # Check for empty or NA values in attr_description
+        empty_mask = processed_df['attr_description'].isna() | (processed_df['attr_description'].astype(str).str.strip() == '')
+        if empty_mask.any():
+            print(f"Found {empty_mask.sum()} rows with empty attr_description")
+            removed_rows['empty_description'] = empty_mask.sum()
+            processed_df = processed_df[~empty_mask]
 
-    # Check for pattern matching syntax in any column
-    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-    for column in processed_df.columns:
-        pattern_mask = processed_df[column].astype(str).str.contains(pattern_chars, regex=True)
-        if pattern_mask.any():
-            print(f"Found {pattern_mask.sum()} rows with pattern matching syntax in column '{column}'")
-            removed_rows['pattern_matching'] += pattern_mask.sum()
-            processed_df = processed_df[~pattern_mask]
+        # Check for integer-only content in attr_description
+        integer_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
+        if integer_mask.any():
+            print(f"Found {integer_mask.sum()} rows with integer-only content in attr_description")
+            removed_rows['integer_description'] = integer_mask.sum()
+            processed_df = processed_df[~integer_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
-    print(f"\nPreprocessing Summary for Meta Data:")
+    print(f"\nPreprocessing Summary for Target Data:")
     print(f"Initial rows: {initial_rows}")
-    print(f"Rows removed due to integer-only descriptions: {removed_rows['integer_description']}")
-    print(f"Rows removed due to pattern matching syntax: {removed_rows['pattern_matching']}")
+    print(f"Rows removed due to empty description: {removed_rows['empty_description']}")
+    print(f"Rows removed due to integer-only description: {removed_rows['integer_description']}")
     print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
@@ -178,41 +174,37 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing rows with integer-only descriptions or pattern matching syntax"""
+    """Preprocess customer data by removing rows where attr_description is numeric or empty"""
     initial_rows = len(df)
     removed_rows = {
         'integer_description': 0,
-        'pattern_matching': 0
+        'empty_description': 0
     }
 
     # Copy dataframe to avoid modifying original
     processed_df = df.copy()
 
-    # Check description fields for integer-only content
-    desc_columns = [col for col in processed_df.columns if 'description' in col.lower()]
-    if desc_columns:
-        for col in desc_columns:
-            integer_mask = processed_df[col].astype(str).str.match(r'^\d+$')
-            if integer_mask.any():
-                print(f"Found {integer_mask.sum()} rows with integer-only content in column '{col}'")
-                removed_rows['integer_description'] += integer_mask.sum()
-                processed_df = processed_df[~integer_mask]
+    if 'attr_description' in processed_df.columns:
+        # Check for empty or NA values in attr_description
+        empty_mask = processed_df['attr_description'].isna() | (processed_df['attr_description'].astype(str).str.strip() == '')
+        if empty_mask.any():
+            print(f"Found {empty_mask.sum()} rows with empty attr_description")
+            removed_rows['empty_description'] = empty_mask.sum()
+            processed_df = processed_df[~empty_mask]
 
-    # Check for pattern matching syntax in any column
-    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-    for column in processed_df.columns:
-        pattern_mask = processed_df[column].astype(str).str.contains(pattern_chars, regex=True)
-        if pattern_mask.any():
-            print(f"Found {pattern_mask.sum()} rows with pattern matching syntax in column '{column}'")
-            removed_rows['pattern_matching'] += pattern_mask.sum()
-            processed_df = processed_df[~pattern_mask]
+        # Check for integer-only content in attr_description
+        integer_mask = processed_df['attr_description'].astype(str).str.match(r'^\d+$')
+        if integer_mask.any():
+            print(f"Found {integer_mask.sum()} rows with integer-only content in attr_description")
+            removed_rows['integer_description'] = integer_mask.sum()
+            processed_df = processed_df[~integer_mask]
 
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
     print(f"\nPreprocessing Summary for Customer Data:")
     print(f"Initial rows: {initial_rows}")
-    print(f"Rows removed due to integer-only descriptions: {removed_rows['integer_description']}")
-    print(f"Rows removed due to pattern matching syntax: {removed_rows['pattern_matching']}")
+    print(f"Rows removed due to empty description: {removed_rows['empty_description']}")
+    print(f"Rows removed due to integer-only description: {removed_rows['integer_description']}")
     print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
@@ -232,25 +224,18 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
-    # Pattern matching regex
-    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
         reason = []
 
-        # Check for integer-only description
-        desc_columns = [col for col in row.index if 'description' in col.lower()]
-        if desc_columns:
-            for col in desc_columns:
-                if str(row[col]).isdigit():
-                    reason.append(f"Integer-only description in column '{col}'")
-
-        # Check for pattern matching syntax
-        for col in row.index:
-            if pd.notna(row[col]) and re.search(pattern_chars, str(row[col])):
-                reason.append(f"Pattern matching syntax in column '{col}'")
+        if 'attr_description' in row.index:
+            # Check for empty description
+            if pd.isna(row['attr_description']) or str(row['attr_description']).strip() == '':
+                reason.append("Empty attr_description")
+            # Check for integer-only description
+            elif str(row['attr_description']).isdigit():
+                reason.append("Integer-only attr_description")
 
         # Add row to data with detailed reason
         if reason:
@@ -589,25 +574,18 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
-    # Pattern matching regex
-    pattern_chars = r'[\^\$\*\+\?\{\}\[\]\(\)\|\\]'
-
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
         reason = []
 
-        # Check for integer-only description
-        desc_columns = [col for col in row.index if 'description' in col.lower()]
-        if desc_columns:
-            for col in desc_columns:
-                if str(row[col]).isdigit():
-                    reason.append(f"Integer-only description in column '{col}'")
-
-        # Check for pattern matching syntax
-        for col in row.index:
-            if pd.notna(row[col]) and re.search(pattern_chars, str(row[col])):
-                reason.append(f"Pattern matching syntax in column '{col}'")
+        if 'attr_description' in row.index:
+            # Check for empty description
+            if pd.isna(row['attr_description']) or str(row['attr_description']).strip() == '':
+                reason.append("Empty attr_description")
+            # Check for integer-only description
+            elif str(row['attr_description']).isdigit():
+                reason.append("Integer-only attr_description")
 
         # Add row to data with detailed reason
         if reason:
