@@ -99,6 +99,7 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
             customer_value_field = 'attr_name'
             display_field = 'Attribute Name'
 
+        # Get full customer record
         customer_record = df1[df1[customer_value_field] == customer_value].iloc[0]
 
         # Get top matches from target data
@@ -112,15 +113,21 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
         # Add matches that meet the threshold
         for target_value, score in value_matches:
             if score >= threshold:
+                # Get full target record
                 target_record = df2[df2[customer_value_field] == target_value].iloc[0]
 
+                # Create base match entry with matching details
                 match_entry = {
-                    f'C360 {display_field}': customer_value,
-                    f'Target Data {display_field}': target_value,
-                    'Target_Match_Type': match_type,
-                    'Target_Value': target_value,
                     'Match Score (%)': score
                 }
+
+                # Add all columns from customer record with C360 prefix
+                for col in customer_record.index:
+                    match_entry[f'C360 {col}'] = customer_record[col]
+
+                # Add all columns from target record with Target Data prefix
+                for col in target_record.index:
+                    match_entry[f'Target Data {col}'] = target_record[col]
 
                 matches.append(match_entry)
 
@@ -587,15 +594,13 @@ def show_demographic_analysis():
                             unsafe_allow_html=True
                         )
 
-                    # Create display version with hidden columns
-                    display_columns = [col for col in attribute_matches.columns 
-                                        if col not in ['Target_Match_Type', 'Target_Value']]
+                    # Create display version with minimal columns for better readability
+                    display_columns = [
+                        f'C360 {match_type}',
+                        f'Target Data {match_type}',
+                        'Match Score (%)'
+                    ]
                     display_df = attribute_matches[display_columns].copy()
-
-                    # Reorder columns to show score after the target data column
-                    score_col = 'Match Score (%)'
-                    cols = [col for col in display_df.columns if col != score_col]
-                    display_df = display_df[cols + [score_col]]  # Move score to the end
 
                     st.markdown(
                         """
@@ -621,6 +626,7 @@ def show_demographic_analysis():
             st.info("Please upload Customer Demographic file to compare attributes")
     else:
         st.info("Please upload Target Data file to use the matching functionality")
+
 
 
 def download_dataframe(df, file_name, file_format='excel', button_text="Download", match_type="All"):
@@ -706,6 +712,7 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create DataFrame
     removed_df = pd.DataFrame(removed_rows_data)
     return removed_df
+
 
 
 def show_code_analysis():
