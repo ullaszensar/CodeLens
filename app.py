@@ -30,7 +30,7 @@ apply_custom_styles()
 # Creator information
 st.sidebar.markdown("""
 ### Created by:
-**Zensar Project Diamond Team**
+Zensar Project Diamond Team
 """)
 
 def get_file_download_link(file_path):
@@ -133,11 +133,12 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     return df_matches
 
 def preprocess_meta_data(df):
-    """Preprocess meta data by removing rows where attr_description is numeric or empty"""
+    """Preprocess meta data by removing rows with single integers/special chars or empty descriptions"""
     initial_rows = len(df)
     removed_rows = {
         'integer_description': 0,
-        'empty_description': 0
+        'empty_description': 0,
+        'single_value': 0
     }
 
     # Copy dataframe to avoid modifying original
@@ -158,12 +159,37 @@ def preprocess_meta_data(df):
             removed_rows['integer_description'] = integer_mask.sum()
             processed_df = processed_df[~integer_mask]
 
+    # Check each cell for single integer or special character
+    def check_single_value(val):
+        if pd.isna(val):
+            return False
+        val_str = str(val).strip()
+        # Check for single integer
+        if val_str.isdigit():
+            return True
+        # Check for single special character (non-alphanumeric)
+        if len(val_str) == 1 and not val_str.isalnum():
+            return True
+        return False
+
+    # Apply check to all cells
+    single_value_mask = processed_df.apply(
+        lambda row: any(check_single_value(val) for val in row),
+        axis=1
+    )
+
+    if single_value_mask.any():
+        print(f"Found {single_value_mask.sum()} rows with single integer or special character values")
+        removed_rows['single_value'] = single_value_mask.sum()
+        processed_df = processed_df[~single_value_mask]
+
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
     print(f"\nPreprocessing Summary for Target Data:")
     print(f"Initial rows: {initial_rows}")
     print(f"Rows removed due to empty description: {removed_rows['empty_description']}")
     print(f"Rows removed due to integer-only description: {removed_rows['integer_description']}")
+    print(f"Rows removed due to single integer/special char: {removed_rows['single_value']}")
     print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
@@ -174,11 +200,12 @@ def preprocess_meta_data(df):
     }
 
 def preprocess_customer_data(df):
-    """Preprocess customer data by removing rows where attr_description is numeric or empty"""
+    """Preprocess customer data by removing rows with single integers/special chars or empty descriptions"""
     initial_rows = len(df)
     removed_rows = {
         'integer_description': 0,
-        'empty_description': 0
+        'empty_description': 0,
+        'single_value': 0
     }
 
     # Copy dataframe to avoid modifying original
@@ -199,12 +226,37 @@ def preprocess_customer_data(df):
             removed_rows['integer_description'] = integer_mask.sum()
             processed_df = processed_df[~integer_mask]
 
+    # Check each cell for single integer or special character
+    def check_single_value(val):
+        if pd.isna(val):
+            return False
+        val_str = str(val).strip()
+        # Check for single integer
+        if val_str.isdigit():
+            return True
+        # Check for single special character (non-alphanumeric)
+        if len(val_str) == 1 and not val_str.isalnum():
+            return True
+        return False
+
+    # Apply check to all cells
+    single_value_mask = processed_df.apply(
+        lambda row: any(check_single_value(val) for val in row),
+        axis=1
+    )
+
+    if single_value_mask.any():
+        print(f"Found {single_value_mask.sum()} rows with single integer or special character values")
+        removed_rows['single_value'] = single_value_mask.sum()
+        processed_df = processed_df[~single_value_mask]
+
     # Calculate total rows removed
     total_removed = initial_rows - len(processed_df)
     print(f"\nPreprocessing Summary for Customer Data:")
     print(f"Initial rows: {initial_rows}")
     print(f"Rows removed due to empty description: {removed_rows['empty_description']}")
     print(f"Rows removed due to integer-only description: {removed_rows['integer_description']}")
+    print(f"Rows removed due to single integer/special char: {removed_rows['single_value']}")
     print(f"Final rows: {len(processed_df)}")
 
     return processed_df, {
@@ -224,6 +276,16 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
+    def check_single_value(val):
+        if pd.isna(val):
+            return False
+        val_str = str(val).strip()
+        if val_str.isdigit():
+            return True
+        if len(val_str) == 1 and not val_str.isalnum():
+            return True
+        return False
+
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
@@ -236,6 +298,12 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
             # Check for integer-only description
             elif str(row['attr_description']).isdigit():
                 reason.append("Integer-only attr_description")
+
+        # Check for single integer or special character in any cell
+        for col in row.index:
+            if check_single_value(row[col]):
+                reason.append(f"Single integer or special character in column '{col}'")
+                break
 
         # Add row to data with detailed reason
         if reason:
@@ -384,6 +452,18 @@ def show_demographic_analysis():
 
                 st.markdown("---")  # Add separator
 
+                # Preprocessing Summary
+                st.markdown("**Preprocessing Summary:**")
+                preprocessing_cols = st.columns(3)
+                with preprocessing_cols[0]:
+                    st.metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
+                with preprocessing_cols[1]:
+                    st.metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
+                with preprocessing_cols[2]:
+                    st.metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
+
+                st.markdown("---")  # Add separator
+
                 # Download buttons in a container
                 with st.container():
                     download_cols = st.columns(2)
@@ -393,7 +473,7 @@ def show_demographic_analysis():
                                 st.session_state.df_meta,
                                 "target_data",
                                 "excel",
-                                button_text="Download Target Data"
+                                button_text="Processed Data"
                             ),
                             unsafe_allow_html=True
                         )
@@ -408,7 +488,7 @@ def show_demographic_analysis():
                                 removed_df,
                                 "target_removed_rows",
                                 "excel",
-                                button_text="Target Data Removed Rows"
+                                button_text="Removed Rows"
                             ),
                             unsafe_allow_html=True
                         )
@@ -574,6 +654,16 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     # Create list to store removed row information
     removed_rows_data = []
 
+    def check_single_value(val):
+        if pd.isna(val):
+            return False
+        val_str = str(val).strip()
+        if val_str.isdigit():
+            return True
+        if len(val_str) == 1 and not val_str.isalnum():
+            return True
+        return False
+
     # Check each removed row
     for idx in removed_indices:
         row = original_df.loc[idx]
@@ -586,6 +676,12 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
             # Check for integer-only description
             elif str(row['attr_description']).isdigit():
                 reason.append("Integer-only attr_description")
+
+        # Check for single integer or special character in any cell
+        for col in row.index:
+            if check_single_value(row[col]):
+                reason.append(f"Single integer or special character in column '{col}'")
+                break
 
         # Add row to data with detailed reason
         if reason:
@@ -832,8 +928,7 @@ def create_dashboard_charts(results):
     # Create DataFrame for Plotly charts
     df_demographics = pd.DataFrame({
         'Field_Name': list(field_frequencies.keys()),
-        'Count': list(field_frequencies.values())
-    })
+        'Count': list(field_frequencies.values())    })
 
     # Create two columns for side-by-side charts
     col1, col2= st.columns(2)
