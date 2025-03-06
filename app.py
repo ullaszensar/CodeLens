@@ -702,7 +702,7 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
         if column == ' ':  # Separator column
             worksheet.set_column(idx, idx, 5, separator_format)  # Narrower width for separator
         else:
-            worksheet.set_column(idx, idx, 75)  # Fixed width of 75 for all other columns
+            worksheet.set_column(idx, idx, 30)  # Fixed width of 30 for all other columns
 
     # Apply header format to the first row
     for col_num, value in enumerate(download_df.columns):
