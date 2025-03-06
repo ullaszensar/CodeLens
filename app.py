@@ -138,14 +138,6 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
         # Sort by match score
         df_matches = df_matches.sort_values('Match Score (%)', ascending=False)
 
-        # Reorder columns to ensure consistent layout
-        score_col = 'Match Score (%)'
-        c360_cols = [col for col in df_matches.columns if col.startswith('C360 ')]
-        blank_col = ['']
-        target_cols = [col for col in df_matches.columns if col.startswith('Target Data ')]
-
-        df_matches = df_matches[c360_cols + blank_col + target_cols + [score_col]]
-
     return df_matches
 
 def preprocess_meta_data(df):
@@ -666,21 +658,23 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
         c360_cols = [col for col in download_df.columns if col.startswith('C360 ')]
         target_cols = [col for col in download_df.columns if col.startswith('Target Data ')]
 
-        # Add blank separator column
-        download_df[''] = ''
-
         # Remove any technical columns if they exist
         if 'Target_Match_Type' in download_df.columns:
             download_df = download_df.drop(['Target_Match_Type'], axis=1)
         if 'Target_Value' in download_df.columns:
             download_df = download_df.drop(['Target_Value'], axis=1)
 
-        # Reorder columns
-        download_df = download_df[c360_cols + [''] + target_cols + ['Match Score (%)']]
+        # Add blank separator column with a space as the name
+        download_df.insert(len(c360_cols), ' ', [''] * len(download_df))
+
+        # Create final column order
+        final_columns = c360_cols + [' '] + target_cols + ['Match Score (%)']
+
+        # Reorder columns using only existing columns
+        download_df = download_df[final_columns]
 
     buffer = io.BytesIO()
 
-    # If this is a removed rows file, add extra formatting
     if 'removed' in file_name:
         # Create Excel writer object with xlsxwriter engine
         writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
