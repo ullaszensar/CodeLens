@@ -1,3 +1,78 @@
+# Package Installation Instructions:
+# 1. One-line installation (recommended):
+#    pip install streamlit==1.41.1 plotly==5.18.0 pandas==2.1.4 pygments==2.18.0 fuzzywuzzy==0.18.0 
+#    python-levenshtein==0.23.0 openpyxl==3.1.2 trafilatura==1.6.4
+#
+# Note: If you encounter any issues, try upgrading pip first:
+#    python -m pip install --upgrade pip
+#
+# Package Version Check
+import pkg_resources
+import sys
+import logging
+import time
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Start timing the initialization
+logger.info("Starting application initialization...")
+start_time = time.time()
+
+def check_required_packages():
+    """Check if all required packages are installed with correct versions"""
+    required_packages = {
+        'streamlit': '1.41.1',
+        'plotly': '5.18.0',
+        'pandas': '2.1.4',
+        'pygments': '2.18.0',
+        'fuzzywuzzy': '0.18.0',
+        'python-levenshtein': '0.23.0',
+        'openpyxl': '3.1.2',
+        'trafilatura': '1.6.4'
+    }
+
+    missing_packages = []
+    outdated_packages = []
+
+    print("\nVerifying package installations...")
+
+    for package, required_version in required_packages.items():
+        try:
+            installed_version = pkg_resources.get_distribution(package).version
+            if installed_version != required_version:
+                outdated_packages.append(f"{package} (installed: {installed_version}, required: {required_version})")
+                print(f"✗ {package} {installed_version} (required: {required_version})")
+            else:
+                print(f"✓ {package} {installed_version}")
+        except pkg_resources.DistributionNotFound:
+            missing_packages.append(package)
+            print(f"✗ {package} not found")
+
+    if missing_packages or outdated_packages:
+        print("\nPackage Verification Failed:")
+        if missing_packages:
+            print("\nMissing Packages:")
+            for pkg in missing_packages:
+                print(f"- {pkg}")
+        if outdated_packages:
+            print("\nOutdated Packages:")
+            for pkg in outdated_packages:
+                print(f"- {pkg}")
+        print("\nPlease install required packages using:")
+        print(" ".join([f"{pkg}=={ver}" for pkg, ver in required_packages.items()]))
+        sys.exit(1)
+    else:
+        print("\n✓ All required packages are correctly installed!")
+
+# Check packages before importing
+check_required_packages()
+
+# Rest of your imports
 import streamlit as st
 import tempfile
 import os
@@ -8,7 +83,7 @@ from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
 from styles import apply_custom_styles
 import base64
-import io  # Add io import for BytesIO
+import io
 import plotly.express as px
 import plotly.graph_objects as go
 from collections import Counter
@@ -16,16 +91,50 @@ import pandas as pd
 from fuzzywuzzy import process, fuzz
 import re
 
-# Page config
-st.set_page_config(
-    page_title="CodeLens - Code Utility",
-    page_icon="🔍",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# Add timing checks for key initialization steps
+def init_app():
+    """Initialize application components with timing checks"""
+    init_start = time.time()
 
-# Apply custom styles
-apply_custom_styles()
+    # Page config
+    st.set_page_config(
+        page_title="CodeLens - Code Utility",
+        page_icon="🔍",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    logger.info(f"Page config initialized in {time.time() - init_start:.2f}s")
+
+    # Apply custom styles
+    style_start = time.time()
+    apply_custom_styles()
+    logger.info(f"Custom styles applied in {time.time() - style_start:.2f}s")
+
+    # Initialize session state if needed
+    if 'df_customer' not in st.session_state:
+        st.session_state.df_customer = None
+    if 'df_meta' not in st.session_state:
+        st.session_state.df_meta = None
+    if 'meta_preprocessing_stats' not in st.session_state:
+        st.session_state.meta_preprocessing_stats = None
+    if 'customer_preprocessing_stats' not in st.session_state:
+        st.session_state.customer_preprocessing_stats = None
+
+    logger.info(f"Total initialization completed in {time.time() - init_start:.2f}s")
+
+# Call initialization
+init_app()
+
+# Page config - REMOVED, replaced by init_app()
+# st.set_page_config(
+#     page_title="CodeLens - Code Utility",
+#     page_icon="🔍",
+#     layout="wide",
+#     initial_sidebar_state="expanded"
+# )
+#
+# # Apply custom styles
+# apply_custom_styles()
 
 # Creator information
 st.sidebar.markdown("""
@@ -320,11 +429,11 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
                 'Removal Reason': ' & '.join(reason),
                 **row.to_dict()
             })
-            print(f"Row {idx + 1} removed: {' & '.join(reason)}")
 
     # Create DataFrame
     removed_df = pd.DataFrame(removed_rows_data)
     return removed_df
+
 
 
 def show_demographic_analysis():
@@ -337,14 +446,6 @@ def show_demographic_analysis():
     app_name = st.sidebar.text_input("Application Name", "MyApp")
 
     # Initialize session state for dataframes if not present
-    if 'df_customer' not in st.session_state:
-        st.session_state.df_customer = None
-    if 'df_meta' not in st.session_state:
-        st.session_state.df_meta = None
-    if 'meta_preprocessing_stats' not in st.session_state:
-        st.session_state.meta_preprocessing_stats = None
-    if 'customer_preprocessing_stats' not in st.session_state:
-        st.session_state.customer_preprocessing_stats = None
 
     # Main content area with two columns
     col1, col2 = st.columns(2)
@@ -715,65 +816,13 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.xlsx" class="download-button">{button_text}</a>'
     return download_link
 
-def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
-    """Create a detailed DataFrame of removed rows with reasons"""
-    # Find indices of removed rows
-    original_indices = set(original_df.index)
-    kept_indices = set(processed_df.index)
-    removed_indices = original_indices - kept_indices
-
-    # Create list to store removed row information
-    removed_rows_data = []
-
-    def check_single_value(val):
-        if pd.isna(val):
-            return False
-        val_str = str(val).strip()
-        if val_str.isdigit():
-            return True
-        if len(val_str) == 1 and not val_str.isalnum():
-            return True
-        return False
-
-    # Check each removed row
-    for idx in removed_indices:
-        row = original_df.loc[idx]
-        reason = []
-
-        if 'attr_description' in row.index:
-            # Check for empty description
-            if pd.isna(row['attr_description']) or str(row['attr_description']).strip() == '':
-                reason.append("Empty attr_description")
-            # Check for integer-only description
-            elif str(row['attr_description']).isdigit():
-                reason.append("Integer-only attr_description")
-
-        # Check for single integer or special character in any cell
-        for col in row.index:
-            if check_single_value(row[col]):
-                reason.append(f"Single integer or special character in column '{col}'")
-                break
-
-        # Add row to data with detailed reason
-        if reason:
-            removed_rows_data.append({
-                'Original Row Number': idx + 1,
-                'Removal Reason': ' & '.join(reason),
-                **row.to_dict()
-            })
-            print(f"Row {idx + 1} removed: {' & '.join(reason)}")
-
-    # Create DataFrame
-    removed_df = pd.DataFrame(removed_rows_data)
-    return removed_df
-
 
 def show_code_analysis():
     """Display code analysis interface"""
     st.title("🔍 CodeLens")
     st.markdown("### Code Analysis Utility")
 
-    # Initialize repo_path
+# Initialize repo_path
     repo_path = None
 
     # Input method selection
@@ -792,13 +841,13 @@ def show_code_analysis():
         uploaded_files = st.sidebar.file_uploader(
             "Upload Code Files",
             accept_multiple_files=True,
-            type=['py', 'java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
+            type=['py','java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
         )
 
         if uploaded_files:
             temp_dir = tempfile.mkdtemp()
             for uploaded_file in uploaded_files:
-                file_path = os.path.join(temp_dir, uploaded_file.name)
+                file_path = os.path.join(temp_dir, uploaded_file.name)  # Fix variable name
                 with open(file_path, 'wb') as f:
                     f.write(uploaded_file.getbuffer())
 
@@ -1103,7 +1152,7 @@ def show_about_page():
     - **Visualization:** Plotly
     - **Pattern Matching:** FuzzyWuzzywith Python-Levenshtein
     - **Code Analysis:** Pygments
-
+    
     #### Key Libraries
     - **streamlit:** Interactive web application framework
     - **pandas:** Data manipulation and analysis
@@ -1112,7 +1161,7 @@ def show_about_page():
     - **python-levenshtein:** Fast string comparison
     - **pygments:** Syntax highlighting
     - **openpyxl:** Excel file handling
-
+    
     #### Features
     - Multi-file Excel data analysis
     - Advanced fuzzy matching algorithms
@@ -1124,7 +1173,7 @@ def show_about_page():
     # Team Information
     st.markdown("""
     ### Design & Development
-
+    
     ❤️ Zensar Project Diamond Team ❤️
     """)
 
