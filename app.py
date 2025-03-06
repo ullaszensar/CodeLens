@@ -675,20 +675,40 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
 
     buffer = io.BytesIO()
 
-    if 'removed' in file_name:
-        # Create Excel writer object with xlsxwriter engine
-        writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
-        download_df.to_excel(writer, sheet_name='Summary', index=False)
+    # Create Excel writer object with xlsxwriter engine
+    writer = pd.ExcelWriter(buffer, engine='xlsxwriter')
+    download_df.to_excel(writer, sheet_name='Summary', index=False)
+    workbook = writer.book
+    worksheet = writer.sheets['Summary']
 
-        # Auto-adjust columns width
-        for column in download_df:
-            column_width = max(download_df[column].astype(str).map(len).max(), len(column))
-            col_idx = download_df.columns.get_loc(column)
-            writer.sheets['Summary'].set_column(col_idx, col_idx, column_width + 2)
+    # Define formats
+    header_format = workbook.add_format({
+        'bg_color': '#00FFFF',  # Cyan color for headers
+        'bold': True,
+        'text_wrap': True,
+        'valign': 'vcenter',
+        'align': 'center'
+    })
 
-        writer.close()
-    else:
-        download_df.to_excel(buffer, index=False)
+    separator_format = workbook.add_format({
+        'bg_color': '#ADD8E6',  # Light blue color for separator
+        'text_wrap': True,
+        'valign': 'vcenter',
+        'align': 'center'
+    })
+
+    # Set column widths and formats
+    for idx, column in enumerate(download_df.columns):
+        if column == ' ':  # Separator column
+            worksheet.set_column(idx, idx, 5, separator_format)  # Narrower width for separator
+        else:
+            worksheet.set_column(idx, idx, 75)  # Fixed width of 75 for all other columns
+
+    # Apply header format to the first row
+    for col_num, value in enumerate(download_df.columns):
+        worksheet.write(0, col_num, value, header_format)
+
+    writer.close()
 
     b64 = base64.b64encode(buffer.getvalue()).decode()
     mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
