@@ -78,13 +78,13 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
     # Get unique values from both dataframes based on match type
     if match_type == "Business Name":
         customer_values = df1['business_name'].dropna().unique()
-        meta_values = df2['business_name'].dropna().unique()
+        target_values = df2['business_name'].dropna().unique()
     elif match_type == "Attribute Description":
         customer_values = df1['attr_description'].dropna().unique()
-        meta_values = df2['attr_description'].dropna().unique()
+        target_values = df2['attr_description'].dropna().unique()
     else:  # Default to Attribute Name
         customer_values = df1['attr_name'].dropna().unique()
-        meta_values = df2['attr_name'].dropna().unique()
+        target_values = df2['attr_name'].dropna().unique()
 
     # Compare values based on match type
     for customer_value in customer_values:
@@ -101,24 +101,24 @@ def compare_attributes(df1, df2, algorithm_type, threshold, match_type="Attribut
 
         customer_record = df1[df1[customer_value_field] == customer_value].iloc[0]
 
-        # Get top matches from meta data
+        # Get top matches from target data
         value_matches = process.extract(
             customer_value,
-            meta_values,
+            target_values,
             scorer=scorer,
             limit=3
         )
 
         # Add matches that meet the threshold
-        for meta_value, score in value_matches:
+        for target_value, score in value_matches:
             if score >= threshold:
-                meta_record = df2[df2[customer_value_field] == meta_value].iloc[0]
+                target_record = df2[df2[customer_value_field] == target_value].iloc[0]
 
                 match_entry = {
                     f'C360 {display_field}': customer_value,
-                    f'Meta Data {display_field}': meta_value,
-                    'Meta_Match_Type': match_type,
-                    'Meta_Value': meta_value,
+                    f'Target Data {display_field}': target_value,
+                    'Target_Match_Type': match_type,
+                    'Target_Value': target_value,
                     'Match Score (%)': score
                 }
 
@@ -319,10 +319,11 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     return removed_df
 
 
+
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
-    st.markdown("### C360 Demographic & Meta Data Analysis")
+    st.markdown("### C360 Demographic & Target Data Analysis")
 
     # Application name input in sidebar
     st.sidebar.header("Analysis Settings")
@@ -586,6 +587,16 @@ def show_demographic_analysis():
                             unsafe_allow_html=True
                         )
 
+                    # Create display version with hidden columns
+                    display_columns = [col for col in attribute_matches.columns 
+                                        if col not in ['Target_Match_Type', 'Target_Value']]
+                    display_df = attribute_matches[display_columns].copy()
+
+                    # Reorder columns to show score after the target data column
+                    score_col = 'Match Score (%)'
+                    cols = [col for col in display_df.columns if col != score_col]
+                    display_df = display_df[cols + [score_col]]  # Move score to the end
+
                     st.markdown(
                         """
                         <style>
@@ -598,7 +609,7 @@ def show_demographic_analysis():
                         unsafe_allow_html=True
                     )
                     st.dataframe(
-                        attribute_matches,
+                        display_df,
                         hide_index=True,
                         height=400,
                         use_container_width=True  # Make the grid full width
@@ -1062,13 +1073,15 @@ def main():
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
         "Select Analysis Type",
-        ["Demographic Analysis", "Code Analysis"]
+        ["Demographic Analysis", "Code Analysis", "About"]
     )
 
     if analysis_type == "Demographic Analysis":
         show_demographic_analysis()
-    else:
+    elif analysis_type == "Code Analysis":
         show_code_analysis()
+    else:
+        show_about_page()
 
 if __name__ == "__main__":
     main()
