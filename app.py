@@ -305,7 +305,7 @@ def show_demographic_analysis():
             try:
                 raw_df_customer = pd.read_excel(customer_demo_file)
                 st.session_state.df_customer, st.session_state.customer_preprocessing_stats = preprocess_customer_data(raw_df_customer)
-                st.success("✅ Customer Demographic file loaded successfully")
+                st.success("✅ Customer Demographic file Processed successfully")
 
                 st.markdown("---")  # Add separator
 
@@ -340,7 +340,7 @@ def show_demographic_analysis():
                                 st.session_state.df_customer,
                                 "customer_demographic",
                                 "excel",
-                                button_text="Download Customer Data"
+                                button_text="Processed Data"
                             ),
                             unsafe_allow_html=True
                         )
@@ -356,7 +356,7 @@ def show_demographic_analysis():
                                 removed_df,
                                 "customer_removed_rows",
                                 "excel",
-                                button_text="Customer Data Removed Rows"
+                                button_text="Removed Rows"
                             ),
                             unsafe_allow_html=True
                         )
@@ -370,13 +370,13 @@ def show_demographic_analysis():
 
     # Second Excel Upload - Meta Data
     with col2:
-        st.subheader("2. Meta Data")
+        st.subheader("2. Target Data")
         st.markdown("---")  # Add separator
 
         # Add container for file upload
         with st.container():
             meta_data_file = st.file_uploader(
-                "Upload Meta Data Excel",
+                "Upload Target Data Excel",
                 type=['xlsx', 'xls'],
                 key='meta_data'
             )
@@ -385,7 +385,7 @@ def show_demographic_analysis():
             try:
                 raw_df_meta = pd.read_excel(meta_data_file)
                 st.session_state.df_meta, st.session_state.meta_preprocessing_stats = preprocess_meta_data(raw_df_meta)
-                st.success("✅ Meta Data file loaded and preprocessed successfully")
+                st.success("✅ Target Data Processed Successfully")
 
                 st.markdown("---")  # Add separator
 
@@ -399,18 +399,6 @@ def show_demographic_analysis():
 
                 st.markdown("---")  # Add separator
 
-                # Preprocessing Summary
-                st.markdown("**Preprocessing Summary:**")
-                preprocessing_cols = st.columns(3)
-                with preprocessing_cols[0]:
-                    st.metric("Initial Rows", st.session_state.meta_preprocessing_stats['initial_rows'])
-                with preprocessing_cols[1]:
-                    st.metric("Rows Removed", st.session_state.meta_preprocessing_stats['total_removed'])
-                with preprocessing_cols[2]:
-                    st.metric("Final Rows", st.session_state.meta_preprocessing_stats['final_rows'])
-
-                st.markdown("---")  # Add separator
-
                 # Download buttons in a container
                 with st.container():
                     download_cols = st.columns(2)
@@ -418,14 +406,13 @@ def show_demographic_analysis():
                         st.markdown(
                             download_dataframe(
                                 st.session_state.df_meta,
-                                "meta_data",
+                                "target_data",
                                 "excel",
-                                button_text="Download Meta Data"
+                                button_text="Download Target Data"
                             ),
                             unsafe_allow_html=True
                         )
                     with download_cols[1]:
-                        # Create detailed removed rows DataFrame
                         removed_df = create_removed_rows_df(
                             st.session_state.meta_preprocessing_stats,
                             raw_df_meta,
@@ -434,9 +421,9 @@ def show_demographic_analysis():
                         st.markdown(
                             download_dataframe(
                                 removed_df,
-                                "meta_removed_rows",
+                                "target_removed_rows",
                                 "excel",
-                                button_text="Meta Data Removed Rows"
+                                button_text="Target Data Removed Rows"
                             ),
                             unsafe_allow_html=True
                         )
@@ -557,7 +544,7 @@ def show_demographic_analysis():
         else:
             st.info("Please upload Customer Demographic file to compare attributes")
     else:
-        st.info("Please upload Meta Data file to use the matching functionality")
+        st.info("Please upload Target Data file to use the matching functionality")
 
 
 def download_dataframe(df, file_name, file_format='excel', button_text="Download", match_type="All"):
@@ -996,7 +983,6 @@ def show_about_page():
 
     ❤️ Zensar Project Diamond Team ❤️
     """)
-
 
 
 def main():
