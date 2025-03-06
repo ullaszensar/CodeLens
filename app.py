@@ -454,7 +454,7 @@ def show_demographic_analysis():
     # First Excel Upload - Customer Demographic
     with col1:
         st.subheader("1. Customer Demographic Data")
-        st.markdown("---")  # Add separator
+        
 
         # Add container for file upload
         with st.container():
@@ -469,8 +469,6 @@ def show_demographic_analysis():
                 raw_df_customer = pd.read_excel(customer_demo_file)
                 st.session_state.df_customer, st.session_state.customer_preprocessing_stats = preprocess_customer_data(raw_df_customer)
                 st.success("✅ Customer Demographic file Processed successfully")
-
-                st.markdown("---")  # Add separator
 
                 # File Summary
                 st.markdown("""
@@ -497,8 +495,6 @@ def show_demographic_analysis():
                     len(st.session_state.df_customer),
                     len(st.session_state.df_customer.columns)
                 ), unsafe_allow_html=True)
-
-                st.markdown("---")  # Add separator
 
                 # Preprocessing Summary
                 st.markdown("""
@@ -530,8 +526,6 @@ def show_demographic_analysis():
                     st.session_state.customer_preprocessing_stats['total_removed'],
                     st.session_state.customer_preprocessing_stats['final_rows']
                 ), unsafe_allow_html=True)
-
-                st.markdown("---")  # Add separator
 
                 # Download buttons in a container
                 with st.container():
@@ -576,7 +570,7 @@ def show_demographic_analysis():
     # Second Excel Upload - Meta Data
     with col2:
         st.subheader("2. Target Data")
-        st.markdown("---")  # Add separator
+        
 
         # Add container for file upload
         with st.container():
@@ -618,8 +612,6 @@ def show_demographic_analysis():
                     len(st.session_state.df_meta.columns)
                 ), unsafe_allow_html=True)
 
-                st.markdown("---")  # Add separator
-
                 # Preprocessing Summary
                 st.markdown("""
                     <h4 style='color: #0066cc; margin-bottom: 10px;'>Preprocessing Summary</h4>
@@ -650,8 +642,6 @@ def show_demographic_analysis():
                     st.session_state.meta_preprocessing_stats['total_removed'],
                     st.session_state.meta_preprocessing_stats['final_rows']
                 ), unsafe_allow_html=True)
-
-                st.markdown("---")  # Add separator
 
                 # Download buttons in a container
                 with st.container():
