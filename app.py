@@ -1,7 +1,7 @@
 # Package Installation Instructions:
 # 1. One-line installation (recommended):
 #    pip install streamlit==1.41.1 plotly==5.18.0 pandas==2.1.4 pygments==2.18.0 fuzzywuzzy==0.18.0 
-#    python-levenshtein==0.23.0 openpyxl==3.1.2 trafilatura==1.6.4
+#    python-levenshtein==0.23.0 openpyxl==3.1.2 trafilatura==1.6.4 xlsxwriter==3.1.9
 #
 # Note: If you encounter any issues, try upgrading pip first:
 #    python -m pip install --upgrade pip
@@ -33,7 +33,8 @@ def check_required_packages():
         'fuzzywuzzy': '0.18.0',
         'python-levenshtein': '0.23.0',
         'openpyxl': '3.1.2',
-        'trafilatura': '1.6.4'
+        'trafilatura': '1.6.4',
+        'xlsxwriter': '3.1.9'
     }
 
     missing_packages = []

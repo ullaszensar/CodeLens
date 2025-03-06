@@ -1,7 +1,12 @@
-Alternatively, you can install all packages at once using:
-
+# Install Packages
 ```bash
-pip install -r requirements.txt
+# 1. One-line installation (recommended):
+pip install streamlit==1.41.1 plotly==5.18.0 pandas==2.1.4 pygments==2.18.0 fuzzywuzzy==0.18.0 python-levenshtein==0.23.0 openpyxl==3.1.2 trafilatura==1.6.4 xlsxwriter==3.1.9
+```
+
+Note: If you encounter any issues, try upgrading pip first:
+```bash
+python -m pip install --upgrade pip
 ```
 
 Contents of `requirements.txt`:
@@ -14,10 +19,19 @@ fuzzywuzzy==0.18.0
 python-levenshtein==0.23.0
 openpyxl==3.1.2
 trafilatura==1.6.4
+xlsxwriter==3.1.9
 ```
 
-### Fuzzy Matching Algorithms
+### Package Version Check
+The application includes an automatic package version check that runs at startup. It will:
+1. Verify all required packages are installed
+2. Check if installed versions match the required versions
+3. Display a ✓ for correctly installed packages
+4. Show detailed messages for any missing or outdated packages
 
+If any issues are found, the application will provide specific installation instructions.
+
+### Fuzzy Matching Algorithms
 The application uses three different fuzzy matching algorithms, each specialized for specific matching scenarios:
 
 #### 1. Levenshtein Ratio (Basic)
@@ -65,7 +79,7 @@ Create `.streamlit/config.toml` with:
 ```toml
 [server]
 headless = true
-address = "0.0.0.0"
+address = "0.0.0.0" 
 port = 5000
 
 [theme]
