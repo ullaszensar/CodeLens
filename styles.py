@@ -4,6 +4,45 @@ def apply_custom_styles():
     """Apply custom CSS styles to the Streamlit app"""
     st.markdown("""
         <style>
+        /* Summary Table Styles */
+        .summary-table {
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 0.9em;
+            width: 100%;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-table thead tr {
+            background-color: #0066cc;
+            color: white;
+            text-align: left;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .summary-table tbody tr {
+            border-bottom: 1px solid #dddddd;
+        }
+
+        .summary-table tbody tr:nth-of-type(even) {
+            background-color: #f3f3f3;
+        }
+
+        /* Reduce the height of detail sections */
+        .detail-section {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
         /* Main container */
         .main {
             padding: 2rem;
@@ -161,7 +200,6 @@ def apply_custom_styles():
             border-radius: 5px;
             margin: 0.5rem 0;
         }
-
 
         /* Analysis tab tables */
         div[data-testid="stHorizontalBlock"] {
