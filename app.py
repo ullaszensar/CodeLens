@@ -427,7 +427,7 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
 
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
-    st.title("🔍 CodeLens")
+    st.title("Diamond Project")
     st.markdown("### C360 Demographic & Target Data Analysis")
 
     # Application name input in sidebar
@@ -878,6 +878,7 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     download_link = f'<a href="data:{mime_type};base64,{b64}" download="{file_name}.xlsx" class="download-button">{button_text}</a>'
     return download_link
+
 
 
 def show_code_analysis():

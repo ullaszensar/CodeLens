@@ -38,64 +38,70 @@ def process_zip_file(uploaded_zip):
 def create_class_diagram():
     """Create a class diagram using graphviz"""
     dot = graphviz.Digraph(comment='CodeLens Class Diagram')
-    dot.attr(rankdir='TB')
+    dot.attr(rankdir='TB', bgcolor='white')
 
     # Core Application Components (Blue)
     with dot.subgraph(name='cluster_0') as c:
-        c.attr(label='Core Application Components', style='filled', color='lightblue')
+        c.attr(label='Core Application Components', style='filled', color='#E3F2FD', fontcolor='#1976D2')
         c.node('MainApp', '''MainApp
         ----
         + show_demographic_analysis()
         + show_code_analysis()
-        + show_about_page()''')
+        + show_about_page()''',
+        style='filled', fillcolor='white', fontcolor='black')
         c.node('Styles', '''Styles
         ----
-        + apply_custom_styles()''')
-        c.edge('MainApp', 'Styles')
+        + apply_custom_styles()''',
+        style='filled', fillcolor='white', fontcolor='black')
+        c.edge('MainApp', 'Styles', color='#1976D2')
 
     # Analysis Modules (Green)
     with dot.subgraph(name='cluster_1') as c:
-        c.attr(label='Analysis Modules', style='filled', color='lightgreen')
+        c.attr(label='Analysis Modules', style='filled', color='#E8F5E9', fontcolor='#2E7D32')
         c.node('ClassDiagram', '''ClassDiagram
         ----
         + show_class_diagram()
-        + process_zip_file()''')
+        + process_zip_file()''',
+        style='filled', fillcolor='white', fontcolor='black')
         c.node('APISOR', '''APISOR
         ----
         + show_api_sor()
-        + process_zip_file()''')
+        + process_zip_file()''',
+        style='filled', fillcolor='white', fontcolor='black')
         c.node('FlowDiagram', '''FlowDiagram
         ----
         + show_flow_diagram()
-        + process_zip_file()''')
-        c.edge('ClassDiagram', 'APISOR', dir='none')
-        c.edge('APISOR', 'FlowDiagram', dir='none')
+        + process_zip_file()''',
+        style='filled', fillcolor='white', fontcolor='black')
+        c.edge('ClassDiagram', 'APISOR', dir='none', color='#2E7D32')
+        c.edge('APISOR', 'FlowDiagram', dir='none', color='#2E7D32')
 
     # Utility Components (Orange)
     with dot.subgraph(name='cluster_2') as c:
-        c.attr(label='Utility Components', style='filled', color='lightsalmon')
+        c.attr(label='Utility Components', style='filled', color='#FFF3E0', fontcolor='#E65100')
         c.node('CodeScanner', '''CodeScanner
         ----
         + analyze_code()
-        + extract_patterns()''')
+        + extract_patterns()''',
+        style='filled', fillcolor='white', fontcolor='black')
         c.node('Utils', '''Utils
         ----
         + display_code_with_highlights()
-        + create_file_tree()''')
-        c.edge('CodeScanner', 'Utils')
+        + create_file_tree()''',
+        style='filled', fillcolor='white', fontcolor='black')
+        c.edge('CodeScanner', 'Utils', color='#E65100')
 
     # Cross-component relationships
-    dot.edge('MainApp', 'ClassDiagram')
-    dot.edge('MainApp', 'APISOR')
-    dot.edge('MainApp', 'FlowDiagram')
-    dot.edge('MainApp', 'CodeScanner')
+    dot.edge('MainApp', 'ClassDiagram', color='#1976D2')
+    dot.edge('MainApp', 'APISOR', color='#1976D2')
+    dot.edge('MainApp', 'FlowDiagram', color='#1976D2')
+    dot.edge('MainApp', 'CodeScanner', color='#1976D2')
 
     return dot
 
 def show_class_diagram():
-    st.title("Class Diagram Generator")
-    st.markdown("### Generate and analyze class diagrams from your Java codebase")
-
+    st.title("Diamond Project")
+    st.markdown("### Class Diagram Generator")
     # Create tabs for different views
     tab1, tab2 = st.tabs(["Project Class Diagram", "Upload & Analyze"])
 

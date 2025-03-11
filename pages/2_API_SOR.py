@@ -39,9 +39,8 @@ def process_zip_file(uploaded_zip):
     return api_files
 
 def show_api_sor():
-    st.title("🔍 CodeLens - API/SOR Analysis")
-    st.markdown("### Analyze API and System of Record (SOR) Functions in Java Projects")
-
+    st.title("Diamond Project")
+    st.markdown("### API/SOR Analysis")
     # File uploader for API documentation or code files
     uploaded_files = st.file_uploader(
         "Upload Java files, API configuration files (JSON, YAML, Properties) or ZIP containing these files",
