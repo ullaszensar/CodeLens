@@ -1245,18 +1245,27 @@ def main():
     st.title("🔍 CodeLens")
     st.markdown("### Data Analysis & Visualization Platform")
 
-    # Add navigation instructions
+    # Add navigation instructions for new pages
     st.sidebar.markdown("""
     ### Navigation
-    Use the pages in the sidebar to access:
-    - Data Analysis (current page)
+    Use the pages in the sidebar to access additional tools:
     - Class Diagram Generator
     - API/SOR Analysis
     - Flow Diagram Generator
     """)
 
-    # Show the demographic analysis interface
-    show_demographic_analysis()
+    # Main page navigation
+    analysis_type = st.sidebar.radio(
+        "Select Analysis Type",
+        ["Demographic Analysis", "Code Analysis", "About"]
+    )
+
+    if analysis_type == "Demographic Analysis":
+        show_demographic_analysis()
+    elif analysis_type == "Code Analysis":
+        show_code_analysis()
+    else:
+        show_about_page()
 
 if __name__ == "__main__":
     main()
