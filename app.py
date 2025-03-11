@@ -1242,8 +1242,11 @@ def show_about_page():
 
 
 def main():
-    st.title("🔍 CodeLens")
-    st.markdown("### Data Analysis & Visualization Platform")
+    # Main page navigation
+    analysis_type = st.sidebar.radio(
+        "Select Analysis Type",
+        ["Demographic Analysis", "Code Analysis", "About"]
+    )
 
     # Add navigation instructions for new pages
     st.sidebar.markdown("""
@@ -1253,12 +1256,6 @@ def main():
     - API/SOR Analysis
     - Flow Diagram Generator
     """)
-
-    # Main page navigation
-    analysis_type = st.sidebar.radio(
-        "Select Analysis Type",
-        ["Demographic Analysis", "Code Analysis", "About"]
-    )
 
     if analysis_type == "Demographic Analysis":
         show_demographic_analysis()
