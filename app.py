@@ -126,17 +126,6 @@ def init_app():
 # Call initialization
 init_app()
 
-# Page config - REMOVED, replaced by init_app()
-# st.set_page_config(
-#     page_title="CodeLens - Code Utility",
-#     page_icon="🔍",
-#     layout="wide",
-#     initial_sidebar_state="expanded"
-# )
-#
-# # Apply custom styles
-# apply_custom_styles()
-
 # Creator information
 st.sidebar.markdown("""
 ### Created by:
@@ -436,7 +425,6 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     return removed_df
 
 
-
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -446,6 +434,7 @@ def show_demographic_analysis():
     st.sidebar.header("Analysis Settings")
     app_name = st.sidebar.text_input("Application Name", "MyApp")
 
+
     # Initialize session state for dataframes if not present
 
     # Main content area with two columns
@@ -454,7 +443,7 @@ def show_demographic_analysis():
     # First Excel Upload - Customer Demographic
     with col1:
         st.subheader("1. Customer Demographic Data")
-        
+
 
         # Add container for file upload
         with st.container():
@@ -570,7 +559,7 @@ def show_demographic_analysis():
     # Second Excel Upload - Meta Data
     with col2:
         st.subheader("2. Target Data")
-        
+
 
         # Add container for file upload
         with st.container():
@@ -814,6 +803,7 @@ def show_demographic_analysis():
                 st.info("No matching attributes found with the current threshold")
     else:
         st.info("Please upload both Customer Demographic and Target Data files to compare attributes")
+
 
 
 def download_dataframe(df, file_name, file_format='excel', button_text="Download", match_type="All"):
@@ -1252,18 +1242,21 @@ def show_about_page():
 
 
 def main():
-    # Sidebar navigation
-    analysis_type = st.sidebar.radio(
-        "Select Analysis Type",
-        ["Demographic Analysis", "Code Analysis", "About"]
-    )
+    st.title("🔍 CodeLens")
+    st.markdown("### Data Analysis & Visualization Platform")
 
-    if analysis_type == "Demographic Analysis":
-        show_demographic_analysis()
-    elif analysis_type == "Code Analysis":
-        show_code_analysis()
-    else:
-        show_about_page()
+    # Add navigation instructions
+    st.sidebar.markdown("""
+    ### Navigation
+    Use the pages in the sidebar to access:
+    - Data Analysis (current page)
+    - Class Diagram Generator
+    - API/SOR Analysis
+    - Flow Diagram Generator
+    """)
+
+    # Show the demographic analysis interface
+    show_demographic_analysis()
 
 if __name__ == "__main__":
     main()
