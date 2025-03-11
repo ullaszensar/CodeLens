@@ -446,6 +446,7 @@ def show_demographic_analysis():
     st.sidebar.header("Analysis Settings")
     app_name = st.sidebar.text_input("Application Name", "MyApp")
 
+
     # Initialize session state for dataframes if not present
 
     # Main content area with two columns
@@ -454,7 +455,7 @@ def show_demographic_analysis():
     # First Excel Upload - Customer Demographic
     with col1:
         st.subheader("1. Customer Demographic Data")
-        
+
 
         # Add container for file upload
         with st.container():
@@ -570,7 +571,7 @@ def show_demographic_analysis():
     # Second Excel Upload - Meta Data
     with col2:
         st.subheader("2. Target Data")
-        
+
 
         # Add container for file upload
         with st.container():
@@ -690,28 +691,42 @@ def show_demographic_analysis():
         # Algorithm selection for attribute matching
         col1, col2, col3 = st.columns(3)
         with col1:
-            attr_algorithm = st.selectbox(
-                "Select Attribute Matching Algorithm",
+            analysis_type = st.selectbox(
+                "Select Analysis Type",
                 [
-                    "Levenshtein Ratio (Basic)",
-                    "Partial Ratio (Substring)",
-                    "Token Sort Ratio (Word Order)"
+                    "Attribute Matching",
+                    "Flow Chart",
+                    "Class Diagram",
+                    "API / SOR Function",
+                    "Search Facility"
                 ],
-                key="attr_algorithm"
+                key="analysis_type"
             )
 
-        with col2:
-            # Similarity threshold
-            attr_threshold = st.slider(
-                "Attribute Similarity Threshold (%)",
-                min_value=0,
-                max_value=100,
-                value=60,
-                help="Minimum similarity score required for attribute matches",
-                key="attr_threshold"
-            )
+        # Show different options based on analysis type
+        if analysis_type == "Attribute Matching":
+            with col2:
+                attr_algorithm = st.selectbox(
+                    "Select Attribute Matching Algorithm",
+                    [
+                        "Levenshtein Ratio (Basic)",
+                        "Partial Ratio (Substring)",
+                        "Token Sort Ratio (Word Order)"
+                    ],
+                    key="attr_algorithm"
+                )
 
-        with col3:
+            with col3:
+                # Similarity threshold
+                attr_threshold = st.slider(
+                    "Attribute Similarity Threshold (%)",
+                    min_value=0,
+                    max_value=100,
+                    value=60,
+                    help="Minimum similarity score required for attribute matches",
+                    key="attr_threshold"
+                )
+
             match_type = st.selectbox(
                 "Select Match Type",
                 [
@@ -723,95 +738,97 @@ def show_demographic_analysis():
                 index=0  # Set default to first option (Attribute Name)
             )
 
-        # Compare attributes only if match type is selected
-        if match_type:
-            attribute_matches = compare_attributes(
-                st.session_state.df_customer,
-                st.session_state.df_meta,
-                attr_algorithm,
-                attr_threshold,
-                match_type
-            )
-
-            if not attribute_matches.empty:
-                # Add Matching Attributes Summary
-                st.markdown("#### Matching Attributes Summary")
-                match_summary_cols = st.columns(3)
-                high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
-
-                match_summary_cols[0].metric(
-                    "Total Matches",
-                    len(attribute_matches)
-                )
-                match_summary_cols[1].metric(
-                    "High Confidence Matches (≥80%)",
-                    high_confidence_matches
-                )
-                match_summary_cols[2].metric(
-                    "Average Match Score",
-                    f"{attribute_matches['Match Score (%)'].mean():.1f}%"
+            # Compare attributes only if match type is selected
+            if match_type:
+                attribute_matches = compare_attributes(
+                    st.session_state.df_customer,
+                    st.session_state.df_meta,
+                    attr_algorithm,
+                    attr_threshold,
+                    match_type
                 )
 
-                st.markdown("#### Matching Attributes Details")
-                # Add Download button at the top right
-                col1, col2 = st.columns([8, 2])
-                with col2:
-                    st.markdown(
-                        download_dataframe(
-                            attribute_matches,
-                            "matching_attributes",
-                            "excel",
-                            button_text="Download",
-                            match_type=match_type
-                        ),
-                        unsafe_allow_html=True
+                if not attribute_matches.empty:
+                    # Add Matching Attributes Summary
+                    st.markdown("#### Matching Attributes Summary")
+                    match_summary_cols = st.columns(3)
+                    high_confidence_matches = len(attribute_matches[attribute_matches['Match Score (%)'] >= 80])
+
+                    match_summary_cols[0].metric(
+                        "Total Matches",
+                        len(attribute_matches)
+                    )
+                    match_summary_cols[1].metric(
+                        "High Confidence Matches (≥80%)",
+                        high_confidence_matches
+                    )
+                    match_summary_cols[2].metric(
+                        "Average Match Score",
+                        f"{attribute_matches['Match Score (%)'].mean():.1f}%"
                     )
 
-                # Create display version with minimal columns for better readability
-                display_df = attribute_matches.copy()
+                    st.markdown("#### Matching Attributes Details")
+                    # Add Download button at the top right
+                    col1, col2 = st.columns([8, 2])
+                    with col2:
+                        st.markdown(
+                            download_dataframe(
+                                attribute_matches,
+                                "matching_attributes",
+                                "excel",
+                                button_text="Download",
+                                match_type=match_type
+                            ),
+                            unsafe_allow_html=True
+                        )
 
-                # For display, show only the main attribute columns and score
-                if match_type == "Business Name":
-                    display_columns = ['C360 business_name', 'Target Data business_name', 'Match Score (%)']
-                elif match_type == "Attribute Description":
-                    display_columns = ['C360 attr_description', 'Target Data attr_description', 'Match Score (%)']
-                else:  # Default to Attribute Name
-                    display_columns = ['C360 attr_name', 'Target Data attr_name', 'Match Score (%)']
+                    # Create display version with minimal columns for better readability
+                    display_df = attribute_matches.copy()
 
-                # Ensure all display columns exist in the DataFrame
-                display_columns = [col for col in display_columns if col in display_df.columns]
+                    # For display, show only the main attribute columns and score
+                    if match_type == "Business Name":
+                        display_columns = ['C360 business_name', 'Target Data business_name', 'Match Score (%)']
+                    elif match_type == "Attribute Description":
+                        display_columns = ['C360 attr_description', 'Target Data attr_description', 'Match Score (%)']
+                    else:  # Default to Attribute Name
+                        display_columns = ['C360 attr_name', 'Target Data attr_name', 'Match Score (%)']
 
-                # If we couldn't find the exact columns, fall back to first columns of each type
-                if len(display_columns) < 3:
-                    c360_cols = [col for col in display_df.columns if col.startswith('C360 ')]
-                    target_cols = [col for col in display_df.columns if col.startswith('Target Data ')]
-                    if c360_cols and target_cols:
-                        display_columns = [c360_cols[0], target_cols[0], 'Match Score (%)']
-                    else:
-                        display_columns = ['Match Score (%)']
+                    # Ensure all display columns exist in the DataFrame
+                    display_columns = [col for col in display_columns if col in display_df.columns]
 
-                display_df = display_df[display_columns]
+                    # If we couldn't find the exact columns, fall back to first columns of each type
+                    if len(display_columns) < 3:
+                        c360_cols = [col for col in display_df.columns if col.startswith('C360 ')]
+                        target_cols = [col for col in display_df.columns if col.startswith('Target Data ')]
+                        if c360_cols and target_cols:
+                            display_columns = [c360_cols[0], target_cols[0], 'Match Score (%)']
+                        else:
+                            display_columns = ['Match Score (%)']
 
-                st.markdown(
-                    """
-                    <style>
-                    .stDataFrame {
-                        max-height: 400px;
-                        overflow-y: auto;
-                    }
-                    </style>
-                    """,
-                    unsafe_allow_html=True
-                )
-                st.dataframe(
-                    display_df,
-                    hide_index=True,
-                    height=400,
-                    use_container_width=True
-                )
+                    display_df = display_df[display_columns]
 
-            else:
-                st.info("No matching attributes found with the current threshold")
+                    st.markdown(
+                        """
+                        <style>
+                        .stDataFrame {
+                            max-height: 400px;
+                            overflow-y: auto;
+                        }
+                        </style>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                    st.dataframe(
+                        display_df,
+                        hide_index=True,
+                        height=400,
+                        use_container_width=True
+                    )
+
+                else:
+                    st.info("No matching attributes found with the current threshold")
+        elif analysis_type in ["Flow Chart", "Class Diagram", "API / SOR Function", "Search Facility"]:
+            st.info(f"🚧 {analysis_type} analysis is under development. Coming soon!")
     else:
         st.info("Please upload both Customer Demographic and Target Data files to compare attributes")
 
@@ -867,7 +884,7 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     separator_format = workbook.add_format({
         'bg_color': '#ADD8E6',  # Light blue color for separator
         'text_wrap': True,
-        'valign':'vcenter',
+        'valign': 'vcenter',
         'align': 'center'
     })
 
