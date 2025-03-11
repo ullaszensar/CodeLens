@@ -1244,7 +1244,7 @@ def show_about_page():
 def main():
     # Main page navigation
     analysis_type = st.sidebar.radio(
-        "Select Analysis Type",
+        "Diamond APP",
         ["Demographic Analysis", "Code Analysis", "About"]
     )
 
@@ -1255,6 +1255,7 @@ def main():
     - Class Diagram Generator
     - API/SOR Analysis
     - Flow Diagram Generator
+    - Text to JSON Converter
     """)
 
     if analysis_type == "Demographic Analysis":
