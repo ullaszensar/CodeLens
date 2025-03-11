@@ -446,8 +446,19 @@ def show_demographic_analysis():
     st.sidebar.header("Analysis Settings")
     app_name = st.sidebar.text_input("Application Name", "MyApp")
 
+    # Move analysis type selection to sidebar
+    analysis_type = st.sidebar.radio(
+        "Select Analysis Type",
+        [
+            "Attribute Matching",
+            "Flow Chart",
+            "Class Diagram",
+            "API / SOR Function",
+            "Search Facility"
+        ],
+        key="analysis_type"
+    )
 
-    # Initialize session state for dataframes if not present
 
     # Main content area with two columns
     col1, col2 = st.columns(2)
