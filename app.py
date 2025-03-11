@@ -1,27 +1,5 @@
-# Package Installation Instructions:
-# 1. One-line installation (recommended):
-#    pip install streamlit==1.41.1 plotly==5.18.0 pandas==2.1.4 pygments==2.18.0 fuzzywuzzy==0.18.0 
-#    python-levenshtein==0.23.0 openpyxl==3.1.2 trafilatura==1.6.4 xlsxwriter==3.1.9
-#
-# Note: If you encounter any issues, try upgrading pip first:
-#    python -m pip install --upgrade pip
-#
-# Package Version Check
-import pkg_resources
-import sys
-import logging
-import time
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Start timing the initialization
-logger.info("Starting application initialization...")
-start_time = time.time()
+import streamlit as st
+from styles import apply_custom_styles
 
 def check_required_packages():
     """Check if all required packages are installed with correct versions"""
@@ -70,19 +48,17 @@ def check_required_packages():
     else:
         print("\n✓ All required packages are correctly installed!")
 
-# Check packages before importing
-check_required_packages()
-
 # Rest of your imports
-import streamlit as st
+import pkg_resources
+import sys
+import logging
+import time
 import tempfile
 import os
 from pathlib import Path
-import time
 from datetime import datetime
 from codescan import CodeAnalyzer
 from utils import display_code_with_highlights, create_file_tree
-from styles import apply_custom_styles
 import base64
 import io
 import plotly.express as px
@@ -92,12 +68,20 @@ import pandas as pd
 from fuzzywuzzy import process, fuzz
 import re
 
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 # Add timing checks for key initialization steps
 def init_app():
     """Initialize application components with timing checks"""
     init_start = time.time()
 
-    # Page config
+    # Page config (moved here from main())
     st.set_page_config(
         page_title="CodeLens - Code Utility",
         page_icon="🔍",
@@ -123,19 +107,11 @@ def init_app():
 
     logger.info(f"Total initialization completed in {time.time() - init_start:.2f}s")
 
+# Check packages before importing
+check_required_packages()
+
 # Call initialization
 init_app()
-
-# Page config - REMOVED, replaced by init_app()
-# st.set_page_config(
-#     page_title="CodeLens - Code Utility",
-#     page_icon="🔍",
-#     layout="wide",
-#     initial_sidebar_state="expanded"
-# )
-#
-# # Apply custom styles
-# apply_custom_styles()
 
 # Creator information
 st.sidebar.markdown("""
@@ -436,7 +412,6 @@ def create_removed_rows_df(preprocessing_stats, original_df, processed_df):
     return removed_df
 
 
-
 def show_demographic_analysis():
     """Display demographic data analysis interface"""
     st.title("🔍 CodeLens")
@@ -445,6 +420,7 @@ def show_demographic_analysis():
     # Application name input in sidebar
     st.sidebar.header("Analysis Settings")
     app_name = st.sidebar.text_input("Application Name", "MyApp")
+
 
     # Move analysis type selection to sidebar
     analysis_type = st.sidebar.radio(
@@ -458,6 +434,7 @@ def show_demographic_analysis():
         ],
         key="analysis_type"
     )
+
 
 
     # Main content area with two columns
@@ -1280,6 +1257,27 @@ def show_about_page():
 
 
 def main():
+    st.set_page_config(
+        page_title="CodeLens - Code Utility",
+        page_icon="🔍",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+
+    apply_custom_styles()
+
+    st.title("🔍 CodeLens")
+    st.markdown("""
+    ### Welcome to CodeLens
+
+    CodeLens is your comprehensive tool for code analysis and data processing. 
+    Select an option from the sidebar to get started:
+
+    - **Demographic Analysis**: Compare and analyze demographic data
+    - **Code Analysis**: Generate diagrams and analyze code structure
+    - **About**: Learn more about CodeLens and its features
+    """)
+
     # Sidebar navigation
     analysis_type = st.sidebar.radio(
         "Select Analysis Type",
