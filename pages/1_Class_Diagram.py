@@ -35,7 +35,7 @@ def process_zip_file(uploaded_zip):
     return java_files
 
 def show_class_diagram():
-    st.title("🔍 CodeLens - Class Diagram Generator")
+    st.title("Class Diagram Generator")
     st.markdown("### Generate and analyze class diagrams from your Java codebase")
 
     # File uploader for code files
@@ -66,10 +66,6 @@ def show_class_diagram():
 
         if java_files:
             st.info("Class diagram generation will be implemented here")
-            # Display file summary
-            st.markdown("### Uploaded Files Summary")
-            for file in java_files:
-                st.markdown(f"- `{file['path']}`")
     else:
         st.info("Please upload Java files or ZIP archives to generate class diagrams")
 
