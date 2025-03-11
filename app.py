@@ -91,7 +91,6 @@ from collections import Counter
 import pandas as pd
 from fuzzywuzzy import process, fuzz
 import re
-import zipfile
 
 # Add timing checks for key initialization steps
 def init_app():
@@ -881,117 +880,320 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     return download_link
 
 
-def process_zip_file(zip_file):
-    """Process a ZIP file, extracting Java files and returning file contents"""
-    try:
-        temp_dir = tempfile.mkdtemp()
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(temp_dir)
-
-        java_files = []
-        for root, _, files in os.walk(temp_dir):
-            for file in files:
-                if file.endswith('.java'):
-                    file_path = os.path.join(root, file)
-                    with open(file_path, 'r') as f:
-                        content = f.read()
-                    java_files.append({
-                        'name': file,
-                        'content': content,
-                        'path': os.path.relpath(file_path, temp_dir)
-                    })
-        return java_files
-    except Exception as e:
-        st.error(f"Error processing ZIP file: {str(e)}")
-        return []
-
-
 def show_code_analysis():
     """Display code analysis interface"""
-    st.title("Code Analysis")
+    st.title("🔍 CodeLens")
+    st.markdown("### Code Analysis Utility")
 
-    # Application name input in sidebar
-    st.sidebar.header("Analysis Settings")
-    app_name = st.sidebar.text_input("Application Name", "MyApp")
+# Initialize repo_path
+    repo_path = None
 
-    # File uploader with drag and drop support
-    uploaded_files = st.file_uploader(
-        "Upload Java files or ZIP containing project files",
-        type=['java', 'zip'],
-        accept_multiple_files=True,
-        help="Drag and drop files here or click to browse"
+    # Input method selection
+    input_method = st.sidebar.radio(
+        "Choose Input Method",
+        ["Upload Files", "Repository Path"]
     )
 
-    if uploaded_files:
-        all_files = []
-        for uploaded_file in uploaded_files:
-            if uploaded_file.name.endswith('.zip'):
-                # Process zip file
-                zip_files = process_zip_file(uploaded_file)
-                all_files.extend(zip_files)
-                st.success(f"Successfully extracted {len(zip_files)} files from {uploaded_file.name}")
-            else:
-                # Process individual Java file
-                content = uploaded_file.getvalue().decode()
-                all_files.append({
-                    'name': uploaded_file.name,
-                    'content': content,
-                    'path': uploaded_file.name
-                })
-                st.success(f"Successfully loaded {uploaded_file.name}")
+    # Application name input
+    app_name = st.sidebar.text_input("Application Name", "MyApp")
 
-        if all_files:
-            st.markdown("### Repository Structure")
+    analysis_triggered = False
+    temp_dir = None
 
-            # Create and display file tree
-            file_tree = create_file_tree([file['path'] for file in all_files])
-            st.code(file_tree, language='text')
+    if input_method == "Upload Files":
+        uploaded_files = st.sidebar.file_uploader(
+            "Upload Code Files",
+            accept_multiple_files=True,
+            type=['py','java', 'js', 'ts', 'cs', 'php', 'rb', 'xsd']
+        )
 
-            # Create analyzer instance
-            analyzer = CodeAnalyzer()
+        if uploaded_files:
+            temp_dir = tempfile.mkdtemp()
+            for uploaded_file in uploaded_files:
+                file_path = os.path.join(temp_dir, uploaded_file.name)  # Fix variable name
+                with open(file_path, 'wb') as f:
+                    f.write(uploaded_file.getbuffer())
 
-            # Process each file
-            for file in all_files:
-                try:
-                    analysis_results = analyzer.analyze_file(
-                        file['content'],
-                        file['name']
-                    )
+            if st.sidebar.button("Run Analysis"):
+                analysis_triggered = True
+                repo_path = temp_dir
 
-                    st.markdown(f"### Analysis Results for `{file['name']}`")
-
-                    # Display code with syntax highlighting
-                    with st.expander("View Code"):
-                        display_code_with_highlights(
-                            file['content'],
-                            analysis_results.get('highlights', [])
-                        )
-
-                    # Generate HTML report
-                    report_file = f"{app_name}_CodeLens_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
-                    analyzer.generate_report(
-                        analysis_results,
-                        report_file
-                    )
-
-                    # Provide download link for report
-                    st.markdown(
-                        get_file_download_link(report_file),
-                        unsafe_allow_html=True
-                    )
-
-                except Exception as e:
-                    st.error(f"Error analyzing {file['name']}: {str(e)}")
     else:
-        st.info("Please upload Java source files or a ZIP archive containing your project")
+        repo_path = st.sidebar.text_input("Enter Repository Path")
+        if repo_path and st.sidebar.button("Run Analysis"):
+            analysis_triggered = True
 
-    # Display logs if available
-    logs = read_log_file()
-    if logs:
-        with st.expander("Analysis Logs"):
-            for log in logs:
-                st.text(log.strip())
+    if analysis_triggered:
+        try:
+            # Validate repo_path before starting analysis
+            if not repo_path:
+                st.error("Repository path is not set. Please select files or enter a path.")
+                return
 
+            st.info(f"Starting analysis with repository path: {repo_path}")
+
+            with st.spinner("Analyzing code..."):
+                analyzer = CodeAnalyzer(repo_path, app_name)
+                progress_bar = st.progress(0)
+
+                # Run analysis
+                results = analyzer.scan_repository()
+                progress_bar.progress(100)
+
+                # Create tabs for Dashboard, Analysis Results, Export Reports, and Logs
+                tab1, tab2, tab3, tab4 = st.tabs(["Dashboard", "Analysis Results", "Export Reports", "Log"])
+
+                with tab1:
+                    st.header("Analysis Dashboard")
+                    st.markdown("""
+                    This dashboard provides visual insights into the code analysis results,
+                    showing distributions of files, demographic fields, and integration patterns.
+                    """)
+                    create_dashboard_charts(results)
+
+                with tab2:
+                    # Summary Stats
+                    st.subheader("Summary")
+                    stats_cols = st.columns(4)
+                    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+                    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+                    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+                    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+
+                    # Demographic Fields Summary Table
+                    st.subheader("Demographic Fields Summary")
+                    demographic_files = [f for f in results['summary']['file_details'] if f['demographic_fields_found'] > 0]
+                    if demographic_files:
+                        cols = st.columns([0.5, 2, 1, 2])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Analyzed**")
+                        cols[2].markdown("**Fields Found**")
+                        cols[3].markdown("**Fields**")
+
+                        for idx, file_detail in enumerate(demographic_files, 1):
+                            file_path = file_detail['file_path']
+                            unique_fields = []
+                            if file_path in results['demographic_data']:
+                                unique_fields = list(results['demographic_data'][file_path].keys())
+
+                            cols = st.columns([0.5, 2, 1, 2])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_path))
+                            cols[2].text(str(file_detail['demographic_fields_found']))
+                            cols[3].text(', '.join(unique_fields))
+
+                    # Integration Patterns Summary Table
+                    st.subheader("Integration Patterns Summary")
+                    integration_files = [f for f in results['summary']['file_details'] if f['integration_patterns_found'] > 0]
+                    if integration_files:
+                        cols = st.columns([0.5, 2, 1, 2])
+                        cols[0].markdown("**#**")
+                        cols[1].markdown("**File Name**")
+                        cols[2].markdown("**Patterns Found**")
+                        cols[3].markdown("**Pattern Details**")
+
+                        for idx, file_detail in enumerate(integration_files, 1):
+                            file_path = file_detail['file_path']
+                            pattern_details = set()
+                            for pattern in results['integration_patterns']:
+                                if pattern['file_path'] == file_path:
+                                    pattern_details.add(f"{pattern['pattern_type']}: {pattern['sub_type']}")
+
+                            cols = st.columns([0.5, 2, 1, 2])
+                            cols[0].text(str(idx))
+                            cols[1].text(os.path.basename(file_path))
+                            cols[2].text(str(file_detail['integration_patterns_found']))
+                            cols[3].text(', '.join(pattern_details))
+
+                with tab3:
+                    st.header("Available Reports")
+
+                    # Get all report files and filter by app_name
+                    report_files = [
+                        f for f in os.listdir()
+                        if f.endswith('.html')
+                        and 'CodeLens' in f
+                        and f.startswith(app_name)
+                    ]
+
+                    # Sort files by timestamp in descending order
+                    report_files.sort(key=parse_timestamp_from_filename, reverse=True)
+
+                    if report_files:
+                        # Create a table with five columns
+                        cols = st.columns([1, 3, 2, 2, 2])
+                        cols[0].markdown("**S.No**")
+                        cols[1].markdown("**File Name**")
+                        cols[2].markdown("**Date**")
+                        cols[3].markdown("**Time**")
+                        cols[4].markdown("**Download**")
+
+                        # List all reports
+                        for idx, report_file in enumerate(report_files, 1):
+                            cols = st.columns([1, 3, 2, 2, 2])
+
+                            # Serial number column
+                            cols[0].text(f"{idx}")
+
+                            # File name column without .html extension
+                            display_name = report_file.replace('.html', '')
+                            cols[1].text(display_name)
+
+                            # Extract timestamp and format date and time separately
+                            timestamp = parse_timestamp_from_filename(report_file)
+                            # Date in DD-MMM-YYYY format
+                            cols[2].text(timestamp.strftime('%d-%b-%Y'))
+                            # Time in 12-hour format with AM/PM
+                            cols[3].text(timestamp.strftime('%I:%M:%S %p'))
+
+                            # Download button column (last)
+                            cols[4].markdown(
+                                get_file_download_link(report_file),
+                                unsafe_allow_html=True
+                            )
+                    else:
+                        st.info("No reports available for this application.")
+
+                with tab4:
+                    st.header("Analysis Log")
+                    # Add auto-refresh checkbox
+                    auto_refresh = st.checkbox("Auto-refresh logs", value=True)
+
+                    # Create a container for logs
+                    log_container = st.empty()
+
+                    def update_logs():
+                        logs = read_log_file()
+                        if logs:
+                            log_content = "".join(logs)
+                            log_container.code(log_content, language="text")
+                        else:
+                            log_container.info("No logs available")
+
+                    # Initial log display
+                    update_logs()
+
+                    # Auto-refresh logs every 5 seconds if enabled
+                    if auto_refresh:
+                        while True:
+                            time.sleep(5)
+                            update_logs()
+
+        except Exception as e:
+            st.error(f"Error during analysis: {str(e)}")
+
+        finally:
+            if temp_dir:
+                import shutil
+                shutil.rmtree(temp_dir)
+
+def create_dashboard_charts(results):
+    """Create visualization charts for the dashboard"""
+    # Summary Stats at the top
+    st.subheader("Summary")
+    stats_cols = st.columns(4)
+    stats_cols[0].metric("Files Analyzed", results['summary']['files_analyzed'])
+    stats_cols[1].metric("Demographic Fields", results['summary']['demographic_fields_found'])
+    stats_cols[2].metric("Integration Patterns", results['summary']['integration_patterns_found'])
+    stats_cols[3].metric("Unique Fields", len(results['summary']['unique_demographic_fields']))
+
+    st.markdown("----")  # Add a separator line
+
+    # 1. Demographic Fields Distribution
+    field_frequencies = {}
+    for file_data in results['demographic_data'].values():
+        for field_name, data in file_data.items():
+            if field_name not in field_frequencies:
+                field_frequencies[field_name] = len(data['occurrences'])
+            else:
+                field_frequencies[field_name] += len(data['occurrences'])
+
+    # Create DataFrame for Plotly charts
+    df_demographics = pd.DataFrame({
+        'Field_Name': list(field_frequencies.keys()),
+        'Count': list(field_frequencies.values())    })
+
+    # Create two columns for side-by-side charts
+    col1, col2= st.columns(2)
+
+    with col1:
+        # Pie Chart
+        fig_demo_pie = px.pie(
+            df_demographics,
+            values='Count',
+            names='Field_Name',
+            title="Distribution of Demographic Fields (Pie Chart)",
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        st.plotly_chart(fig_demo_pie, use_container_width=True)
+
+    with col2:
+        # Bar Chart
+        fig_demo_bar = px.bar(
+            df_demographics,
+            x='Field_Name',
+            y='Count',
+            title="Distribution of Demographic Fields (Bar Chart)",
+            color='Field_Name',
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+        fig_demo_bar.update_layout(showlegend=False)
+        st.plotly_chart(fig_demo_bar, use_container_width=True)
+
+    # 2. Files by Language Bar Chart
+    file_extensions = [Path(file['file_path']).suffix for file in results['summary']['file_details']]
+    df_files = pd.DataFrame({
+        'Extension': file_extensions,
+        'Count': [1] * len(file_extensions)
+    }).groupby('Extension').count().reset_index()
+
+    fig_files = px.bar(
+        df_files,
+        x='Extension',
+        y='Count',
+        title="Files by Language",
+        color='Extension',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    fig_files.update_layout(showlegend=False)
+    st.plotly_chart(fig_files)
+
+    # Create visualization for pattern types distribution
+    st.subheader("Integration Patterns Distribution")
+    pattern_counts = Counter(pattern['pattern_type'] for pattern in results['integration_patterns'])
+    df_patterns = pd.DataFrame({
+        'Pattern_Type': list(pattern_counts.keys()),
+        'Count': list(pattern_counts.values())
+    })
+
+    fig_patterns = px.bar(
+        df_patterns,
+        x='Pattern_Type',
+        y='Count',
+        title="Integration Patterns Distribution",
+        color='Pattern_Type',
+        color_discrete_sequence=px.colors.qualitative.Set3
+    )
+    fig_patterns.update_layout(showlegend=False)
+    st.plotly_chart(fig_patterns, use_container_width=True)
+
+    # Files and Fields Correlation
+    st.subheader("Files and Fields Correlation")
+    df_correlation = pd.DataFrame({
+        'File_Name': [os.path.basename(detail['file_path']) for detail in results['summary']['file_details']],
+        'Demographic_Fields': [detail['demographic_fields_found'] for detail in results['summary']['file_details']],
+        'Integration_Patterns': [detail['integration_patterns_found'] for detail in results['summary']['file_details']]
+    })
+
+    fig_correlation = px.bar(
+        df_correlation,
+        x='File_Name',
+        y=['Demographic_Fields', 'Integration_Patterns'],
+        title="Files and Fields Correlation",
+        barmode='group',
+        color_discrete_sequence=['#0066cc', '#90EE90']
+    )
+    st.plotly_chart(fig_correlation, use_container_width=True)
 
 def show_about_page():
     """Display About page with technical stack and team information"""
@@ -1037,7 +1239,6 @@ def show_about_page():
     
     ❤️ Zensar Project Diamond Team ❤️
     """)
-
 
 
 def main():
