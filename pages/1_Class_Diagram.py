@@ -8,8 +8,8 @@ import os
 apply_custom_styles()
 
 def process_zip_file(uploaded_zip):
-    """Process uploaded zip file and extract Python files"""
-    python_files = []
+    """Process uploaded zip file and extract Java files"""
+    java_files = []
     with tempfile.TemporaryDirectory() as temp_dir:
         # Save uploaded file to temp directory
         zip_path = os.path.join(temp_dir, "uploaded.zip")
@@ -23,55 +23,55 @@ def process_zip_file(uploaded_zip):
             # Walk through extracted files
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
-                    if file.endswith('.py'):
+                    if file.endswith('.java'):
                         file_path = os.path.join(root, file)
                         with open(file_path, 'r') as f:
                             content = f.read()
-                            python_files.append({
+                            java_files.append({
                                 'name': file,
                                 'content': content,
                                 'path': os.path.relpath(file_path, temp_dir)
                             })
-    return python_files
+    return java_files
 
 def show_class_diagram():
     st.title("🔍 CodeLens - Class Diagram Generator")
-    st.markdown("### Generate and analyze class diagrams from your codebase")
+    st.markdown("### Generate and analyze class diagrams from your Java codebase")
 
     # File uploader for code files
     uploaded_files = st.file_uploader(
-        "Upload Python files or ZIP containing Python files",
-        type=['py', 'zip'],
+        "Upload Java files or ZIP containing Java project files",
+        type=['java', 'zip'],
         accept_multiple_files=True
     )
 
     if uploaded_files:
-        python_files = []
+        java_files = []
 
         for uploaded_file in uploaded_files:
             if uploaded_file.name.endswith('.zip'):
                 # Process zip file
                 zip_files = process_zip_file(uploaded_file)
-                python_files.extend(zip_files)
-                st.success(f"Successfully extracted {len(zip_files)} Python files from {uploaded_file.name}")
+                java_files.extend(zip_files)
+                st.success(f"Successfully extracted {len(zip_files)} Java files from {uploaded_file.name}")
             else:
-                # Process individual Python file
+                # Process individual Java file
                 content = uploaded_file.getvalue().decode()
-                python_files.append({
+                java_files.append({
                     'name': uploaded_file.name,
                     'content': content,
                     'path': uploaded_file.name
                 })
                 st.success(f"Successfully loaded {uploaded_file.name}")
 
-        if python_files:
+        if java_files:
             st.info("Class diagram generation will be implemented here")
             # Display file summary
             st.markdown("### Uploaded Files Summary")
-            for file in python_files:
+            for file in java_files:
                 st.markdown(f"- `{file['path']}`")
     else:
-        st.info("Please upload Python files or ZIP archives to generate class diagrams")
+        st.info("Please upload Java files or ZIP archives to generate class diagrams")
 
     # Settings section in sidebar
     st.sidebar.header("Diagram Settings")

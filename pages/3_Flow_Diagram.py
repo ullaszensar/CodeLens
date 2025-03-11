@@ -23,7 +23,7 @@ def process_zip_file(uploaded_zip):
             # Walk through extracted files
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
-                    if file.endswith(('.txt', '.md', '.py')):
+                    if file.endswith(('.txt', '.md', '.java')):
                         file_path = os.path.join(root, file)
                         with open(file_path, 'r') as f:
                             content = f.read()
@@ -36,12 +36,12 @@ def process_zip_file(uploaded_zip):
 
 def show_flow_diagram():
     st.title("🔍 CodeLens - Flow Diagram Generator")
-    st.markdown("### Generate and visualize process flows")
+    st.markdown("### Generate and visualize process flows from Java projects")
 
     # File uploader for flow diagram input
     uploaded_files = st.file_uploader(
-        "Upload process description files (TXT, MD, PY) or ZIP containing these files",
-        type=['txt', 'md', 'py', 'zip'],
+        "Upload Java files, documentation files (TXT, MD) or ZIP containing these files",
+        type=['java', 'txt', 'md', 'zip'],
         accept_multiple_files=True
     )
 
@@ -71,7 +71,7 @@ def show_flow_diagram():
             for file in flow_files:
                 st.markdown(f"- `{file['path']}`")
     else:
-        st.info("Please upload process description files to generate flow diagrams")
+        st.info("Please upload Java source files or documentation to generate flow diagrams")
 
     # Settings section in sidebar
     st.sidebar.header("Diagram Settings")

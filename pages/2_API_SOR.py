@@ -25,7 +25,8 @@ def process_zip_file(uploaded_zip):
             # Walk through extracted files
             for root, dirs, files in os.walk(temp_dir):
                 for file in files:
-                    if file.endswith(('.py', '.json', '.yaml', '.yml')):
+                    # Include Java files and common API config files
+                    if file.endswith(('.java', '.json', '.yaml', '.yml', '.properties')):
                         file_path = os.path.join(root, file)
                         with open(file_path, 'r') as f:
                             content = f.read()
@@ -39,12 +40,12 @@ def process_zip_file(uploaded_zip):
 
 def show_api_sor():
     st.title("🔍 CodeLens - API/SOR Analysis")
-    st.markdown("### Analyze API and System of Record (SOR) Functions")
+    st.markdown("### Analyze API and System of Record (SOR) Functions in Java Projects")
 
     # File uploader for API documentation or code files
     uploaded_files = st.file_uploader(
-        "Upload API documentation or code files (Python, JSON, YAML) or ZIP containing these files",
-        type=['py', 'json', 'yaml', 'yml', 'zip'],
+        "Upload Java files, API configuration files (JSON, YAML, Properties) or ZIP containing these files",
+        type=['java', 'json', 'yaml', 'yml', 'properties', 'zip'],
         accept_multiple_files=True
     )
 
@@ -75,7 +76,7 @@ def show_api_sor():
             for file in api_files:
                 st.markdown(f"- `{file['path']}` ({file['type'].upper()})")
     else:
-        st.info("Please upload API documentation or code files for analysis")
+        st.info("Please upload Java files or API configuration files for analysis")
 
     # Settings section in sidebar
     st.sidebar.header("Analysis Settings")
