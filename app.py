@@ -444,7 +444,6 @@ def show_demographic_analysis():
     with col1:
         st.subheader("1. Customer Demographic Data")
 
-
         # Add container for file upload
         with st.container():
             customer_demo_file = st.file_uploader(
@@ -455,9 +454,21 @@ def show_demographic_analysis():
 
         if customer_demo_file is not None:
             try:
-                raw_df_customer = pd.read_excel(customer_demo_file)
+                # Read all sheets from the Excel file
+                excel_file = pd.ExcelFile(customer_demo_file)
+                sheet_names = excel_file.sheet_names
+
+                # Sheet selection dropdown
+                selected_sheet = st.selectbox(
+                    "Select Customer Data Sheet",
+                    options=sheet_names,
+                    key='customer_sheet_selector'
+                )
+
+                # Read the selected sheet
+                raw_df_customer = pd.read_excel(customer_demo_file, sheet_name=selected_sheet)
                 st.session_state.df_customer, st.session_state.customer_preprocessing_stats = preprocess_customer_data(raw_df_customer)
-                st.success("✅ Customer Demographic file Processed successfully")
+                st.success(f"✅ Customer Demographic from sheet '{selected_sheet}' Processed successfully")
 
                 # File Summary
                 st.markdown("""
@@ -471,6 +482,10 @@ def show_demographic_analysis():
                         </thead>
                         <tbody>
                             <tr>
+                                <td>Selected Sheet</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
                                 <td>Total Rows</td>
                                 <td>{}</td>
                             </tr>
@@ -481,6 +496,7 @@ def show_demographic_analysis():
                         </tbody>
                     </table>
                 """.format(
+                    selected_sheet,
                     len(st.session_state.df_customer),
                     len(st.session_state.df_customer.columns)
                 ), unsafe_allow_html=True)
