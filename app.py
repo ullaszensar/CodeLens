@@ -560,7 +560,6 @@ def show_demographic_analysis():
     with col2:
         st.subheader("2. Target Data")
 
-
         # Add container for file upload
         with st.container():
             meta_data_file = st.file_uploader(
@@ -571,9 +570,21 @@ def show_demographic_analysis():
 
         if meta_data_file is not None:
             try:
-                raw_df_meta = pd.read_excel(meta_data_file)
+                # Read all sheets from the Excel file
+                excel_file = pd.ExcelFile(meta_data_file)
+                sheet_names = excel_file.sheet_names
+
+                # Sheet selection dropdown
+                selected_sheet = st.selectbox(
+                    "Select Target Data Sheet",
+                    options=sheet_names,
+                    key='sheet_selector'
+                )
+
+                # Read the selected sheet
+                raw_df_meta = pd.read_excel(meta_data_file, sheet_name=selected_sheet)
                 st.session_state.df_meta, st.session_state.meta_preprocessing_stats = preprocess_meta_data(raw_df_meta)
-                st.success("✅ Target Data Processed Successfully")
+                st.success(f"✅ Target Data from sheet '{selected_sheet}' Processed Successfully")
 
                 # File Summary
                 st.markdown("""
@@ -587,6 +598,10 @@ def show_demographic_analysis():
                         </thead>
                         <tbody>
                             <tr>
+                                <td>Selected Sheet</td>
+                                <td>{}</td>
+                            </tr>
+                            <tr>
                                 <td>Total Rows</td>
                                 <td>{}</td>
                             </tr>
@@ -597,6 +612,7 @@ def show_demographic_analysis():
                         </tbody>
                     </table>
                 """.format(
+                    selected_sheet,
                     len(st.session_state.df_meta),
                     len(st.session_state.df_meta.columns)
                 ), unsafe_allow_html=True)
@@ -805,7 +821,6 @@ def show_demographic_analysis():
         st.info("Please upload both Customer Demographic and Target Data files to compare attributes")
 
 
-
 def download_dataframe(df, file_name, file_format='excel', button_text="Download", match_type="All"):
     """Generate a download link for a dataframe in Excel format"""
     # Create a descriptive file name based on match type
@@ -847,7 +862,6 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
 
     # Define formats
     header_format = workbook.add_format({
-        'bg_color': '#00FFFF',  # Cyan color for headers
         'bold': True,
         'text_wrap': True,
         'valign': 'vcenter',
@@ -855,10 +869,8 @@ def download_dataframe(df, file_name, file_format='excel', button_text="Download
     })
 
     separator_format = workbook.add_format({
-        'bg_color': '#ADD8E6',  # Light blue color for separator
-        'text_wrap': True,
-        'valign':'vcenter',
-        'align': 'center'
+        'top': 1,
+        'bottom': 1
     })
 
     # Set column widths and formats
@@ -1216,7 +1228,7 @@ def show_about_page():
     - **Visualization:** Plotly
     - **Pattern Matching:** FuzzyWuzzywith Python-Levenshtein
     - **Code Analysis:** Pygments
-    
+
     #### Key Libraries
     - **streamlit:** Interactive web application framework
     - **pandas:** Data manipulation and analysis
@@ -1225,7 +1237,7 @@ def show_about_page():
     - **python-levenshtein:** Fast string comparison
     - **pygments:** Syntax highlighting
     - **openpyxl:** Excel file handling
-    
+
     #### Features
     - Multi-file Excel data analysis
     - Advanced fuzzy matching algorithms
@@ -1237,7 +1249,7 @@ def show_about_page():
     # Team Information
     st.markdown("""
     ### Design & Development
-    
+
     ❤️ Zensar Project Diamond Team ❤️
     """)
 
